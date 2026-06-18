@@ -372,14 +372,27 @@
                     const { Client, Databases, Query } = Appwrite;
                     const conf = window.CONFIG.appwrite;
 
-                    // Create a fresh Appwrite client directly
+                    // --- Step 1: Ping Appwrite health to detect CORS vs real network error ---
+                    let healthOk = false;
+                    try {
+                        const ping = await fetch(`${conf.endpoint}/health`, {
+                            method: 'GET',
+                            headers: { 'X-Appwrite-Project': conf.projectId }
+                        });
+                        healthOk = true; // got a response (even 4xx = server reachable)
+                    } catch (pingErr) {
+                        // fetch threw = CORS blocked or server unreachable
+                        const origin = window.location.origin;
+                        throw new Error(`CORS_OR_NETWORK:${origin}`);
+                    }
+
+                    // --- Step 2: Create Appwrite client and query admins ---
                     const client = new Client()
                         .setEndpoint(conf.endpoint)
                         .setProject(conf.projectId);
 
                     const databases = new Databases(client);
 
-                    // Query the 'admins' collection — collection ID must be 'admins'
                     const response = await databases.listDocuments(
                         conf.databaseId,
                         'admins',
@@ -411,20 +424,29 @@
                     }
 
                 } catch (err) {
-                    console.error('Login Error Full:', err);
+                    console.error('Login Error:', err.message, err.code, err);
 
-                    let msg = 'خطأ غير متوقع. افتح الـ Console للتفاصيل.';
+                    let msg;
 
                     if (err.message === 'SDK_NOT_LOADED') {
                         msg = 'خطأ: لم يتم تحميل Appwrite SDK. تحقق من اتصالك بالإنترنت.';
+
+                    } else if (err.message?.startsWith('CORS_OR_NETWORK:')) {
+                        const origin = err.message.split(':').slice(1).join(':');
+                        msg = `خطأ CORS: الموقع الحالي (${origin}) غير مضاف في Appwrite Platforms.
+الحل: افتح Appwrite Console → Settings → Integrations → Platforms → اضغط Add Platform → Web واكتب (${window.location.hostname})`;
+
                     } else if (err.code === 404) {
-                        msg = 'خطأ 404: جدول admins غير موجود. تأكد أن الـ Collection ID = admins في Appwrite.';
+                        msg = 'خطأ 404: جدول admins غير موجود. تأكد أن Collection ID = admins في Appwrite.';
+
                     } else if (err.code === 401) {
-                        msg = 'خطأ 401: لا توجد صلاحية وصول لجدول admins. فعّل Read permissions للـ Any في إعدادات الـ Collection بـ Appwrite.';
-                    } else if (err.code === 0 || err.message?.includes('fetch') || err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
-                        msg = 'خطأ في الشبكة: تعذر الاتصال بـ Appwrite. تحقق من اتصالك بالإنترنت.';
-                    } else if (err.message) {
-                        msg = `خطأ: ${err.message}`;
+                        msg = 'خطأ 401: لا توجد صلاحية وصول لجدول admins. تأكد من تفعيل Read permissions للـ Any.';
+
+                    } else if (err.code === 400) {
+                        msg = 'خطأ 400: البريد الإلكتروني أو كلمة المرور غير صحيح. تحقق من البيانات.';
+
+                    } else {
+                        msg = `خطأ [${err.code || '?'}]: ${err.message || 'غير معروف'}`;
                     }
 
                     showAlert(msg);
