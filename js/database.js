@@ -422,7 +422,33 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         const response = await this.databases.listDocuments(conf.databaseId, conf.collections.trips);
-        return response.documents;
+        const trips = response.documents;
+        
+        try {
+            const destsResponse = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
+            const dests = destsResponse.documents;
+            
+            trips.forEach(t => {
+                t.image = t.image_url || t.image || '';
+                const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
+                if (dest) {
+                    t.country_ar = dest.name_ar;
+                    t.country_en = dest.name_en;
+                    t.flag = dest.flag;
+                } else {
+                    t.country_ar = t.country_ar || '';
+                    t.country_en = t.country_en || '';
+                    t.flag = t.flag || '';
+                }
+            });
+        } catch (err) {
+            console.warn('Failed to map destinations to trips:', err);
+            trips.forEach(t => {
+                t.image = t.image_url || t.image || '';
+            });
+        }
+        
+        return trips;
     }
 
     async getTrip(id) {
@@ -448,32 +474,63 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         const response = await this.databases.listDocuments(conf.databaseId, conf.collections.bookings);
-        return response.documents;
+        const list = response.documents;
+        
+        try {
+            const tripsResponse = await this.databases.listDocuments(conf.databaseId, conf.collections.trips);
+            const trips = tripsResponse.documents;
+            list.forEach(b => {
+                const trip = trips.find(t => String(t.$id) === String(b.trip_id) || String(t.id) === String(b.trip_id));
+                b.trip_title = trip ? trip.title_ar : 'رحلة غير معروفة';
+                b.reference = b.$id;
+                b.status = b.booking_status || 'confirmed';
+                
+                b.travel_date = 'غير محدد';
+                if (b.special_requests) {
+                    const matchDate = b.special_requests.match(/التاريخ المختار:\s*([^\n]+)/);
+                    if (matchDate) b.travel_date = matchDate[1].trim();
+                }
+                b.created_at = b.$createdAt;
+            });
+        } catch (err) {
+            console.warn('Failed to map trips to bookings:', err);
+            list.forEach(b => {
+                b.trip_title = 'رحلة';
+                b.reference = b.$id;
+                b.status = b.booking_status || 'confirmed';
+                b.travel_date = 'غير محدد';
+                b.created_at = b.$createdAt;
+            });
+        }
+        
+        return list;
     }
 
     async createBooking(booking) {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
-        const ref = 'BK-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         const record = {
-            trip_id: parseInt(booking.trip_id),
-            trip_title: booking.trip_title,
+            trip_id: String(booking.trip_id),
             name: booking.name,
             email: booking.email,
             phone: booking.phone,
-            adults: parseInt(booking.adults),
-            children: parseInt(booking.children),
-            travel_date: booking.travel_date,
-            payment_method: booking.payment_method,
-            total_price: parseFloat(booking.total_price),
-            notes: booking.notes || '',
-            reference: ref,
-            status: 'confirmed',
-            created_at: new Date().toISOString()
+            adults: parseInt(booking.adults) || 1,
+            children: parseInt(booking.children) || 0,
+            total_price: parseFloat(booking.total_price) || 0,
+            payment_status: 'pending',
+            booking_status: 'confirmed',
+            payment_id: booking.payment_method || 'cod',
+            special_requests: `التاريخ المختار: ${booking.travel_date || 'غير محدد'}\nطريقة الدفع: ${booking.payment_method || 'غير محدد'}\nملاحظات: ${booking.notes || ''}`
         };
 
         const doc = await this.databases.createDocument(conf.databaseId, conf.collections.bookings, Appwrite.ID.unique(), record);
-        await this.updateTripSpots(booking.trip_id, parseInt(booking.adults) + parseInt(booking.children));
+        
+        try {
+            await this.updateTripSpots(booking.trip_id, (parseInt(booking.adults) || 1) + (parseInt(booking.children) || 0));
+        } catch (spotsErr) {
+            console.error('Error updating spots:', spotsErr);
+        }
+        
         return doc;
     }
 
@@ -481,7 +538,7 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         return await this.databases.updateDocument(conf.databaseId, conf.collections.bookings, id, {
-            status: 'cancelled'
+            booking_status: 'cancelled'
         });
     }
 
@@ -528,13 +585,13 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         const record = {
-            email: email,
-            created_at: new Date().toISOString()
+            email: email
         };
         
         try {
+            const { Query } = Appwrite;
             const existing = await this.databases.listDocuments(conf.databaseId, conf.collections.subscribers, [
-                Appwrite.Query.equal('email', email)
+                Query.equal('email', [email])
             ]);
             if (existing.documents.length > 0) {
                 return existing.documents[0];
@@ -564,9 +621,7 @@ class DBService {
             travel_type: survey.travel_type,
             budget: survey.budget,
             climate: survey.climate || survey.preferred_climate || '',
-            duration: survey.duration || survey.duration_preference || '',
-            message: survey.message || '',
-            created_at: new Date().toISOString()
+            duration: parseInt(survey.duration || survey.duration_preference) || 7
         };
         const doc = await this.databases.createDocument(conf.databaseId, conf.collections.surveys, Appwrite.ID.unique(), record);
         

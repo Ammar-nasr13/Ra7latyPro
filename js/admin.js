@@ -209,13 +209,14 @@ async function loadSurveysTable() {
 function renderSurveys(list) {
     const table = document.getElementById('adminSurveysTable');
     if (list.length === 0) {
-        table.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">لا توجد استجابات استبيان بعد.</td></tr>';
+        table.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">لا توجد استجابات استبيان بعد.</td></tr>';
         return;
     }
     
-    list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    list.sort((a,b) => new Date(b.$createdAt || b.created_at) - new Date(a.$createdAt || a.created_at));
 
     list.forEach(s => {
+        const dateStr = s.$createdAt || s.created_at;
         table.innerHTML += `
             <tr>
                 <td>
@@ -226,8 +227,7 @@ function renderSurveys(list) {
                 <td class="text-capitalize">${s.budget}</td>
                 <td class="text-capitalize">${s.preferred_climate || s.climate || ''}</td>
                 <td class="text-capitalize">${s.duration_preference || s.duration || ''}</td>
-                <td><p class="small text-secondary mb-0 text-wrap" style="max-width:250px;">${s.message || '-'}</p></td>
-                <td>${s.created_at ? s.created_at.slice(0, 10) : '-'}</td>
+                <td>${dateStr ? dateStr.slice(0, 10) : '-'}</td>
             </tr>
         `;
     });
@@ -255,14 +255,15 @@ function renderSubscribers(list) {
         return;
     }
 
-    list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    list.sort((a,b) => new Date(b.$createdAt || b.created_at) - new Date(a.$createdAt || a.created_at));
 
     list.forEach((s, idx) => {
+        const dateStr = s.$createdAt || s.created_at;
         table.innerHTML += `
             <tr>
                 <td>${idx + 1}</td>
                 <td class="fw-bold">${s.email}</td>
-                <td>${s.created_at ? s.created_at.slice(0, 19).replace('T', ' ') : '-'}</td>
+                <td>${dateStr ? dateStr.slice(0, 19).replace('T', ' ') : '-'}</td>
             </tr>
         `;
     });
@@ -280,7 +281,8 @@ window.exportSubscribersCSV = async function() {
         csvContent += 'Email,Subscribed At\n';
 
         list.forEach(s => {
-            csvContent += `"${s.email}","${s.created_at}"\n`;
+            const dateStr = s.$createdAt || s.created_at || '';
+            csvContent += `"${s.email}","${dateStr}"\n`;
         });
 
         const encodedUri = encodeURI(csvContent);
@@ -410,7 +412,7 @@ window.seedAppwriteDatabase = async function() {
 window.loadDestinationsTable = async function () {
     const tbody = document.getElementById('adminDestinationsTable');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
 
     try {
         const conf = window.CONFIG.appwrite;
@@ -421,20 +423,17 @@ window.loadDestinationsTable = async function () {
         const docs = res.documents;
 
         if (!docs.length) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-map-location-dot fa-2x mb-2 d-block opacity-25"></i>لا توجد وجهات بعد. أضف أول وجهة!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-map-location-dot fa-2x mb-2 d-block opacity-25"></i>لا توجد وجهات بعد. أضف أول وجهة!</td></tr>`;
             return;
         }
 
         tbody.innerHTML = docs.map((d, i) => `
             <tr>
                 <td class="fw-bold text-muted">${i + 1}</td>
-                <td>
-                    ${d.image ? `<img src="${d.image}" style="width:60px;height:45px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">` : '<span class="text-muted">—</span>'}
-                </td>
+                <td class="fs-4">${d.flag || '—'}</td>
                 <td class="fw-semibold">${d.name_ar || '—'}</td>
                 <td class="text-muted small">${d.name_en || '—'}</td>
-                <td><span class="badge bg-secondary">${d.category || '—'}</span></td>
-                <td>${d.is_featured ? '<span class="badge bg-warning text-dark">مميز ⭐</span>' : '<span class="badge bg-light text-dark">عادي</span>'}</td>
+                <td class="text-muted small">${d.slug || '—'}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteDestination('${d.$id}')">
                         <i class="fa-solid fa-trash-alt"></i>
@@ -444,7 +443,7 @@ window.loadDestinationsTable = async function () {
         `).join('');
     } catch (err) {
         console.error('Destinations load error:', err);
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
     }
 };
 
@@ -457,13 +456,40 @@ window.deleteDestination = async function (docId) {
         const databases = new Databases(client);
         await databases.deleteDocument(conf.databaseId, conf.collections.destinations, docId);
         await window.loadDestinationsTable();
+        await window.loadDestinationsDropdown();
     } catch (err) {
         alert('خطأ في الحذف: ' + err.message);
     }
 };
 
-// Wire Add Destination form
+window.loadDestinationsDropdown = async function () {
+    const select = document.getElementById('trip_destination_id');
+    if (!select) return;
+    
+    try {
+        const conf = window.CONFIG.appwrite;
+        const { Client, Databases } = Appwrite;
+        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+        const databases = new Databases(client);
+        const res = await databases.listDocuments(conf.databaseId, conf.collections.destinations);
+        const docs = res.documents;
+        
+        if (!docs.length) {
+            select.innerHTML = '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
+            return;
+        }
+        
+        select.innerHTML = '<option value="">اختر الدولة...</option>' + 
+            docs.map(d => `<option value="${d.$id}">${d.flag || ''} ${d.name_ar} (${d.name_en})</option>`).join('');
+    } catch (err) {
+        console.error('Error loading destinations dropdown:', err);
+        select.innerHTML = '<option value="">فشل تحميل الدول</option>';
+    }
+};
+
+// Wire forms
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Add Destination Form
     const destForm = document.getElementById('addDestinationForm');
     if (destForm) {
         destForm.addEventListener('submit', async (e) => {
@@ -478,28 +504,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
                 const databases = new Databases(client);
 
-                // Get next sort order
-                const existing = await databases.listDocuments(conf.databaseId, conf.collections.destinations);
-                const nextSort = (existing.total || 0) + 1;
-
                 const payload = {
                     name_ar: document.getElementById('dest_name_ar').value.trim(),
                     name_en: document.getElementById('dest_name_en').value.trim(),
-                    desc_ar: document.getElementById('dest_desc_ar').value.trim(),
-                    desc_en: document.getElementById('dest_desc_en').value.trim(),
-                    category: document.getElementById('dest_category').value,
-                    sort_order: parseInt(document.getElementById('dest_sort_order').value) || nextSort,
-                    is_featured: document.getElementById('dest_is_featured').value === 'true',
-                    image: document.getElementById('dest_image').value.trim() || null,
-                    id: nextSort
+                    slug: document.getElementById('dest_slug').value.trim(),
+                    flag: document.getElementById('dest_flag').value.trim()
                 };
 
                 await databases.createDocument(conf.databaseId, conf.collections.destinations, ID.unique(), payload);
 
-                // Close modal and reload
                 bootstrap.Modal.getInstance(document.getElementById('addDestinationModal')).hide();
                 destForm.reset();
                 await window.loadDestinationsTable();
+                await window.loadDestinationsDropdown();
                 await window.loadOverviewStats();
 
             } catch (err) {
@@ -510,10 +527,115 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // 2. Add Trip Form
+    const tripForm = document.getElementById('addTripForm');
+    if (tripForm) {
+        tripForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveTripBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري الحفظ...';
+
+            try {
+                const conf = window.CONFIG.appwrite;
+                const { Client, Databases, ID } = Appwrite;
+                const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+                const databases = new Databases(client);
+
+                const splitByLine = (id) => {
+                    const el = document.getElementById(id);
+                    const val = el ? el.value.trim() : '';
+                    return val ? val.split('\n').map(s => s.trim()).filter(Boolean) : [];
+                };
+                const splitByComma = (id) => {
+                    const el = document.getElementById(id);
+                    const val = el ? el.value.trim() : '';
+                    return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+                };
+
+                const payload = {
+                    destination_id: document.getElementById('trip_destination_id').value,
+                    title_ar: document.getElementById('trip_title_ar').value.trim(),
+                    title_en: document.getElementById('trip_title_en').value.trim(),
+                    desc_ar: document.getElementById('trip_desc_ar').value.trim(),
+                    desc_en: document.getElementById('trip_desc_en').value.trim(),
+                    price: parseFloat(document.getElementById('trip_price').value) || 0,
+                    currency: document.getElementById('trip_currency').value.trim() || '$',
+                    duration: document.getElementById('trip_duration').value.trim(),
+                    category: document.getElementById('trip_category').value,
+                    climate: document.getElementById('trip_climate').value,
+                    travel_type: splitByComma('trip_travel_type'),
+                    budget_tier: document.getElementById('trip_budget_tier').value,
+                    is_egyptian: document.getElementById('trip_is_egyptian').value === 'true',
+                    is_active: document.getElementById('trip_is_active').value === 'true',
+                    spots_total: parseInt(document.getElementById('trip_spots_total').value) || 20,
+                    spots_left: parseInt(document.getElementById('trip_spots_left').value) || 20,
+                    departure_dates: splitByComma('trip_departure_dates'),
+                    sort_order: parseInt(document.getElementById('trip_sort_order').value) || 0,
+                    color_from: document.getElementById('trip_color_from').value.trim(),
+                    color_to: document.getElementById('trip_color_to').value.trim(),
+                    image_url: document.getElementById('trip_image_url').value.trim(),
+                    
+                    highlights_ar: splitByLine('trip_highlights_ar'),
+                    highlights_en: splitByLine('trip_highlights_en'),
+                    included_ar: splitByLine('trip_included_ar'),
+                    included_en: splitByLine('trip_included_en'),
+                    excluded_ar: splitByLine('trip_excluded_ar'),
+                    excluded_en: splitByLine('trip_excluded_en'),
+                    itinerary_ar: splitByLine('trip_itinerary_ar'),
+                    itinerary_en: splitByLine('trip_itinerary_en'),
+                    
+                    meta_title_ar: document.getElementById('trip_meta_title_ar').value.trim(),
+                    meta_title_en: document.getElementById('trip_meta_title_en').value.trim(),
+                    meta_desc_ar: document.getElementById('trip_meta_desc_ar').value.trim(),
+                    meta_desc_en: document.getElementById('trip_meta_desc_en').value.trim(),
+                    meta_keywords_ar: document.getElementById('trip_meta_keywords_ar').value.trim(),
+                    meta_keywords_en: document.getElementById('trip_meta_keywords_en').value.trim()
+                };
+
+                await databases.createDocument(conf.databaseId, conf.collections.trips, ID.unique(), payload);
+
+                bootstrap.Modal.getInstance(document.getElementById('addTripModal')).hide();
+                tripForm.reset();
+                // Reset tab back to basic
+                const basicTab = document.querySelector('#trip-basic-tab');
+                if (basicTab) {
+                    const tabInst = bootstrap.Tab.getInstance(basicTab) || new bootstrap.Tab(basicTab);
+                    tabInst.show();
+                }
+                
+                await window.loadTripsTable();
+                await window.loadOverviewStats();
+
+            } catch (err) {
+                alert('خطأ في الحفظ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
+            }
+        });
+    }
+
+    // Load initial dropdowns
+    window.loadDestinationsDropdown();
+
+    // Wire shown.bs.tab events for lazy loading
+    const destTabBtn = document.getElementById('destinations-tab');
+    if (destTabBtn) {
+        destTabBtn.addEventListener('shown.bs.tab', () => window.loadDestinationsTable());
+    }
+    const tripsTabBtn = document.getElementById('trips-tab');
+    if (tripsTabBtn) {
+        tripsTabBtn.addEventListener('shown.bs.tab', () => {
+            window.loadTripsTable();
+            window.loadDestinationsDropdown();
+        });
+    }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TRIPS MANAGEMENT
+// TRIPS TABLE & DELETE
 // ─────────────────────────────────────────────────────────────────────────────
 
 window.loadTripsTable = async function () {
@@ -526,38 +648,51 @@ window.loadTripsTable = async function () {
         const { Client, Databases } = Appwrite;
         const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
         const databases = new Databases(client);
-        const res = await databases.listDocuments(conf.databaseId, conf.collections.trips);
-        const docs = res.documents;
+        
+        // Fetch both trips and destinations
+        const [tripsRes, destsRes] = await Promise.all([
+            databases.listDocuments(conf.databaseId, conf.collections.trips),
+            databases.listDocuments(conf.databaseId, conf.collections.destinations)
+        ]);
+        
+        const trips = tripsRes.documents;
+        const dests = destsRes.documents;
 
-        if (!docs.length) {
+        if (!trips.length) {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-plane fa-2x mb-2 d-block opacity-25"></i>لا توجد رحلات بعد. أضف أول رحلة!</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = docs.map(t => `
-            <tr>
-                <td>
-                    ${t.image ? `<img src="${t.image}" style="width:70px;height:50px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">` : '<span class="text-muted">—</span>'}
-                </td>
-                <td>
-                    <div class="fw-semibold">${t.title_ar || '—'}</div>
-                    <div class="text-muted small">${t.title_en || ''}</div>
-                </td>
-                <td>${t.flag || ''} ${t.country_ar || t.country_en || '—'}</td>
-                <td class="fw-bold text-success">$${t.price || '—'}</td>
-                <td>${t.duration || '—'} يوم</td>
-                <td>
-                    <span class="badge ${(t.spots_left || 0) > 0 ? 'bg-success' : 'bg-danger'}">
-                        ${t.spots_left || 0} / ${t.spots_total || 0}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteTrip('${t.$id}')">
-                        <i class="fa-solid fa-trash-alt"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = trips.map(t => {
+            const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
+            const countryDisplay = dest ? `${dest.flag || ''} ${dest.name_ar}` : '<span class="text-muted">غير محدد</span>';
+            const imgUrl = t.image_url || t.image;
+            
+            return `
+                <tr>
+                    <td>
+                        ${imgUrl ? `<img src="${imgUrl}" style="width:70px;height:50px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">` : '<span class="text-muted">—</span>'}
+                    </td>
+                    <td>
+                        <div class="fw-semibold">${t.title_ar || '—'}</div>
+                        <div class="text-muted small">${t.title_en || ''}</div>
+                    </td>
+                    <td>${countryDisplay}</td>
+                    <td class="fw-bold text-success">$${t.price || '—'}</td>
+                    <td>${t.duration || '—'}</td>
+                    <td>
+                        <span class="badge ${(t.spots_left || 0) > 0 ? 'bg-success' : 'bg-danger'}">
+                            ${t.spots_left || 0} / ${t.spots_total || 0}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteTrip('${t.$id}')">
+                            <i class="fa-solid fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     } catch (err) {
         console.error('Trips load error:', err);
         tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
@@ -578,80 +713,3 @@ window.deleteTrip = async function (docId) {
         alert('خطأ في الحذف: ' + err.message);
     }
 };
-
-// Wire Add Trip form
-document.addEventListener('DOMContentLoaded', () => {
-    const tripForm = document.getElementById('addTripForm');
-    if (tripForm) {
-        tripForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('saveTripBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري الحفظ...';
-
-            try {
-                const conf = window.CONFIG.appwrite;
-                const { Client, Databases, ID } = Appwrite;
-                const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
-                const databases = new Databases(client);
-
-                const existing = await databases.listDocuments(conf.databaseId, conf.collections.trips);
-                const nextId = (existing.total || 0) + 1;
-
-                const hlAr = document.getElementById('trip_highlights_ar').value.trim();
-                const hlEn = document.getElementById('trip_highlights_en').value.trim();
-                const dates = document.getElementById('trip_departure_dates').value.trim();
-                const ttype = document.getElementById('trip_travel_type').value.trim();
-                const destId = document.getElementById('trip_destination_id').value.trim();
-
-                const payload = {
-                    id: nextId,
-                    title_ar: document.getElementById('trip_title_ar').value.trim(),
-                    title_en: document.getElementById('trip_title_en').value.trim(),
-                    country_ar: document.getElementById('trip_country_ar').value.trim(),
-                    country_en: document.getElementById('trip_country_en').value.trim(),
-                    flag: document.getElementById('trip_flag').value.trim() || null,
-                    price: parseFloat(document.getElementById('trip_price').value) || 0,
-                    currency: 'USD',
-                    duration: parseInt(document.getElementById('trip_duration').value) || 7,
-                    spots_total: parseInt(document.getElementById('trip_spots_total').value) || 20,
-                    spots_left: parseInt(document.getElementById('trip_spots_left').value) || 20,
-                    climate: document.getElementById('trip_climate').value,
-                    budget_tier: document.getElementById('trip_budget_tier').value,
-                    is_egyptian: document.getElementById('trip_is_egyptian').value === 'true',
-                    desc_ar: document.getElementById('trip_desc_ar').value.trim() || null,
-                    desc_en: document.getElementById('trip_desc_en').value.trim() || null,
-                    highlights_ar: hlAr ? hlAr.split(',').map(s => s.trim()) : [],
-                    highlights_en: hlEn ? hlEn.split(',').map(s => s.trim()) : [],
-                    departure_dates: dates ? dates.split(',').map(s => s.trim()) : [],
-                    travel_type: ttype ? ttype.split(',').map(s => s.trim()) : [],
-                    image: document.getElementById('trip_image').value.trim() || null,
-                    destination_id: destId ? parseInt(destId) : null
-                };
-
-                await databases.createDocument(conf.databaseId, conf.collections.trips, ID.unique(), payload);
-
-                bootstrap.Modal.getInstance(document.getElementById('addTripModal')).hide();
-                tripForm.reset();
-                await window.loadTripsTable();
-                await window.loadOverviewStats();
-
-            } catch (err) {
-                alert('خطأ في الحفظ: ' + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
-            }
-        });
-    }
-
-    // Load destinations & trips tables when tabs clicked
-    const destTabBtn = document.getElementById('destinations-tab');
-    if (destTabBtn) {
-        destTabBtn.addEventListener('shown.bs.tab', () => window.loadDestinationsTable());
-    }
-    const tripsTabBtn = document.getElementById('trips-tab');
-    if (tripsTabBtn) {
-        tripsTabBtn.addEventListener('shown.bs.tab', () => window.loadTripsTable());
-    }
-});

@@ -237,7 +237,6 @@
                                             <th>الميزانية</th>
                                             <th>المناخ</th>
                                             <th>المدة</th>
-                                            <th>الملاحظات</th>
                                             <th>التاريخ</th>
                                         </tr>
                                     </thead>
@@ -311,16 +310,15 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>#</th>
-                                            <th>الصورة</th>
+                                            <th>العلم</th>
                                             <th>الاسم (عربي)</th>
                                             <th>الاسم (إنجليزي)</th>
-                                            <th>التصنيف</th>
-                                            <th>مميز</th>
+                                            <th>الرابط الدلالي (Slug)</th>
                                             <th>إجراء</th>
                                         </tr>
                                     </thead>
                                     <tbody id="adminDestinationsTable">
-                                        <tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>
+                                        <tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -329,56 +327,30 @@
 
                     <!-- Modal: Add Destination -->
                     <div class="modal fade" id="addDestinationModal" tabindex="-1">
-                        <div class="modal-dialog modal-lg">
+                        <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header bg-dark text-white">
-                                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة وجهة جديدة</h5>
+                                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة دولة/وجهة جديدة</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
                                 <form id="addDestinationForm">
                                 <div class="modal-body">
                                     <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">اسم الوجهة (عربي) *</label>
-                                            <input type="text" class="form-control" id="dest_name_ar" placeholder="مثال: الغردقة" required>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">اسم الدولة (عربي) *</label>
+                                            <input type="text" class="form-control" id="dest_name_ar" placeholder="مثال: مصر" required>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">اسم الوجهة (إنجليزي) *</label>
-                                            <input type="text" class="form-control" id="dest_name_en" placeholder="Example: Hurghada" required>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">اسم الدولة (إنجليزي) *</label>
+                                            <input type="text" class="form-control" id="dest_name_en" placeholder="Example: Egypt" required>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">وصف قصير (عربي)</label>
-                                            <textarea class="form-control" id="dest_desc_ar" rows="2" placeholder="وصف الوجهة..."></textarea>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">الرابط الدلالي (Slug) *</label>
+                                            <input type="text" class="form-control" id="dest_slug" placeholder="Example: egypt" required>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">وصف قصير (إنجليزي)</label>
-                                            <textarea class="form-control" id="dest_desc_en" rows="2" placeholder="Destination description..."></textarea>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">التصنيف</label>
-                                            <select class="form-select" id="dest_category">
-                                                <option value="beach">شاطئ (beach)</option>
-                                                <option value="heritage">تراث (heritage)</option>
-                                                <option value="culture">ثقافة (culture)</option>
-                                                <option value="adventure">مغامرة (adventure)</option>
-                                                <option value="mountain">جبال (mountain)</option>
-                                                <option value="city">مدن (city)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">ترتيب العرض</label>
-                                            <input type="number" class="form-control" id="dest_sort_order" value="1" min="1">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">مميزة على الرئيسية؟</label>
-                                            <select class="form-select" id="dest_is_featured">
-                                                <option value="true">نعم ✔</option>
-                                                <option value="false">لا</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label fw-semibold">رابط الصورة (URL)</label>
-                                            <input type="url" class="form-control" id="dest_image" placeholder="https://images.unsplash.com/...">
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">العلم (Emoji) *</label>
+                                            <input type="text" class="form-control" id="dest_flag" placeholder="مثال: 🇪🇬" maxlength="10" required>
                                         </div>
                                     </div>
                                 </div>
@@ -433,100 +405,220 @@
                                 </div>
                                 <form id="addTripForm">
                                 <div class="modal-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">عنوان الرحلة (عربي) *</label>
-                                            <input type="text" class="form-control" id="trip_title_ar" placeholder="مثال: سحر الغردقة" required>
+                                    <ul class="nav nav-tabs mb-3" id="tripModalTabs" role="tablist">
+                                        <li class="nav-item">
+                                            <button class="nav-link active small py-2" id="trip-basic-tab" data-bs-toggle="tab" data-bs-target="#trip-basic" type="button" role="tab">البيانات الأساسية</button>
+                                        </li>
+                                        <li class="nav-item">
+                                            <button class="nav-link small py-2" id="trip-classification-tab" data-bs-toggle="tab" data-bs-target="#trip-classification" type="button" role="tab">التصنيف والتدرج</button>
+                                        </li>
+                                        <li class="nav-item">
+                                            <button class="nav-link small py-2" id="trip-details-tab" data-bs-toggle="tab" data-bs-target="#trip-details-tabpane" type="button" role="tab">التفاصيل والوصف</button>
+                                        </li>
+                                        <li class="nav-item">
+                                            <button class="nav-link small py-2" id="trip-program-tab" data-bs-toggle="tab" data-bs-target="#trip-program" type="button" role="tab">البرنامج والشمولية</button>
+                                        </li>
+                                        <li class="nav-item">
+                                            <button class="nav-link small py-2" id="trip-seo-tab" data-bs-toggle="tab" data-bs-target="#trip-seo" type="button" role="tab">محركات البحث SEO</button>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content" id="tripModalTabsContent">
+                                        
+                                        <!-- Tab 1: Basic -->
+                                        <div class="tab-pane fade show active" id="trip-basic" role="tabpanel">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">عنوان الرحلة (عربي) *</label>
+                                                    <input type="text" class="form-control" id="trip_title_ar" placeholder="مثال: سحر الغردقة" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">عنوان الرحلة (إنجليزي) *</label>
+                                                    <input type="text" class="form-control" id="trip_title_en" placeholder="Example: Hurghada Magic" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">الدولة / الوجهة *</label>
+                                                    <select class="form-select" id="trip_destination_id" required>
+                                                        <option value="">جاري تحميل الدول...</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">السعر (USD) *</label>
+                                                    <input type="number" class="form-control" id="trip_price" min="1" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">العملة *</label>
+                                                    <input type="text" class="form-control" id="trip_currency" value="$" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">المدة (نص) *</label>
+                                                    <input type="text" class="form-control" id="trip_duration" placeholder="مثال: 5 أيام أو 7 Days" value="5 أيام" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">إجمالي المقاعد *</label>
+                                                    <input type="number" class="form-control" id="trip_spots_total" value="20" min="1" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">مقاعد متبقية *</label>
+                                                    <input type="number" class="form-control" id="trip_spots_left" value="20" min="0" required>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">رابط صورة الرحلة (URL) *</label>
+                                                    <input type="url" class="form-control" id="trip_image_url" placeholder="https://images.unsplash.com/..." required>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">عنوان الرحلة (إنجليزي) *</label>
-                                            <input type="text" class="form-control" id="trip_title_en" placeholder="Example: Hurghada Magic" required>
+
+                                        <!-- Tab 2: Classification -->
+                                        <div class="tab-pane fade" id="trip-classification" role="tabpanel">
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">التصنيف</label>
+                                                    <select class="form-select" id="trip_category">
+                                                        <option value="beach">شاطئ (beach)</option>
+                                                        <option value="heritage">تراث (heritage)</option>
+                                                        <option value="culture">ثقافة (culture)</option>
+                                                        <option value="adventure">مغامرة (adventure)</option>
+                                                        <option value="mountain">جبال (mountain)</option>
+                                                        <option value="city">مدن (city)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">المناخ</label>
+                                                    <select class="form-select" id="trip_climate">
+                                                        <option value="beach">شاطئ (beach)</option>
+                                                        <option value="desert">صحراء (desert)</option>
+                                                        <option value="mountain">جبال (mountain)</option>
+                                                        <option value="city">مدن (city)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">فئة الميزانية</label>
+                                                    <select class="form-select" id="trip_budget_tier">
+                                                        <option value="low">اقتصادي (low)</option>
+                                                        <option value="medium" selected>متوسط (medium)</option>
+                                                        <option value="high">مرتفع (high)</option>
+                                                        <option value="luxury">فاخر (luxury)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">رحلة مصرية؟</label>
+                                                    <select class="form-select" id="trip_is_egyptian">
+                                                        <option value="true">نعم (داخل مصر)</option>
+                                                        <option value="false">لا (خارج مصر / دولية)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">الرحلة نشطة؟</label>
+                                                    <select class="form-select" id="trip_is_active">
+                                                        <option value="true">نعم (نشط وتظهر بالموقع)</option>
+                                                        <option value="false">لا (مسودة مخفية)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-semibold">ترتيب العرض</label>
+                                                    <input type="number" class="form-control" id="trip_sort_order" value="0">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">اللون الأول للتدرج (Hex Color)</label>
+                                                    <input type="text" class="form-control" id="trip_color_from" placeholder="مثال: #0099CC" value="#0099CC">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">اللون الثاني للتدرج (Hex Color)</label>
+                                                    <input type="text" class="form-control" id="trip_color_to" placeholder="مثال: #FF6633" value="#FF6633">
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">الدولة (عربي)</label>
-                                            <input type="text" class="form-control" id="trip_country_ar" placeholder="مصر">
+
+                                        <!-- Tab 3: Details -->
+                                        <div class="tab-pane fade" id="trip-details-tabpane" role="tabpanel">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">وصف الرحلة (عربي)</label>
+                                                    <textarea class="form-control" id="trip_desc_ar" rows="3" placeholder="اكتب الوصف هنا..."></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">وصف الرحلة (إنجليزي)</label>
+                                                    <textarea class="form-control" id="trip_desc_en" rows="3" placeholder="Write description here..."></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">أبرز معالم الرحلة (عربي) - اكتب كل عنصر في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_highlights_ar" rows="3" placeholder="مثال:&#10;شاطئ ذهبي ممتد&#10;رحلة غوص مميزة&#10;سهرة بدوية ساحرة"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">أبرز معالم الرحلة (إنجليزي) - اكتب كل عنصر في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_highlights_en" rows="3" placeholder="Example:&#10;Pristine golden beach&#10;Exciting diving trip&#10;Bedouin night show"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">نوع السفر (Travel Type) - افصل بينها بـ ,</label>
+                                                    <input type="text" class="form-control" id="trip_travel_type" placeholder="مثال: family,couple,solo" value="family,couple,solo">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">تواريخ السفر المتاحة (Departure Dates) - افصل بينها بـ ,</label>
+                                                    <input type="text" class="form-control" id="trip_departure_dates" placeholder="مثال: 2026-07-01, 2026-08-15">
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">الدولة (إنجليزي)</label>
-                                            <input type="text" class="form-control" id="trip_country_en" placeholder="Egypt">
+
+                                        <!-- Tab 4: Program -->
+                                        <div class="tab-pane fade" id="trip-program" role="tabpanel">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">ما تشمله الرحلة (عربي) - اكتب كل عنصر في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_included_ar" rows="3" placeholder="مثال:&#10;الطيران ذهاب وعودة&#10;الإقامة في فندق 5 نجوم&#10;الوجبات والمشروبات"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">ما تشمله الرحلة (إنجليزي) - اكتب كل عنصر في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_included_en" rows="3" placeholder="Example:&#10;Round-trip flight tickets&#10;5-star hotel stay&#10;All inclusive meals"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">ما لا تشمله الرحلة (عربي) - اكتب كل عنصر في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_excluded_ar" rows="3" placeholder="مثال:&#10;المصاريف الشخصية&#10;الرحلات الاختيارية&#10;الإكراميات"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">ما لا تشمله الرحلة (إنجليزي) - اكتب كل عنصر في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_excluded_en" rows="3" placeholder="Example:&#10;Personal expenses&#10;Optional activities&#10;Tips and gratuities"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">البرنامج اليومي (عربي) - اكتب تفاصيل كل يوم في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_itinerary_ar" rows="3" placeholder="مثال:&#10;اليوم الأول: الوصول للفندق والاستلام والراحة&#10;اليوم الثاني: رحلة غوص وسنوركل صباحية&#10;اليوم الثالث: جولة حرة للتسوق"></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">البرنامج اليومي (إنجليزي) - اكتب تفاصيل كل يوم في سطر منفصل</label>
+                                                    <textarea class="form-control" id="trip_itinerary_en" rows="3" placeholder="Example:&#10;Day 1: Arrival at hotel, check-in and leisure time&#10;Day 2: Morning snorkeling and diving trip&#10;Day 3: Free city tour and shopping"></textarea>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">علم الدولة (Emoji)</label>
-                                            <input type="text" class="form-control" id="trip_flag" placeholder="🇪🇬" maxlength="4">
+
+                                        <!-- Tab 5: SEO -->
+                                        <div class="tab-pane fade" id="trip-seo" role="tabpanel">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">عنوان الميتا (عربي) - Meta Title AR</label>
+                                                    <input type="text" class="form-control" id="trip_meta_title_ar" placeholder="مثال: حجز رحلة الغردقة - أفضل العروض">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">عنوان الميتا (إنجليزي) - Meta Title EN</label>
+                                                    <input type="text" class="form-control" id="trip_meta_title_en" placeholder="Example: Book Hurghada Trip - Best Deals">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">وصف الميتا (عربي) - Meta Description AR</label>
+                                                    <textarea class="form-control" id="trip_meta_desc_ar" rows="3" placeholder="اكتب وصف الميتا لمحركات البحث هنا..."></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">وصف الميتا (إنجليزي) - Meta Description EN</label>
+                                                    <textarea class="form-control" id="trip_meta_desc_en" rows="3" placeholder="Write meta description here..."></textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">كلمات مفتاحية (عربي) - Meta Keywords AR</label>
+                                                    <input type="text" class="form-control" id="trip_meta_keywords_ar" placeholder="مثال: الغردقة, رحلة الغردقة, حجز رحلات">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">كلمات مفتاحية (إنجليزي) - Meta Keywords EN</label>
+                                                    <input type="text" class="form-control" id="trip_meta_keywords_en" placeholder="Example: Hurghada, trip, booking, travel">
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">السعر (USD) *</label>
-                                            <input type="number" class="form-control" id="trip_price" min="1" required>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">المدة (أيام) *</label>
-                                            <input type="number" class="form-control" id="trip_duration" min="1" value="7" required>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">إجمالي المقاعد</label>
-                                            <input type="number" class="form-control" id="trip_spots_total" value="20" min="1">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">مقاعد متبقية</label>
-                                            <input type="number" class="form-control" id="trip_spots_left" value="20" min="0">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">المناخ / النوع</label>
-                                            <select class="form-select" id="trip_climate">
-                                                <option value="beach">شاطئ (beach)</option>
-                                                <option value="desert">صحراء (desert)</option>
-                                                <option value="mountain">جبال (mountain)</option>
-                                                <option value="city">مدن (city)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">فئة الميزانية</label>
-                                            <select class="form-select" id="trip_budget_tier">
-                                                <option value="low">اقتصادي (low)</option>
-                                                <option value="medium" selected>متوسط (medium)</option>
-                                                <option value="high">مرتفع (high)</option>
-                                                <option value="luxury">فاخر (luxury)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">رحلة مصرية؟</label>
-                                            <select class="form-select" id="trip_is_egyptian">
-                                                <option value="true">نعم (Egypt)</option>
-                                                <option value="false">لا (دولية)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">وصف الرحلة (عربي)</label>
-                                            <textarea class="form-control" id="trip_desc_ar" rows="2"></textarea>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">وصف الرحلة (إنجليزي)</label>
-                                            <textarea class="form-control" id="trip_desc_en" rows="2"></textarea>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">أبرز معالم (عربي) - فصل بينها ب ,</label>
-                                            <input type="text" class="form-control" id="trip_highlights_ar" placeholder="شاطئ ذهبي,غوص وسنوركل">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">أبرز معالم (إنجليزي) - فصل بينها ب ,</label>
-                                            <input type="text" class="form-control" id="trip_highlights_en" placeholder="Golden Beach,Snorkeling">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">تواريخ السفر - فصل ب ,</label>
-                                            <input type="text" class="form-control" id="trip_departure_dates" placeholder="2026-07-01,2026-08-15">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">رابط الصورة (URL)</label>
-                                            <input type="url" class="form-control" id="trip_image" placeholder="https://images.unsplash.com/...">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">ID الوجهة (اختياري)</label>
-                                            <input type="number" class="form-control" id="trip_destination_id" placeholder="رقم ID الوجهة">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">نوع السفر - فصل ب ,</label>
-                                            <input type="text" class="form-control" id="trip_travel_type" placeholder="family,couple,solo">
-                                        </div>
+
                                     </div>
                                 </div>
                                 <div class="modal-footer">
