@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">تفاصيل الوجهة — رحلاتي</title>
-    <meta name="description" content="استكشف تفاصيل الوجهة السياحية والرحلات المتاحة لها مع شركة رحلاتي.">
+    <meta name="description" content="استكشف تفاصيل الوجهة السياحية والرحلات المتاحة لها مع شركة رحلاتي." id="pageDescription">
     <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ra7alaty.com/destination-details" id="pageCanonical">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -14,6 +15,34 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     
+    <!-- Static BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "الرئيسية",
+          "item": "https://ra7alaty.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "الوجهات",
+          "item": "https://ra7alaty.com/destinations"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "تفاصيل الوجهة",
+          "item": "https://ra7alaty.com/destination-details"
+        }
+      ]
+    }
+    </script>
+
     <style>
         .destination-hero {
             height: 380px;
@@ -226,10 +255,61 @@
             document.getElementById('destCategory').textContent = d.category;
             document.getElementById('destHero').style.backgroundImage = `url('${d.image}')`;
 
+            // Update dynamic SEO tags
+            const descEl = document.getElementById('pageDescription');
+            if (descEl) descEl.setAttribute('content', `استكشف وجهة ${name} مع رحلاتي. ${desc ? desc.slice(0, 120) : ''}، واحجز رحلتك الآن!`);
+            const canonEl = document.getElementById('pageCanonical');
+            if (canonEl) canonEl.setAttribute('href', `https://ra7alaty.com/destination-details?id=${d.id}`);
+
+
             // Load related trips
             const trips = await window.db.getTrips();
             const related = trips.filter(t => String(t.destination_id) === String(d.id));
             renderRelatedTrips(related);
+
+            // Inject dynamic TouristDestination Structured Data
+            const existingSD = document.getElementById('sd-destination');
+            if (existingSD) existingSD.remove();
+            const sdScript = document.createElement('script');
+            sdScript.type = 'application/ld+json';
+            sdScript.id = 'sd-destination';
+            const lowestPrice = related.length > 0 ? Math.min(...related.map(t => t.price)) : null;
+            sdScript.textContent = JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "TouristDestination",
+              "name": name,
+              "description": desc,
+              "image": d.image || 'https://ra7alaty.com/images/og-default.jpg',
+              "url": `https://ra7alaty.com/destination-details?id=${d.id}`,
+              "touristType": d.category || 'Tourist',
+              "includesAttraction": related.map(t => ({
+                "@type": "TouristAttraction",
+                "name": lang === 'ar' ? t.title_ar : t.title_en,
+                "url": `https://ra7alaty.com/trip-details?id=${t.id}`
+              })),
+              "containedInPlace": {
+                "@type": "Country",
+                "name": lang === 'ar' ? d.name_ar : d.name_en
+              }
+            });
+            document.head.appendChild(sdScript);
+
+            // Inject dynamic BreadcrumbList with real destination name
+            const existingBC = document.getElementById('sd-breadcrumb');
+            if (existingBC) existingBC.remove();
+            const bcScript = document.createElement('script');
+            bcScript.type = 'application/ld+json';
+            bcScript.id = 'sd-breadcrumb';
+            bcScript.textContent = JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "الرئيسية", "item": "https://ra7alaty.com" },
+                { "@type": "ListItem", "position": 2, "name": "الوجهات", "item": "https://ra7alaty.com/destinations" },
+                { "@type": "ListItem", "position": 3, "name": name, "item": `https://ra7alaty.com/destination-details?id=${d.id}` }
+              ]
+            });
+            document.head.appendChild(bcScript);
         }
 
         function renderRelatedTrips(trips) {

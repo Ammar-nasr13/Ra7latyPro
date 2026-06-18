@@ -73,46 +73,98 @@
             font-weight: 600;
             color: #e2e8f0;
             margin-bottom: 0.5rem;
+            display: block;
+            text-align: right;
         }
 
-        .input-group {
+        /* Custom RTL-friendly input wrapper */
+        .field-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
-        .input-group:focus-within {
+        .field-wrapper:focus-within {
             border-color: #c5a028;
-            box-shadow: 0 0 0 3px rgba(197, 160, 40, 0.25);
-            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(197, 160, 40, 0.2);
+            background: rgba(255, 255, 255, 0.07);
         }
 
-        .input-group-text {
-            background: transparent;
-            border: none;
-            color: #a0aec0;
-            padding-left: 0.5rem;
-            padding-right: 1rem;
-        }
-
-        .form-control {
-            background: transparent;
-            border: none;
-            color: #ffffff;
-            padding: 0.8rem 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .form-control:focus {
-            background: transparent;
-            box-shadow: none;
-            color: #ffffff;
-        }
-
-        .form-control::placeholder {
+        .field-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            min-width: 48px;
+            height: 52px;
             color: #718096;
+            font-size: 1rem;
+            transition: color 0.2s ease;
+            /* Left side in RTL = visual right */
+            order: 2;
+        }
+
+        .field-wrapper:focus-within .field-icon {
+            color: #c5a028;
+        }
+
+        .field-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-family: 'Cairo', sans-serif;
+            padding: 0.85rem 1rem;
+            height: 52px;
+            order: 1;
+            direction: ltr; /* keep email/password LTR inside */
+            text-align: right;
+        }
+
+        .field-input[type="email"],
+        .field-input[type="password"] {
+            text-align: left;
+        }
+
+        .field-input::placeholder {
+            color: #4a5568;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .field-input:autofill,
+        .field-input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 50px rgba(13, 33, 55, 0.9) inset;
+            -webkit-text-fill-color: #ffffff;
+            caret-color: #ffffff;
+        }
+
+        /* Password toggle eye button */
+        .field-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            min-width: 40px;
+            height: 52px;
+            background: transparent;
+            border: none;
+            color: #4a5568;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            order: 0;
+            padding: 0;
+        }
+
+        .field-toggle:hover {
+            color: #c5a028;
         }
 
         .btn-login {
@@ -121,12 +173,14 @@
             color: #0d2137;
             font-weight: 700;
             font-size: 1.05rem;
+            font-family: 'Cairo', sans-serif;
             padding: 0.9rem;
             border-radius: 12px !important;
             width: 100%;
             margin-top: 1.5rem;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(197, 160, 40, 0.3);
+            cursor: pointer;
         }
 
         .btn-login:hover {
@@ -138,6 +192,12 @@
 
         .btn-login:active {
             transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            transform: none;
+            cursor: not-allowed;
         }
 
         .alert-custom {
@@ -183,11 +243,6 @@
         .back-to-site a:hover {
             color: #c5a028;
         }
-
-        /* Remove border-radius resets for login page to keep modern feel */
-        * {
-            border-radius: revert !important;
-        }
     </style>
 </head>
 <body>
@@ -205,19 +260,42 @@
         </div>
 
         <form id="loginForm">
-            <div class="mb-3">
-                <label for="email" class="form-label">البريد الإلكتروني للقرص</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                    <input type="email" id="email" class="form-control" placeholder="admin@rahalaty.com" required autocomplete="email">
+            <!-- Email Field -->
+            <div class="mb-4">
+                <label for="email" class="form-label">البريد الإلكتروني</label>
+                <div class="field-wrapper">
+                    <span class="field-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input
+                        type="email"
+                        id="email"
+                        class="field-input"
+                        placeholder="admin@rahalaty.com"
+                        required
+                        autocomplete="email"
+                    >
                 </div>
             </div>
 
+            <!-- Password Field -->
             <div class="mb-4">
                 <label for="password" class="form-label">كلمة المرور</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                <div class="field-wrapper">
+                    <span class="field-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input
+                        type="password"
+                        id="password"
+                        class="field-input"
+                        placeholder="••••••••"
+                        required
+                        autocomplete="current-password"
+                    >
+                    <button type="button" class="field-toggle" id="togglePassword" title="إظهار/إخفاء كلمة المرور">
+                        <i class="fa-solid fa-eye" id="toggleIcon"></i>
+                    </button>
                 </div>
             </div>
 
@@ -228,14 +306,13 @@
         </form>
 
         <div class="back-to-site">
-            <a href="./"><i class="fa-solid fa-arrow-right me-1"></i>العودة للموقع الرئيسي</a>
+            <a href="./"><i class="fa-solid fa-arrow-left me-1"></i>العودة للموقع الرئيسي</a>
         </div>
     </div>
 
     <!-- Appwrite Web SDK -->
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
     <script src="js/config.js"></script>
-    <script src="js/database.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -251,6 +328,17 @@
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const btnSpinner = document.getElementById('btnSpinner');
+
+            // Password visibility toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            togglePassword.addEventListener('click', () => {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                toggleIcon.className = isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+            });
 
             function showAlert(message, type = 'error') {
                 alertBox.className = `alert-custom alert-${type}`;
@@ -276,40 +364,42 @@
                 btnSpinner.classList.remove('d-none');
 
                 try {
-                    // Initialize DB Service (makes direct Appwrite connection)
-                    await window.db.init();
-
-                    if (!window.db.isAppwriteConnected()) {
-                        showAlert('تعذر الاتصال بـ Appwrite. يرجى التحقق من إعدادات الاتصال في CONFIG أو إعدادات الأدمن.');
-                        submitBtn.disabled = false;
-                        btnText.textContent = 'تسجيل الدخول';
-                        btnSpinner.classList.add('d-none');
-                        return;
+                    // Verify Appwrite SDK is loaded
+                    if (typeof Appwrite === 'undefined') {
+                        throw new Error('SDK_NOT_LOADED');
                     }
 
+                    const { Client, Databases, Query } = Appwrite;
                     const conf = window.CONFIG.appwrite;
-                    const { Query } = Appwrite;
 
-                    // Query the 'admins' collection in Appwrite database
-                    const response = await window.db.databases.listDocuments(
+                    // Create a fresh Appwrite client directly
+                    const client = new Client()
+                        .setEndpoint(conf.endpoint)
+                        .setProject(conf.projectId);
+
+                    const databases = new Databases(client);
+
+                    // Query the 'admins' collection — collection ID must be 'admins'
+                    const response = await databases.listDocuments(
                         conf.databaseId,
                         'admins',
                         [
-                            Query.equal('email', email),
-                            Query.equal('password', password)
+                            Query.equal('email', [email]),
+                            Query.equal('password', [password])
                         ]
                     );
 
                     if (response.documents.length > 0) {
                         const adminUser = response.documents[0];
-                        
+
                         // Save session
                         sessionStorage.setItem('rahalaty_admin_logged_in', 'true');
-                        sessionStorage.setItem('rahalaty_admin_name', adminUser.name);
-                        sessionStorage.setItem('rahalaty_admin_email', adminUser.email);
+                        sessionStorage.setItem('rahalaty_admin_name', adminUser.name || 'Admin');
+                        sessionStorage.setItem('rahalaty_admin_email', adminUser.email || email);
+                        sessionStorage.setItem('rahalaty_admin_role', adminUser.role || 'admin');
 
-                        showAlert('تم تسجيل الدخول بنجاح! جاري تحويلك لوحة التحكم...', 'success');
-                        
+                        showAlert('تم تسجيل الدخول بنجاح! جاري التحويل للوحة التحكم...', 'success');
+
                         setTimeout(() => {
                             window.location.href = 'admin';
                         }, 1200);
@@ -321,8 +411,23 @@
                     }
 
                 } catch (err) {
-                    console.error(err);
-                    showAlert('خطأ: تعذر الاتصال بـ Appwrite أو أن جدول admins غير موجود.');
+                    console.error('Login Error Full:', err);
+
+                    let msg = 'خطأ غير متوقع. افتح الـ Console للتفاصيل.';
+
+                    if (err.message === 'SDK_NOT_LOADED') {
+                        msg = 'خطأ: لم يتم تحميل Appwrite SDK. تحقق من اتصالك بالإنترنت.';
+                    } else if (err.code === 404) {
+                        msg = 'خطأ 404: جدول admins غير موجود. تأكد أن الـ Collection ID = admins في Appwrite.';
+                    } else if (err.code === 401) {
+                        msg = 'خطأ 401: لا توجد صلاحية وصول لجدول admins. فعّل Read permissions للـ Any في إعدادات الـ Collection بـ Appwrite.';
+                    } else if (err.code === 0 || err.message?.includes('fetch') || err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
+                        msg = 'خطأ في الشبكة: تعذر الاتصال بـ Appwrite. تحقق من اتصالك بالإنترنت.';
+                    } else if (err.message) {
+                        msg = `خطأ: ${err.message}`;
+                    }
+
+                    showAlert(msg);
                     submitBtn.disabled = false;
                     btnText.textContent = 'تسجيل الدخول';
                     btnSpinner.classList.add('d-none');

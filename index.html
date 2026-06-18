@@ -32,15 +32,22 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Organization Schema JSON-LD -->
+    <!-- TravelAgency + Organization Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "TravelAgency",
       "name": "رحلاتي",
       "alternateName": "Rahalaty",
+      "description": "أفضل شركة سياحة مصرية — احجز رحلتك إلى الغردقة وشرم الشيخ والأقصر وأوروبا. أكثر من 16 وجهة سياحية بأسعار تنافسية.",
       "url": "https://ra7alaty.com",
-      "logo": "https://ra7alaty.com/images/og-default.jpg",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://ra7alaty.com/images/og-default.jpg",
+        "width": 1200,
+        "height": 630
+      },
+      "image": "https://ra7alaty.com/images/og-default.jpg",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Cairo",
@@ -48,8 +55,103 @@
       },
       "telephone": "+201000000000",
       "email": "info@ra7alaty.com",
+      "priceRange": "$$",
+      "areaServed": "EG",
+      "currenciesAccepted": "EGP, USD",
       "sameAs": [
         "https://ra7alaty.com"
+      ],
+      "foundingDate": "2015",
+      "numberOfEmployees": {
+        "@type": "QuantitativeValue",
+        "minValue": 10,
+        "maxValue": 50
+      }
+    }
+    </script>
+
+    <!-- WebSite with SearchAction Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "رحلاتي | Rahalaty",
+      "url": "https://ra7alaty.com",
+      "inLanguage": ["ar", "en"],
+      "description": "موقع رحلاتي — احجز أفضل الرحلات السياحية في مصر والعالم",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://ra7alaty.com/destinations?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- FAQPage Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "ما هي أفضل وجهات رحلاتي السياحية في مصر؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "تقدم رحلاتي أفضل الوجهات السياحية في مصر مثل الغردقة وشرم الشيخ والأقصر وأسوان والقاهرة، إلى جانب وجهات دولية في أوروبا وتركيا واليونان."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "كيف أحجز رحلة مع رحلاتي؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "يمكنك حجز رحلتك مباشرة من خلال موقعنا ra7alaty.com — اختر الوجهة، ثم الرحلة المناسبة واضغط على زر احجز الآن واملأ بيانات الحجز."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل تقدم رحلاتي رحلات خارج مصر؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "نعم، رحلاتي تقدم رحلات دولية إلى اليونان وتركيا وإيطاليا وسويسرا والأردن وعدد كبير من الوجهات العالمية."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "ما هي أسعار الرحلات في رحلاتي؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "تتراوح أسعار الرحلات بين الفئات الاقتصادية والمتوسطة والفاخرة. يمكنك استخدام الاستبيان الذكي لاختيار الرحلة المناسبة لميزانيتك."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل يمكنني الاستعانة بالاستبيان الذكي لاختيار رحلتي؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "بالطبع! الاستبيان الذكي في رحلاتي يساعدك على اختيار الرحلة المثالية بناءً على ميزانيتك وتفضيلات السفر وعدد الأفراد."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "الرئيسية",
+          "item": "https://ra7alaty.com"
+        }
       ]
     }
     </script>
