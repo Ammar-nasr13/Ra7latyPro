@@ -402,3 +402,256 @@ window.seedAppwriteDatabase = async function() {
         seedBtn.textContent = 'تهيئة قاعدة البيانات (Seed Data)';
     }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESTINATIONS MANAGEMENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.loadDestinationsTable = async function () {
+    const tbody = document.getElementById('adminDestinationsTable');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
+
+    try {
+        const conf = window.CONFIG.appwrite;
+        const { Client, Databases } = Appwrite;
+        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+        const databases = new Databases(client);
+        const res = await databases.listDocuments(conf.databaseId, conf.collections.destinations);
+        const docs = res.documents;
+
+        if (!docs.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-map-location-dot fa-2x mb-2 d-block opacity-25"></i>لا توجد وجهات بعد. أضف أول وجهة!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = docs.map((d, i) => `
+            <tr>
+                <td class="fw-bold text-muted">${i + 1}</td>
+                <td>
+                    ${d.image ? `<img src="${d.image}" style="width:60px;height:45px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">` : '<span class="text-muted">—</span>'}
+                </td>
+                <td class="fw-semibold">${d.name_ar || '—'}</td>
+                <td class="text-muted small">${d.name_en || '—'}</td>
+                <td><span class="badge bg-secondary">${d.category || '—'}</span></td>
+                <td>${d.is_featured ? '<span class="badge bg-warning text-dark">مميز ⭐</span>' : '<span class="badge bg-light text-dark">عادي</span>'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteDestination('${d.$id}')">
+                        <i class="fa-solid fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Destinations load error:', err);
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
+    }
+};
+
+window.deleteDestination = async function (docId) {
+    if (!confirm('هل تريد حذف هذه الوجهة؟ لا يمكن التراجع!')) return;
+    try {
+        const conf = window.CONFIG.appwrite;
+        const { Client, Databases } = Appwrite;
+        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+        const databases = new Databases(client);
+        await databases.deleteDocument(conf.databaseId, conf.collections.destinations, docId);
+        await window.loadDestinationsTable();
+    } catch (err) {
+        alert('خطأ في الحذف: ' + err.message);
+    }
+};
+
+// Wire Add Destination form
+document.addEventListener('DOMContentLoaded', () => {
+    const destForm = document.getElementById('addDestinationForm');
+    if (destForm) {
+        destForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveDestBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري الحفظ...';
+
+            try {
+                const conf = window.CONFIG.appwrite;
+                const { Client, Databases, ID } = Appwrite;
+                const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+                const databases = new Databases(client);
+
+                // Get next sort order
+                const existing = await databases.listDocuments(conf.databaseId, conf.collections.destinations);
+                const nextSort = (existing.total || 0) + 1;
+
+                const payload = {
+                    name_ar: document.getElementById('dest_name_ar').value.trim(),
+                    name_en: document.getElementById('dest_name_en').value.trim(),
+                    desc_ar: document.getElementById('dest_desc_ar').value.trim(),
+                    desc_en: document.getElementById('dest_desc_en').value.trim(),
+                    category: document.getElementById('dest_category').value,
+                    sort_order: parseInt(document.getElementById('dest_sort_order').value) || nextSort,
+                    is_featured: document.getElementById('dest_is_featured').value === 'true',
+                    image: document.getElementById('dest_image').value.trim() || null,
+                    id: nextSort
+                };
+
+                await databases.createDocument(conf.databaseId, conf.collections.destinations, ID.unique(), payload);
+
+                // Close modal and reload
+                bootstrap.Modal.getInstance(document.getElementById('addDestinationModal')).hide();
+                destForm.reset();
+                await window.loadDestinationsTable();
+                await window.loadOverviewStats();
+
+            } catch (err) {
+                alert('خطأ في الحفظ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الوجهة';
+            }
+        });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRIPS MANAGEMENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.loadTripsTable = async function () {
+    const tbody = document.getElementById('adminTripsTable');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
+
+    try {
+        const conf = window.CONFIG.appwrite;
+        const { Client, Databases } = Appwrite;
+        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+        const databases = new Databases(client);
+        const res = await databases.listDocuments(conf.databaseId, conf.collections.trips);
+        const docs = res.documents;
+
+        if (!docs.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-plane fa-2x mb-2 d-block opacity-25"></i>لا توجد رحلات بعد. أضف أول رحلة!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = docs.map(t => `
+            <tr>
+                <td>
+                    ${t.image ? `<img src="${t.image}" style="width:70px;height:50px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">` : '<span class="text-muted">—</span>'}
+                </td>
+                <td>
+                    <div class="fw-semibold">${t.title_ar || '—'}</div>
+                    <div class="text-muted small">${t.title_en || ''}</div>
+                </td>
+                <td>${t.flag || ''} ${t.country_ar || t.country_en || '—'}</td>
+                <td class="fw-bold text-success">$${t.price || '—'}</td>
+                <td>${t.duration || '—'} يوم</td>
+                <td>
+                    <span class="badge ${(t.spots_left || 0) > 0 ? 'bg-success' : 'bg-danger'}">
+                        ${t.spots_left || 0} / ${t.spots_total || 0}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteTrip('${t.$id}')">
+                        <i class="fa-solid fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Trips load error:', err);
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
+    }
+};
+
+window.deleteTrip = async function (docId) {
+    if (!confirm('هل تريد حذف هذه الرحلة؟ لا يمكن التراجع!')) return;
+    try {
+        const conf = window.CONFIG.appwrite;
+        const { Client, Databases } = Appwrite;
+        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+        const databases = new Databases(client);
+        await databases.deleteDocument(conf.databaseId, conf.collections.trips, docId);
+        await window.loadTripsTable();
+        await window.loadOverviewStats();
+    } catch (err) {
+        alert('خطأ في الحذف: ' + err.message);
+    }
+};
+
+// Wire Add Trip form
+document.addEventListener('DOMContentLoaded', () => {
+    const tripForm = document.getElementById('addTripForm');
+    if (tripForm) {
+        tripForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveTripBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري الحفظ...';
+
+            try {
+                const conf = window.CONFIG.appwrite;
+                const { Client, Databases, ID } = Appwrite;
+                const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+                const databases = new Databases(client);
+
+                const existing = await databases.listDocuments(conf.databaseId, conf.collections.trips);
+                const nextId = (existing.total || 0) + 1;
+
+                const hlAr = document.getElementById('trip_highlights_ar').value.trim();
+                const hlEn = document.getElementById('trip_highlights_en').value.trim();
+                const dates = document.getElementById('trip_departure_dates').value.trim();
+                const ttype = document.getElementById('trip_travel_type').value.trim();
+                const destId = document.getElementById('trip_destination_id').value.trim();
+
+                const payload = {
+                    id: nextId,
+                    title_ar: document.getElementById('trip_title_ar').value.trim(),
+                    title_en: document.getElementById('trip_title_en').value.trim(),
+                    country_ar: document.getElementById('trip_country_ar').value.trim(),
+                    country_en: document.getElementById('trip_country_en').value.trim(),
+                    flag: document.getElementById('trip_flag').value.trim() || null,
+                    price: parseFloat(document.getElementById('trip_price').value) || 0,
+                    currency: 'USD',
+                    duration: parseInt(document.getElementById('trip_duration').value) || 7,
+                    spots_total: parseInt(document.getElementById('trip_spots_total').value) || 20,
+                    spots_left: parseInt(document.getElementById('trip_spots_left').value) || 20,
+                    climate: document.getElementById('trip_climate').value,
+                    budget_tier: document.getElementById('trip_budget_tier').value,
+                    is_egyptian: document.getElementById('trip_is_egyptian').value === 'true',
+                    desc_ar: document.getElementById('trip_desc_ar').value.trim() || null,
+                    desc_en: document.getElementById('trip_desc_en').value.trim() || null,
+                    highlights_ar: hlAr ? hlAr.split(',').map(s => s.trim()) : [],
+                    highlights_en: hlEn ? hlEn.split(',').map(s => s.trim()) : [],
+                    departure_dates: dates ? dates.split(',').map(s => s.trim()) : [],
+                    travel_type: ttype ? ttype.split(',').map(s => s.trim()) : [],
+                    image: document.getElementById('trip_image').value.trim() || null,
+                    destination_id: destId ? parseInt(destId) : null
+                };
+
+                await databases.createDocument(conf.databaseId, conf.collections.trips, ID.unique(), payload);
+
+                bootstrap.Modal.getInstance(document.getElementById('addTripModal')).hide();
+                tripForm.reset();
+                await window.loadTripsTable();
+                await window.loadOverviewStats();
+
+            } catch (err) {
+                alert('خطأ في الحفظ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
+            }
+        });
+    }
+
+    // Load destinations & trips tables when tabs clicked
+    const destTabBtn = document.getElementById('destinations-tab');
+    if (destTabBtn) {
+        destTabBtn.addEventListener('shown.bs.tab', () => window.loadDestinationsTable());
+    }
+    const tripsTabBtn = document.getElementById('trips-tab');
+    if (tripsTabBtn) {
+        tripsTabBtn.addEventListener('shown.bs.tab', () => window.loadTripsTable());
+    }
+});
