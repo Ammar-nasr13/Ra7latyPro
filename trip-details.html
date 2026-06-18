@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">تفاصيل الرحلة — رحلاتي</title>
+    <meta name="description" content="احجز رحلتك السياحية المميزة مع رحلاتي. تفاصيل شاملة عن البرنامج، الأسعار، الميزات والتواريخ المتاحة.">
+    <meta name="robots" content="index, follow">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .trip-details-hero {
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+        }
+        .trip-details-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(13,33,55,0.98) 0%, rgba(13,33,55,0.4) 60%, transparent 100%);
+            z-index: 1;
+        }
+        .trip-details-hero-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            padding-bottom: 2.5rem;
+        }
+        
+        /* Premium Card Layout */
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid rgba(197, 160, 40, 0.15);
+            border-top: 4px solid var(--color-gold);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .fact-box {
+            background: #fff;
+            border: 1.5px solid rgba(197, 160, 40, 0.15);
+            padding: 1.2rem 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .fact-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(197, 160, 40, 0.1);
+            color: var(--color-gold);
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        /* Travel Timeline */
+        .itinerary-timeline {
+            padding-right: 1.8rem;
+            list-style: none;
+            margin-right: 0.5rem;
+            padding-left: 0;
+            position: relative;
+        }
+        body.ltr-layout .itinerary-timeline {
+            padding-right: 0;
+            padding-left: 1.8rem;
+            margin-right: 0;
+            margin-left: 0.5rem;
+        }
+        .itinerary-item {
+            position: relative;
+            margin-bottom: 2.8rem;
+        }
+        .itinerary-item h3 {
+            color: var(--color-nile) !important;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .itinerary-item::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border: 2.5px solid var(--color-gold);
+            position: absolute;
+            top: 8px;
+            z-index: 2;
+            transform: rotate(45deg); /* diamond shape */
+        }
+        body.rtl-layout .itinerary-item::before {
+            right: -1.8rem;
+        }
+        body.ltr-layout .itinerary-item::before {
+            left: -1.8rem;
+        }
+
+        .booking-sidebar {
+            background: #fff;
+            border: 1px solid rgba(197, 160, 40, 0.2);
+            border-top: 5px solid var(--color-gold);
+            padding: 1.8rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 100px;
+        }
+
+        #sidebarPrice {
+            color: var(--color-nile-dark) !important;
+            font-weight: 900;
+        }
+
+        /* Custom inputs & select focus */
+        .form-select, .form-control {
+            border: 1.5px solid rgba(197, 160, 40, 0.25) !important;
+            color: var(--color-nile-dark) !important;
+            transition: all 0.2s ease-in-out !important;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: var(--color-gold) !important;
+            box-shadow: 0 0 0 0.25rem rgba(197, 160, 40, 0.25) !important;
+        }
+
+        .spots-alert-box {
+            background: rgba(206, 17, 38, 0.04) !important;
+            border: 1.5px solid rgba(206, 17, 38, 0.15) !important;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .spots-alert-box, .spots-alert-box i, .spots-alert-box span {
+            color: #C0392B !important;
+        }
+        
+        .spots-alert-box-safe {
+            background: rgba(26, 147, 111, 0.04) !important;
+            border: 1.5px solid rgba(26, 147, 111, 0.15) !important;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .spots-alert-box-safe, .spots-alert-box-safe i, .spots-alert-box-safe span {
+            color: #1A936F !important;
+        }
+
+        /* Custom Accordion overrides */
+        .accordion-item {
+            border: 1px solid rgba(197, 160, 40, 0.15) !important;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+        }
+        .accordion-button {
+            font-weight: 700;
+            color: var(--color-nile);
+            background: #fff;
+            padding: 1.2rem 1.5rem;
+        }
+        .accordion-button:not(.collapsed) {
+            background: var(--color-sand) !important;
+            color: var(--color-nile-dark) !important;
+            border-bottom: 1px solid rgba(197, 160, 40, 0.15);
+        }
+
+        /* Custom Accordion List Styling */
+        .accordion-body ul {
+            list-style: none;
+            padding: 0 !important;
+            margin: 0;
+        }
+        .accordion-body li {
+            position: relative;
+            padding-right: 1.8rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        body.ltr-layout .accordion-body li {
+            padding-right: 0;
+            padding-left: 1.8rem;
+        }
+        .accordion-body li::before {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            font-size: 0.85rem;
+            top: 2px;
+        }
+        body.rtl-layout .accordion-body li::before {
+            right: 0;
+        }
+        body.ltr-layout .accordion-body li::before {
+            left: 0;
+        }
+        #includedContent li::before {
+            content: "\f00c"; /* check icon */
+            color: #1A936F;
+        }
+        #excludedContent li::before {
+            content: "\f00d"; /* cross icon */
+            color: var(--color-egypt-red);
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar navbar-expand-lg py-3" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <div class="logo-holder d-flex align-items-center justify-content-center" style="width:42px; height:42px; background:rgba(197,160,40,0.15); border-radius:50%; border:2px solid rgba(197,160,40,0.4); overflow:hidden;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Coat_of_arms_of_Egypt.svg" alt="نسر مصر" width="30" height="30" style="object-fit:contain; filter:brightness(1.1);">
+                </div>
+                <div>
+                    <div class="fw-bold fs-5 text-gold-gradient" data-i18n="siteName" style="line-height:1.1;">رحلاتي</div>
+                    <div class="text-secondary" data-i18n="siteTagline" style="font-size:0.62rem; letter-spacing:0.08em; font-weight:700;">سفر وسياحة</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler border-0 text-white" type="button" id="mobileMenuBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars fs-4 text-warning"></i>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html" data-i18n="navHome">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html#world-trips" data-i18n="navTrips">الرحلات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="destinations.html" data-i18n="navDestinations">كل الوجهات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#egypt-destinations" data-i18n="navEgypt">وجهات مصر</a>
+                    </li>
+                    
+                </ul>
+            </div>
+
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <!-- Currency Selector -->
+                <div class="position-relative" id="currencyWidget">
+                    <button onclick="toggleCurrencyMenu()" id="currencyBtn" class="btn btn-sm btn-dark border-secondary rounded-pill text-warning d-flex align-items-center gap-2 px-3 py-2">
+                        <i class="fa-solid fa-coins fa-xs"></i>
+                        <span id="currencyBtnLabel">USD</span>
+                        <i class="fa-solid fa-chevron-down fa-xs opacity-70" style="font-size:0.6rem;"></i>
+                    </button>
+                    <div id="currencyMenu" class="dropdown-menu dropdown-menu-end p-2 mt-2" style="display:none; position:absolute; right:0; background:#0D2035; border:1px solid rgba(197,160,40,0.25); min-width:160px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+                        <button onclick="selectCurrency('USD')" class="dropdown-item text-white py-2" style="font-size:0.85rem;"><span class="me-2">🇺🇸</span>USD</button>
+                        <button onclick="selectCurrency('EUR')" class="dropdown-item text-white py-2" style="font-size:0.85rem;"><span class="me-2">🇪🇺</span>EUR</button>
+                        <button onclick="selectCurrency('EGP')" class="dropdown-item text-white py-2" style="font-size:0.85rem;"><span class="me-2">🇪🇬</span>EGP</button>
+                        <button onclick="selectCurrency('SAR')" class="dropdown-item text-white py-2" style="font-size:0.85rem;"><span class="me-2">🇸🇦</span>SAR</button>
+                        <button onclick="selectCurrency('AED')" class="dropdown-item text-white py-2" style="font-size:0.85rem;"><span class="me-2">🇦🇪</span>AED</button>
+                    </div>
+                </div>
+                <!-- Language Selector -->
+                <button class="lang-btn">EN</button>
+                <a href="survey.html" class="btn-gold" data-i18n="navCta">احجز رحلتك</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================= HERO ================= -->
+    <div class="trip-details-hero" id="tripHero" style="background-image:url('');">
+        <div class="container trip-details-hero-content">
+            <div class="mb-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 text-light opacity-80" style="font-size:0.88rem;">
+                        <li class="breadcrumb-item"><a href="index.html" class="text-white text-decoration-none" data-i18n="navHome">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="index.html#world-trips" class="text-white text-decoration-none" data-i18n="navTrips">الرحلات</a></li>
+                        <li class="breadcrumb-item active text-warning" aria-current="page" id="breadcrumbTrip">اسم الرحلة</li>
+                    </ol>
+                </nav>
+            </div>
+            <h1 class="display-4 fw-black text-gold-gradient" id="tripTitle">اسم الرحلة</h1>
+            <div class="d-flex align-items-center gap-2 mt-2">
+                <i class="fa-solid fa-location-dot text-warning"></i>
+                <span id="tripCountry">مصر</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN SECTION ================= -->
+    <main class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Trip Details -->
+                <div class="col-12 col-lg-8 fade-up">
+                    
+                    <!-- Fact Grid -->
+                    <div class="row row-cols-2 row-cols-sm-4 g-3 mb-5">
+                        <div class="col">
+                            <div class="fact-box">
+                                <div class="fact-icon">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <div>
+                                    <div class="text-secondary small" data-i18n="durationLabel">المدة:</div>
+                                    <div class="fw-bold text-dark fs-5 mt-1" id="factDuration">5 أيام</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="fact-box">
+                                <div class="fact-icon">
+                                    <i class="fa-solid fa-cloud-sun"></i>
+                                </div>
+                                <div>
+                                    <div class="text-secondary small" data-i18n="climateLabel">المناخ:</div>
+                                    <div class="fw-bold text-dark fs-5 mt-1" id="factClimate">شاطئ وبحر</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="fact-box">
+                                <div class="fact-icon">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                                <div>
+                                    <div class="text-secondary small" data-i18n="budgetLabel">الميزانية:</div>
+                                    <div class="fw-bold text-dark fs-5 mt-1" id="factBudget">اقتصادي</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="fact-box">
+                                <div class="fact-icon">
+                                    <i class="fa-solid fa-user-group"></i>
+                                </div>
+                                <div>
+                                    <div class="text-secondary small" data-i18n="travelTypeLabel">نوع السفر:</div>
+                                    <div class="fw-bold text-dark fs-6 mt-1 text-wrap" id="factTravelType">عائلة، أصدقاء</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="premium-card">
+                        <p class="fs-5 text-secondary" id="tripDesc" style="line-height:1.8;">
+                            تفاصيل ووصف الرحلة بالكامل
+                        </p>
+                    </div>
+
+                    <!-- Highlights -->
+                    <div class="premium-card">
+                        <h2 class="h4 fw-bold text-dark mb-3 border-bottom pb-2" data-i18n="highlightsTitle">أبرز مميزات الرحلة</h2>
+                        <ul class="row row-cols-1 row-cols-sm-2 g-3 list-unstyled" id="highlightsList" style="padding:0;">
+                            <!-- Dynamically loaded -->
+                        </ul>
+                    </div>
+
+                    <!-- Inclusive / Exclusive Accordion -->
+                    <div class="accordion mb-5" id="tripInfoAccordion">
+                        <div class="accordion-item mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" data-i18n="includedTitle">
+                                    ما تشمله الرحلة
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#tripInfoAccordion">
+                                <div class="accordion-body bg-white text-secondary" id="includedContent">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-3">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" data-i18n="excludedTitle">
+                                    ما لا تشمله الرحلة
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#tripInfoAccordion">
+                                <div class="accordion-body bg-white text-secondary" id="excludedContent">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Itinerary timeline -->
+                    <div class="premium-card mb-5">
+                        <h2 class="h4 fw-bold text-dark mb-4 border-bottom pb-2" data-i18n="itineraryTitle">برنامج الرحلة</h2>
+                        <ul class="itinerary-timeline" id="itineraryTimeline" style="padding-left:0; padding-right:0;">
+                            <!-- Dynamic -->
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Booking Sidebar -->
+                <div class="col-12 col-lg-4 fade-up" style="animation-delay:0.1s;">
+                    <div class="booking-sidebar">
+                        <div class="text-center mb-3">
+                            <span class="text-muted d-block" style="font-size:0.9rem;" data-i18n="pricePerPerson">سعر الرحلة للشخص الواحد</span>
+                            <span class="fs-2 fw-black text-warning" data-price-usd="0" id="sidebarPrice">$0</span>
+                        </div>
+
+                        <!-- Date & Spots Alert -->
+                        <div id="sidebarSpotsAlertContainer" class="p-3 mb-4 text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                <i class="fa-solid fa-user-group" id="sidebarSpotsIcon"></i>
+                                <span class="fw-bold small" id="sidebarSpotsLabel">0 مقاعد متبقية</span>
+                            </div>
+                            <span class="badge bg-danger text-white d-none" id="sidebarUrgentBadge" data-i18n="lastSeats">آخر مقاعد!</span>
+                        </div>
+
+                        <!-- Departure dates drop down select -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark" for="departureSelect" data-i18n="datesTitle">تواريخ المغادرة المتاحة</label>
+                            <select class="form-select px-3 py-2.5" id="departureSelect">
+                                <!-- Dynamic dates -->
+                            </select>
+                        </div>
+
+                        <!-- Book Button -->
+                        <button class="btn btn-warning w-100 rounded-pill py-3 fw-bold btn-gold fs-5" id="sidebarBookBtn" data-i18n="bookTripBtn">احجز رحلتك الآن</button>
+
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="bg-dark text-secondary pt-5 pb-4 border-top border-secondary border-opacity-10">
+        <div class="container text-center text-md-start">
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-3 justify-content-center justify-content-md-start">
+                        <div class="d-flex align-items-center justify-content-center" style="width:38px; height:38px; background:rgba(197,160,40,0.1); border-radius:50%; border:1px solid rgba(197,160,40,0.3);">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Coat_of_arms_of_Egypt.svg" alt="Eagle logo" width="24" height="24">
+                        </div>
+                        <h2 class="h5 fw-bold text-white mb-0" data-i18n="siteName">رحلاتي</h2>
+                    </div>
+                    <p class="small" data-i18n="footerDesc">رحلاتي هي شريكك المثالي لاستكشاف العالم بأجود الخدمات وخبرة تزيد على 10 سنوات وبأجواء مصرية دافئة.</p>
+                    <div class="social-links d-flex gap-2 justify-content-center justify-content-md-start">
+                        <a href="#" class="social-link facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="social-link instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="social-link tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="#" class="social-link whatsapp" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 d-flex flex-column align-items-center align-items-md-start">
+                    <h3 class="h6 text-white fw-bold mb-3" data-i18n="navTrips">الرحلات</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a href="index.html#world-trips" class="text-secondary text-decoration-none hover-warning" data-i18n="filterEgypt">رحلات مصر</a></li>
+                        <li><a href="index.html#world-trips" class="text-secondary text-decoration-none hover-warning" data-i18n="filterGlobal">رحلات عالمية</a></li>
+                        <li><a href="survey.html" class="text-secondary text-decoration-none hover-warning" data-i18n="navSurvey">الاستبيان الذكي</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-4 d-flex flex-column align-items-center align-items-md-start">
+                    <h3 class="h6 text-white fw-bold mb-3" data-i18n="footerContact">اتصل بنا</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small align-items-center align-items-md-start">
+                        <li>
+                            <a href="mailto:info@ra7alaty.com" class="footer-contact-link">
+                                <i class="fa-solid fa-envelope text-warning"></i>
+                                <span>info@ra7alaty.com</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:+201000000000" class="footer-contact-link">
+                                <i class="fa-solid fa-phone text-warning"></i>
+                                <span dir="ltr">+20 100 000 0000</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center pt-4 border-top border-secondary border-opacity-10">
+                <p class="small mb-0" data-i18n="footerRights">جميع الحقوق محفوظة © 2026 رحلاتي.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+    <script src="js/config.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            await loadTripDetails(id);
+
+            document.addEventListener('langChanged', async () => {
+                await loadTripDetails(id);
+            });
+        });
+
+        async function loadTripDetails(id) {
+            const trip = await window.db.getTrip(id);
+            if (!trip) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const lang = localStorage.getItem('rahalaty_lang') || 'ar';
+            const title = lang === 'ar' ? trip.title_ar : trip.title_en;
+            const country = lang === 'ar' ? trip.country_ar : trip.country_en;
+            const desc = lang === 'ar' ? trip.desc_ar : trip.desc_en;
+            const budgetLabel = lang === 'ar' ? (trip.budget_tier === 'low' ? 'اقتصادي' : trip.budget_tier === 'medium' ? 'متوسط' : trip.budget_tier === 'high' ? 'مرتفع' : 'فاخر') : trip.budget_tier;
+            const climateLabel = lang === 'ar' ? (trip.climate === 'beach' ? 'شاطئ وبحر' : trip.climate === 'desert' ? 'صحراء وتاريخ' : trip.climate === 'mountain' ? 'جبال وطبيعة' : 'مدن ومعالم') : trip.climate;
+            const travelStyle = trip.travel_type.map(t => {
+                return lang === 'ar' ? (t === 'family' ? 'عائلة' : t === 'couple' ? 'شريك' : t === 'solo' ? 'منفرد' : 'أصدقاء') : t;
+            }).join('، ');
+
+            // Update DOM Details
+            document.getElementById('pageTitle').textContent = `${title} — رحلاتي`;
+            document.getElementById('breadcrumbTrip').textContent = title;
+            document.getElementById('tripTitle').textContent = title;
+            document.getElementById('tripCountry').textContent = country + ' ' + (trip.flag || '');
+            document.getElementById('tripHero').style.backgroundImage = `url('${trip.image}')`;
+
+            document.getElementById('factDuration').textContent = lang === 'ar' ? `${trip.duration} أيام` : `${trip.duration} days`;
+            document.getElementById('factClimate').textContent = climateLabel;
+            document.getElementById('factBudget').textContent = budgetLabel;
+            document.getElementById('factTravelType').textContent = travelStyle;
+            
+            document.getElementById('tripDesc').textContent = desc;
+
+            // Render Highlights
+            const hList = document.getElementById('highlightsList');
+            hList.innerHTML = '';
+            const highlights = lang === 'ar' ? trip.highlights_ar : trip.highlights_en;
+            highlights.forEach(h => {
+                hList.innerHTML += `
+                    <li class="col d-flex align-items-center gap-3 py-2 fw-semibold text-secondary">
+                        <i class="fa-solid fa-circle text-warning fs-5" style="font-size: 0.85rem !important;"></i>
+                        <span>${h}</span>
+                    </li>
+                `;
+            });
+
+            // Set dynamic itinerary, inclusions, exclusions
+            generateDynamicItinerary(trip, lang);
+
+            // Update Booking Sidebar details
+            const sidebarPrice = document.getElementById('sidebarPrice');
+            sidebarPrice.setAttribute('data-price-usd', trip.price);
+            sidebarPrice.textContent = `${trip.currency}${trip.price}`;
+
+            const spotsLeft = trip.spots_left ?? 10;
+            const spotsUrgent = spotsLeft <= 3;
+            const spotsLabel = lang === 'ar' ? `${spotsLeft} مقاعد متبقية` : `${spotsLeft} seats left`;
+
+            const labelEl = document.getElementById('sidebarSpotsLabel');
+            labelEl.textContent = spotsLabel;
+
+            const spotsAlertContainer = document.getElementById('sidebarSpotsAlertContainer');
+            if (spotsAlertContainer) {
+                spotsAlertContainer.className = 'p-3 mb-4 text-center'; // Reset classes
+                if (spotsUrgent) {
+                    spotsAlertContainer.classList.add('spots-alert-box');
+                } else {
+                    spotsAlertContainer.classList.add('spots-alert-box-safe');
+                }
+            }
+
+            const badge = document.getElementById('sidebarUrgentBadge');
+            if (spotsUrgent) {
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+
+            // Fill departure dates
+            const depSelect = document.getElementById('departureSelect');
+            depSelect.innerHTML = '';
+            const dates = trip.departure_dates || ['2026-06-20', '2026-07-15'];
+            dates.forEach(d => {
+                depSelect.innerHTML += `<option value="${d}">${d}</option>`;
+            });
+
+            
+            // Book Button routing
+            document.getElementById('sidebarBookBtn').onclick = () => {
+                const date = depSelect.value;
+                window.location.href = `book.html?trip_id=${trip.id}&date=${date}`;
+            };
+
+            // Convert prices
+            const savedCurrency = localStorage.getItem('rahalaty_currency') || 'USD';
+            window.selectCurrency(savedCurrency);
+        }
+
+        function generateDynamicItinerary(trip, lang) {
+            const inc = document.getElementById('includedContent');
+            const exc = document.getElementById('excludedContent');
+            const timeline = document.getElementById('itineraryTimeline');
+
+            // Set Inclusions / Exclusions
+            if (lang === 'ar') {
+                inc.innerHTML = `
+                    <ul class="d-flex flex-column gap-2 mb-0">
+                        <li>الإقامة في فندق مميز (شامل الإفطار أو إقامة كاملة حسب الوجهة).</li>
+                        <li>جميع الانتقالات الداخلية بسيارة مكيفة مريحة.</li>
+                        <li>مرشد سياحي مرافق وخبير بالمعالم السياحية.</li>
+                        <li>تذاكر الدخول للمزارات الأساسية المذكورة في برنامج الرحلة.</li>
+                    </ul>
+                `;
+                exc.innerHTML = `
+                    <ul class="d-flex flex-column gap-2 mb-0">
+                        <li>تذاكر الطيران الدولي (في حال الرحلات الخارجية).</li>
+                        <li>المصاريف الشخصية والهدايا والتذكارات.</li>
+                        <li>الرحلات والأنشطة الاختيارية غير المذكورة في البرنامج.</li>
+                        <li>الإكراميات ورسوم الدخول الإضافية للمومياوات أو داخل الهرم.</li>
+                    </ul>
+                `;
+            } else {
+                inc.innerHTML = `
+                    <ul class="d-flex flex-column gap-2 mb-0">
+                        <li>Accommodation in a top-rated hotel (Breakfast or All-Inclusive).</li>
+                        <li>All internal transfers in a comfortable air-conditioned vehicle.</li>
+                        <li>Expert professional English-speaking tour guide.</li>
+                        <li>Entry tickets to the main attractions listed in the itinerary.</li>
+                    </ul>
+                `;
+                exc.innerHTML = `
+                    <ul class="d-flex flex-column gap-2 mb-0">
+                        <li>International flight tickets (for global trips).</li>
+                        <li>Personal expenses, shopping, and souvenirs.</li>
+                        <li>Optional activities and extra tours not included in the program.</li>
+                        <li>Tips for guides/drivers and extra entry tickets inside pyramids/tombs.</li>
+                    </ul>
+                `;
+            }
+
+            // Generate Timeline
+            timeline.innerHTML = '';
+            const duration = trip.duration;
+            const highlights = lang === 'ar' ? trip.highlights_ar : trip.highlights_en;
+
+            for (let i = 1; i <= duration; i++) {
+                let dayTitle = '';
+                let dayDesc = '';
+
+                if (lang === 'ar') {
+                    if (i === 1) {
+                        dayTitle = 'اليوم الأول: الوصول والاستقبال';
+                        dayDesc = 'الوصول إلى الوجهة، الاستقبال بقلب دافئ من مندوب رحلاتي، الانتقال إلى الفندق واستلام الغرف، ثم وقت حر للاستراحة والاستكشاف الفردي.';
+                    } else if (i === duration) {
+                        dayTitle = `اليوم ${i === 2 ? 'الثاني' : i === 3 ? 'الثالث' : 'الأخير'}: المغادرة والعودة`;
+                        dayDesc = 'تناول الإفطار بالفندق، تسجيل الخروج، الانتقال إلى المطار أو نقطة التجمع للعودة إلى الديار بسلامة الله حاملين أجمل الذكريات.';
+                    } else {
+                        const hItem = highlights[i - 2] || highlights[0];
+                        dayTitle = `اليوم ${i === 2 ? 'الثاني' : i === 3 ? 'الثالث' : i === 4 ? 'الرابع' : i === 5 ? 'الخامس' : 'التالي'}: جولة ${hItem}`;
+                        dayDesc = `الاستيقاظ مبكراً والاستمتاع ببرنامج الجولة المميز لزيارة ${hItem} مع المرشد السياحي والتقاط الصور التذكارية الرائعة وتناول وجبة الغداء.`;
+                    }
+                } else {
+                    if (i === 1) {
+                        dayTitle = 'Day 1: Arrival & Welcome';
+                        dayDesc = 'Arrive at the destination, warm welcome by Rahalaty representative, transfer to the hotel for check-in, and free leisure time to relax.';
+                    } else if (i === duration) {
+                        dayTitle = `Day ${i}: Departure & Farewell`;
+                        dayDesc = 'Breakfast at the hotel, check-out, and transfer to the airport or assembly point for your flight back home with beautiful memories.';
+                    } else {
+                        const hItem = highlights[i - 2] || highlights[0];
+                        dayTitle = `Day ${i}: ${hItem} Tour`;
+                        dayDesc = `Wake up, enjoy breakfast, and start our exciting tour exploring ${hItem} with our expert guide. Lunch is included.`;
+                    }
+                }
+
+                timeline.innerHTML += `
+                    <li class="itinerary-item">
+                        <h3 class="h6 fw-bold text-dark mb-1">${dayTitle}</h3>
+                        <p class="small text-secondary mb-0">${dayDesc}</p>
+                    </li>
+                `;
+            }
+        }
+
+
+    </script>
+</body>
+</html>

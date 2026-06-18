@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="surveyPageTitle">استبيان الرحلات — رحلاتي</title>
+    <meta name="description" content="استبيان تفضيلات السفر من رحلاتي. أجب على بضعة أسئلة وسيقوم نظامنا الذكي باقتراح أفضل الرحلات المناسبة لك ميزانية ووجهة.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ra7alaty.com/survey.html">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="min-height:100vh; background:linear-gradient(160deg, #0D2137 0%, #1A3A5C 50%, #2A5A8C 100%);">
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar navbar-expand-lg py-3" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <div class="logo-holder d-flex align-items-center justify-content-center" style="width:42px; height:42px; background:rgba(197,160,40,0.15); border-radius:50%; border:2px solid rgba(197,160,40,0.4); overflow:hidden;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Coat_of_arms_of_Egypt.svg" alt="نسر مصر" width="30" height="30" style="object-fit:contain; filter:brightness(1.1);">
+                </div>
+                <div>
+                    <div class="fw-bold fs-5 text-gold-gradient" data-i18n="siteName" style="line-height:1.1;">رحلاتي</div>
+                    <div class="text-secondary" data-i18n="siteTagline" style="font-size:0.62rem; letter-spacing:0.08em; font-weight:700;">سفر وسياحة</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler border-0 text-white" type="button" id="mobileMenuBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars fs-4 text-warning"></i>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="index.html" data-i18n="navHome">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="index.html#world-trips" data-i18n="navTrips">الرحلات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="destinations.html" data-i18n="navDestinations">كل الوجهات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="index.html#egypt-destinations" data-i18n="navEgypt">وجهات مصر</a>
+                    </li>
+                    
+                </ul>
+            </div>
+            
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <button class="lang-btn">EN</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================= CONTENT ================= -->
+    <main style="padding-top:120px; padding-bottom:50px;">
+        <div class="container position-relative" style="z-index:2;">
+            
+            <!-- Page Header -->
+            <div class="text-center mb-4 text-white fade-up">
+                <div class="fs-1 mb-2">🧭</div>
+                <h1 class="fw-bold" data-i18n="surveyPageTitle">استبيان الرحلات</h1>
+                <p class="text-secondary small mt-1" data-i18n="surveyPageSub">أجب على هذه الأسئلة لنجد لك الرحلة المثالية</p>
+            </div>
+
+            <!-- Survey Card -->
+            <div class="survey-wrapper fade-up">
+                
+                <!-- Progress Header -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2 text-secondary small">
+                        <span id="stepLabel" data-step="1">خطوة 1 من 4</span>
+                        <span id="stepPercent">25%</span>
+                    </div>
+                    <div class="survey-progress-bar">
+                        <div class="survey-progress-fill" id="progressFill" style="width:25%;"></div>
+                    </div>
+                </div>
+
+                <form id="surveyForm" novalidate>
+                    
+                    <!-- STEP 1: Personal Info -->
+                    <div class="survey-step active" id="step1">
+                        <h2 class="h5 fw-bold text-dark mb-1" data-i18n="step1Title">أولاً — بياناتك الشخصية</h2>
+                        <p class="text-muted small mb-4" data-i18n="step1Sub">حتى نتواصل معك بنتائج الاستبيان والعروض</p>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small" for="name" data-i18n="labelName">الاسم الكامل</label>
+                            <input type="text" id="name" class="form-control rounded-pill px-3 py-2.5" placeholder="اكتب اسمك الكامل هنا..." required data-i18n-placeholder="inputNamePlaceholder">
+                            <div class="invalid-feedback ps-3">يرجى كتابة الاسم بشكل صحيح</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small" for="email" data-i18n="labelEmail">البريد الإلكتروني</label>
+                            <input type="email" id="email" class="form-control rounded-pill px-3 py-2.5" placeholder="example@email.com" required dir="ltr">
+                            <div class="invalid-feedback ps-3">بريد إلكتروني غير صالح</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small" for="phone" data-i18n="labelPhone">رقم الهاتف (اختياري)</label>
+                            <input type="tel" id="phone" class="form-control rounded-pill px-3 py-2.5" placeholder="+20 100 000 0000" dir="ltr">
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Companions -->
+                    <div class="survey-step" id="step2">
+                        <h2 class="h5 fw-bold text-dark mb-1" data-i18n="step2Title">ثانياً — نوع رحلتك</h2>
+                        <p class="text-muted small mb-4" data-i18n="step2Sub">مع من ستسافر في مغامرتك القادمة؟</p>
+
+                        <div class="survey-option-grid">
+                            <div class="survey-option" data-field="travel_type" data-value="family">
+                                <span class="option-icon"><i class="fa-solid fa-people-roof"></i></span>
+                                <span class="option-label" data-i18n="optFamily">مع العائلة</span>
+                            </div>
+                            <div class="survey-option" data-field="travel_type" data-value="couple">
+                                <span class="option-icon"><i class="fa-solid fa-heart"></i></span>
+                                <span class="option-label" data-i18n="optCouple">مع الشريك</span>
+                            </div>
+                            <div class="survey-option" data-field="travel_type" data-value="solo">
+                                <span class="option-icon"><i class="fa-solid fa-person"></i></span>
+                                <span class="option-label" data-i18n="optSolo">منفرداً</span>
+                            </div>
+                            <div class="survey-option" data-field="travel_type" data-value="friends">
+                                <span class="option-icon"><i class="fa-solid fa-user-group"></i></span>
+                                <span class="option-label" data-i18n="optFriends">مع الأصدقاء</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="travel_type_input" required>
+                        <div class="text-danger small mt-2 ps-3 d-none" id="travelTypeError">يرجى تحديد رفيق السفر</div>
+                    </div>
+
+                    <!-- STEP 3: Preferences -->
+                    <div class="survey-step" id="step3">
+                        <h2 class="h5 fw-bold text-dark mb-1" data-i18n="step3Title">ثالثاً — تفضيلاتك</h2>
+                        <p class="text-muted small mb-4" data-i18n="step3Sub">أخبرنا عن ميزانيتك، المناخ والمدة المفضلة للسفر</p>
+
+                        <!-- Budget radios -->
+                        <div class="mb-4">
+                            <label class="survey-label small text-secondary" data-i18n="budgetLabel">الميزانية:</label>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="budget" value="low" style="accent-color:var(--color-gold); width:18px; height:18px;" checked>
+                                    <span class="fw-bold text-dark small" data-i18n="optBudgetLow">اقتصادي (أقل من $500)</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="budget" value="medium" style="accent-color:var(--color-gold); width:18px; height:18px;">
+                                    <span class="fw-bold text-dark small" data-i18n="optBudgetMed">متوسط ($500 - $1500)</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="budget" value="high" style="accent-color:var(--color-gold); width:18px; height:18px;">
+                                    <span class="fw-bold text-dark small" data-i18n="optBudgetHigh">مرتفع ($1500 - $3000)</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="budget" value="luxury" style="accent-color:var(--color-gold); width:18px; height:18px;">
+                                    <span class="fw-bold text-dark small" data-i18n="optBudgetLux">فاخر (أكثر من $3000)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Climate cards -->
+                        <div class="mb-4">
+                            <label class="survey-label small text-secondary" data-i18n="climateLabel">المناخ:</label>
+                            <div class="survey-option-grid">
+                                <div class="survey-option py-3 px-2" data-field="climate" data-value="beach">
+                                    <span class="option-icon" style="font-size:1.4rem;"><i class="fa-solid fa-umbrella-beach"></i></span>
+                                    <span class="option-label small" data-i18n="optCliBeach">شاطئ وبحر</span>
+                                </div>
+                                <div class="survey-option py-3 px-2" data-field="climate" data-value="desert">
+                                    <span class="option-icon" style="font-size:1.4rem;"><i class="fa-solid fa-sun"></i></span>
+                                    <span class="option-label small" data-i18n="optCliDesert">صحراء وتاريخ</span>
+                                </div>
+                                <div class="survey-option py-3 px-2" data-field="climate" data-value="mountain">
+                                    <span class="option-icon" style="font-size:1.4rem;"><i class="fa-solid fa-mountain-sun"></i></span>
+                                    <span class="option-label small" data-i18n="optCliMountain">جبال وطبيعة</span>
+                                </div>
+                                <div class="survey-option py-3 px-2" data-field="climate" data-value="city">
+                                    <span class="option-icon" style="font-size:1.4rem;"><i class="fa-solid fa-city"></i></span>
+                                    <span class="option-label small" data-i18n="optCliCity">مدن ومعالم</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="climate_input" required>
+                            <div class="text-danger small mt-2 ps-3 d-none" id="climateError">يرجى تحديد المناخ المفضل</div>
+                        </div>
+
+                        <!-- Duration preference -->
+                        <div>
+                            <label class="survey-label small text-secondary" data-i18n="durationLabel">المدة:</label>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="duration" value="weekend" style="accent-color:var(--color-gold); width:18px; height:18px;" checked>
+                                    <span class="fw-bold text-dark small" data-i18n="optDurWeekend">عطلة نهاية الأسبوع (2-3 أيام)</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="duration" value="week" style="accent-color:var(--color-gold); width:18px; height:18px;">
+                                    <span class="fw-bold text-dark small" data-i18n="optDurWeek">أسبوع (4-7 أيام)</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="duration" value="twoweeks" style="accent-color:var(--color-gold); width:18px; height:18px;">
+                                    <span class="fw-bold text-dark small" data-i18n="optDurTwoWeeks">أسبوعين (8-14 يوم)</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-3 p-2.5 border rounded-3 cursor-pointer bg-white">
+                                    <input type="radio" name="duration" value="month" style="accent-color:var(--color-gold); width:18px; height:18px;">
+                                    <span class="fw-bold text-dark small" data-i18n="optDurMonth">شهر أو أكثر</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Summary & message -->
+                    <div class="survey-step" id="step4">
+                        <h2 class="h5 fw-bold text-dark mb-1" data-i18n="step4Title">رابعاً — ملاحظات إضافية</h2>
+                        <p class="text-muted small mb-4" data-i18n="step4Sub">أي طلبات خاصة تريد إضافتها؟</p>
+
+                        <!-- Summary Table -->
+                        <div class="p-3 rounded-4 mb-4 border" style="background:#F7EDD5; border-color:#E8D5A3 !important;">
+                            <div class="fw-bold text-dark mb-2 small" data-i18n="summaryTitle">📋 ملخص إجاباتك</div>
+                            <div class="d-flex flex-column gap-2 small" id="summaryCells">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small" for="message" data-i18n="labelMessage">ملاحظات إضافية (اختياري)</label>
+                            <textarea id="message" class="form-control rounded-4 p-3" rows="3" placeholder="مثلاً: فندق 5 نجوم، أو أفضل الأماكن الهادئة..." data-i18n-placeholder="inputMessagePlaceholder"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="survey-nav">
+                        <button type="button" class="btn-survey-back" id="btnBack" style="visibility:hidden;" data-i18n="btnBack">→ رجوع</button>
+                        <button type="button" class="btn-survey-next" id="btnNext" data-i18n="btnNext">التالي ←</button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+    <script src="js/config.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        const surveyAnswers = {
+            travel_type: '',
+            climate: ''
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSurveyWizard();
+            setupLangWatcher();
+        });
+
+        function setupLangWatcher() {
+            document.addEventListener('langChanged', () => {
+                updateStepUI();
+                if (currentStep === 4) buildSummaryUI();
+            });
+        }
+
+        function setupSurveyWizard() {
+            const nextBtn = document.getElementById('btnNext');
+            const backBtn = document.getElementById('btnBack');
+
+            // Set Step option cards handlers
+            const options = document.querySelectorAll('.survey-option');
+            options.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    const field = opt.getAttribute('data-field');
+                    const val = opt.getAttribute('data-value');
+
+                    // Deselect options of the same field
+                    document.querySelectorAll(`.survey-option[data-field="${field}"]`).forEach(o => o.classList.remove('selected'));
+                    
+                    // Select clicked
+                    opt.classList.add('selected');
+                    surveyAnswers[field] = val;
+
+                    document.getElementById(field + '_input').value = val;
+                    
+                    // Hide errors
+                    document.getElementById(field + 'Error')?.classList.add('d-none');
+                });
+            });
+
+            // Navigation
+            nextBtn.addEventListener('click', async () => {
+                if (validateStep(currentStep)) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        showStep(currentStep);
+                    } else {
+                        // Submit Form
+                        await submitSurvey();
+                    }
+                }
+            });
+
+            backBtn.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            });
+
+            updateStepUI();
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.survey-step').forEach((s, idx) => {
+                s.classList.toggle('active', idx + 1 === step);
+            });
+            updateStepUI();
+            if (step === 4) buildSummaryUI();
+        }
+
+        function updateStepUI() {
+            const pct = Math.round((currentStep / totalSteps) * 100);
+            document.getElementById('progressFill').style.width = `${pct}%`;
+            document.getElementById('stepPercent').textContent = `${pct}%`;
+
+            const lang = localStorage.getItem('rahalaty_lang') || 'ar';
+            const template = window.TEXTS[lang].stepOf;
+            document.getElementById('stepLabel').textContent = template.replace('%s', currentStep);
+
+            const backBtn = document.getElementById('btnBack');
+            backBtn.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+
+            const nextBtn = document.getElementById('btnNext');
+            const isLast = currentStep === totalSteps;
+            
+            nextBtn.innerHTML = isLast 
+                ? `${window.TEXTS[lang].btnSubmit}` 
+                : `${window.TEXTS[lang].btnNext}`;
+        }
+
+        function validateStep(step) {
+            let valid = true;
+
+            if (step === 1) {
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (!name || name.length < 3) {
+                    document.getElementById('name').classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    document.getElementById('name').classList.remove('is-invalid');
+                }
+
+                if (!email || !emailRegex.test(email)) {
+                    document.getElementById('email').classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    document.getElementById('email').classList.remove('is-invalid');
+                }
+            } else if (step === 2) {
+                const companion = surveyAnswers['travel_type'];
+                if (!companion) {
+                    document.getElementById('travelTypeError').classList.remove('d-none');
+                    valid = false;
+                } else {
+                    document.getElementById('travelTypeError').classList.add('d-none');
+                }
+            } else if (step === 3) {
+                const climate = surveyAnswers['climate'];
+                if (!climate) {
+                    document.getElementById('climateError').classList.remove('d-none');
+                    valid = false;
+                } else {
+                    document.getElementById('climateError').classList.add('d-none');
+                }
+            }
+
+            return valid;
+        }
+
+        function buildSummaryUI() {
+            const cells = document.getElementById('summaryCells');
+            cells.innerHTML = '';
+
+            const lang = localStorage.getItem('rahalaty_lang') || 'ar';
+            const tx = window.TEXTS[lang];
+
+            const budgetVal = document.querySelector('input[name="budget"]:checked').value;
+            const durationVal = document.querySelector('input[name="duration"]:checked').value;
+
+            const budgetMap = { low: tx.optBudgetLow, medium: tx.optBudgetMed, high: tx.optBudgetHigh, luxury: tx.optBudgetLux };
+            const travelMap = { family: tx.optFamily, couple: tx.optCouple, solo: tx.optSolo, friends: tx.optFriends };
+            const climateMap = { beach: tx.optCliBeach, desert: tx.optCliDesert, mountain: tx.optCliMountain, city: tx.optCliCity };
+            const durationMap = { weekend: tx.optDurWeekend, week: tx.optDurWeek, twoweeks: tx.optDurTwoWeeks, month: tx.optDurMonth };
+
+            cells.innerHTML += `
+                <div><strong>${tx.travelTypeLabel}</strong> ${travelMap[surveyAnswers.travel_type] || surveyAnswers.travel_type}</div>
+                <div><strong>${tx.budgetLabel}</strong> ${budgetMap[budgetVal] || budgetVal}</div>
+                <div><strong>${tx.climateLabel}</strong> ${climateMap[surveyAnswers.climate] || surveyAnswers.climate}</div>
+                <div><strong>${tx.durationLabel}</strong> ${durationMap[durationVal] || durationVal}</div>
+            `;
+        }
+
+        async function submitSurvey() {
+            const nextBtn = document.getElementById('btnNext');
+            nextBtn.disabled = true;
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            const budgetVal = document.querySelector('input[name="budget"]:checked').value;
+            const durationVal = document.querySelector('input[name="duration"]:checked').value;
+            const message = document.getElementById('message').value.trim();
+
+            const surveyData = {
+                name,
+                email,
+                phone,
+                budget: budgetVal,
+                travel_type: surveyAnswers.travel_type,
+                preferred_climate: surveyAnswers.climate,
+                duration_preference: durationVal,
+                message
+            };
+
+            try {
+                const responseId = await window.db.createSurveyResponse(surveyData);
+                // Redirect
+                window.location.href = `survey-results.html?id=${responseId}`;
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء حفظ الإجابات. يرجى إعادة المحاولة.');
+                nextBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

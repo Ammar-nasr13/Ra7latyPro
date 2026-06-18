@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="bookingTitle">حجز رحلتك — رحلاتي</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .booking-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(197, 160, 40, 0.2);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .booking-header {
+            background: linear-gradient(135deg, var(--color-nile), var(--color-nile-dark));
+            color: white;
+            padding: 2rem;
+            border-bottom: 3px solid var(--color-gold);
+        }
+        .payment-radio-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+        .payment-option {
+            border: 2px solid var(--color-sand-dark);
+            border-radius: 12px;
+            padding: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s;
+        }
+        .payment-option:hover {
+            border-color: var(--color-gold-light);
+        }
+        .payment-option.selected {
+            border-color: var(--color-gold);
+            background: rgba(197,160,40,0.05);
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar navbar-expand-lg py-3" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <div class="logo-holder d-flex align-items-center justify-content-center" style="width:42px; height:42px; background:rgba(197,160,40,0.15); border-radius:50%; border:2px solid rgba(197,160,40,0.4); overflow:hidden;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Coat_of_arms_of_Egypt.svg" alt="نسر مصر" width="30" height="30" style="object-fit:contain; filter:brightness(1.1);">
+                </div>
+                <div>
+                    <div class="fw-bold fs-5 text-gold-gradient" data-i18n="siteName" style="line-height:1.1;">رحلاتي</div>
+                    <div class="text-secondary" data-i18n="siteTagline" style="font-size:0.62rem; letter-spacing:0.08em; font-weight:700;">سفر وسياحة</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler border-0 text-white" type="button" id="mobileMenuBtn" aria-label="Open menu">
+                <i class="fa-solid fa-bars fs-4 text-warning"></i>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html" data-i18n="navHome">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#world-trips" data-i18n="navTrips">الرحلات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="destinations.html" data-i18n="navDestinations">كل الوجهات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#egypt-destinations" data-i18n="navEgypt">وجهات مصر</a>
+                    </li>
+                    
+                </ul>
+            </div>
+
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <button class="lang-btn">EN</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================= MAIN ================= -->
+    <main style="padding-top:110px; min-height:85vh;" class="pb-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-12 col-lg-8 mx-auto fade-up">
+                    <div class="booking-card shadow">
+                        
+                        <!-- Header -->
+                        <div class="booking-header">
+                            <h1 class="h3 fw-bold mb-1" data-i18n="bookingTitle">حجز رحلتك</h1>
+                            <p class="mb-0 opacity-80 small" data-i18n="bookingSub">املأ البيانات التالية لتأكيد حجزك معنا وسنتواصل معك فوراً</p>
+                        </div>
+
+                        <!-- Form body -->
+                        <div class="p-4 bg-white">
+                            <form id="bookingForm" novalidate>
+                                
+                                <!-- Trip summary card -->
+                                <div class="p-3 bg-light rounded-3 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2 border">
+                                    <div>
+                                        <div class="text-secondary small" data-i18n="navTrips">الرحلة المحددة:</div>
+                                        <div class="fw-bold text-dark fs-5" id="summaryTripTitle">اسم الرحلة</div>
+                                    </div>
+                                    <div class="text-md-end">
+                                        <div class="text-secondary small" data-i18n="labelTravelDate">تاريخ المغادرة:</div>
+                                        <div class="fw-bold text-warning" id="summaryTripDate">2026-06-20</div>
+                                    </div>
+                                </div>
+
+                                <!-- Personal Details -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark" for="name" data-i18n="labelName">الاسم الكامل</label>
+                                    <input type="text" id="name" class="form-control rounded-pill px-3 py-2.5" placeholder="اكتب اسمك الكامل هنا..." required data-i18n-placeholder="inputNamePlaceholder">
+                                    <div class="invalid-feedback ps-3">يرجى كتابة الاسم الكامل بشكل صحيح</div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-sm-6">
+                                        <label class="form-label fw-bold text-dark" for="email" data-i18n="labelEmail">البريد الإلكتروني</label>
+                                        <input type="email" id="email" class="form-control rounded-pill px-3 py-2.5" placeholder="example@email.com" required dir="ltr">
+                                        <div class="invalid-feedback ps-3">بريد إلكتروني غير صالح</div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label class="form-label fw-bold text-dark" for="phone" data-i18n="labelPhone">رقم الهاتف</label>
+                                        <input type="tel" id="phone" class="form-control rounded-pill px-3 py-2.5" placeholder="+20 100 000 0000" required dir="ltr">
+                                        <div class="invalid-feedback ps-3">رقم هاتف غير صالح</div>
+                                    </div>
+                                </div>
+
+                                <!-- Group details -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <label class="form-label fw-bold text-dark" for="adults" data-i18n="labelAdults">عدد البالغين</label>
+                                        <select class="form-select rounded-pill px-3 py-2.5" id="adults">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label fw-bold text-dark" for="children" data-i18n="labelChildren">عدد الأطفال (تحت 12 سنة)</label>
+                                        <select class="form-select rounded-pill px-3 py-2.5" id="children">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Method -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark mb-2" data-i18n="labelPayment">طريقة الدفع المفضلّة</label>
+                                    <div class="payment-radio-group">
+                                        <div class="payment-option selected" data-value="credit_card">
+                                            <i class="fa-solid fa-credit-card fs-5 text-warning"></i>
+                                            <span class="fw-bold small">بطاقة ائتمان (فيزا / ماستر كارد)</span>
+                                        </div>
+                                        <div class="payment-option" data-value="vodafone_cash">
+                                            <i class="fa-solid fa-mobile-screen fs-5 text-warning"></i>
+                                            <span class="fw-bold small">فودافون كاش (محفظة هاتف)</span>
+                                        </div>
+                                        <div class="payment-option" data-value="instapay">
+                                            <i class="fa-solid fa-money-bill-transfer fs-5 text-warning"></i>
+                                            <span class="fw-bold small">إنستا باي (تحويل فوري)</span>
+                                        </div>
+                                        <div class="payment-option" data-value="meeza">
+                                            <i class="fa-solid fa-wallet fs-5 text-warning"></i>
+                                            <span class="fw-bold small">بطاقة ميزة الوطنية</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="payment_method" id="paymentMethodInput" value="credit_card">
+                                </div>
+
+                                <!-- Notes -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark" for="notes" data-i18n="labelNotes">ملاحظات إضافية</label>
+                                    <textarea id="notes" class="form-control rounded-4 p-3" rows="3" placeholder="مثلاً: فندق 5 نجوم، غرف مطلة على البحر، الخ..." data-i18n-placeholder="inputMessagePlaceholder"></textarea>
+                                </div>
+
+                                <!-- Price breakdown & total -->
+                                <div class="p-3 bg-light rounded-4 mb-4 border">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-secondary small" id="adultBreakdownLabel">سعر البالغين (1 × $350)</span>
+                                        <span class="fw-bold" data-price-usd="0" id="adultBreakdownVal">$0</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2 d-none" id="childBreakdownRow">
+                                        <span class="text-secondary small" id="childBreakdownLabel">سعر الأطفال (1 × $175)</span>
+                                        <span class="fw-bold" data-price-usd="0" id="childBreakdownVal">$0</span>
+                                    </div>
+                                    <hr class="my-2 text-secondary opacity-20">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-dark" data-i18n="totalPriceLabel">الإجمالي الكلي</span>
+                                        <span class="fs-4 fw-black text-warning" data-price-usd="0" id="totalBookingPrice">$0</span>
+                                    </div>
+                                </div>
+
+                                <!-- Submit btn -->
+                                <button type="submit" class="btn btn-warning w-100 rounded-pill py-3 fw-bold btn-gold fs-5" id="submitBtn">
+                                    <span id="submitText" data-i18n="confirmBookingBtn">تأكيد الحجز والدفع</span>
+                                    <span id="submitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                                </button>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="bg-dark text-secondary pt-5 pb-4 border-top border-secondary border-opacity-10">
+        <div class="container text-center text-md-start">
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-3 justify-content-center justify-content-md-start">
+                        <div class="d-flex align-items-center justify-content-center" style="width:38px; height:38px; background:rgba(197,160,40,0.1); border-radius:50%; border:1px solid rgba(197,160,40,0.3);">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Coat_of_arms_of_Egypt.svg" alt="Eagle logo" width="24" height="24">
+                        </div>
+                        <h2 class="h5 fw-bold text-white mb-0" data-i18n="siteName">رحلاتي</h2>
+                    </div>
+                    <p class="small" data-i18n="footerDesc">رحلاتي هي شريكك المثالي لاستكشاف العالم بأجود الخدمات وخبرة تزيد على 10 سنوات وبأجواء مصرية دافئة.</p>
+                    <div class="social-links d-flex gap-2 justify-content-center justify-content-md-start">
+                        <a href="#" class="social-link facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="social-link instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="social-link tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="#" class="social-link whatsapp" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 d-flex flex-column align-items-center align-items-md-start">
+                    <h3 class="h6 text-white fw-bold mb-3" data-i18n="navTrips">الرحلات</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a href="index.html#world-trips" class="text-secondary text-decoration-none hover-warning" data-i18n="filterEgypt">رحلات مصر</a></li>
+                        <li><a href="index.html#world-trips" class="text-secondary text-decoration-none hover-warning" data-i18n="filterGlobal">رحلات عالمية</a></li>
+                        <li><a href="survey.html" class="text-secondary text-decoration-none hover-warning" data-i18n="navSurvey">الاستبيان الذكي</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-4 d-flex flex-column align-items-center align-items-md-start">
+                    <h3 class="h6 text-white fw-bold mb-3" data-i18n="footerContact">اتصل بنا</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small align-items-center align-items-md-start">
+                        <li>
+                            <a href="mailto:info@ra7alaty.com" class="footer-contact-link">
+                                <i class="fa-solid fa-envelope text-warning"></i>
+                                <span>info@ra7alaty.com</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:+201000000000" class="footer-contact-link">
+                                <i class="fa-solid fa-phone text-warning"></i>
+                                <span dir="ltr">+20 100 000 0000</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center pt-4 border-top border-secondary border-opacity-10">
+                <p class="small mb-0" data-i18n="footerRights">جميع الحقوق محفوظة © 2026 رحلاتي.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+    <script src="js/config.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        let selectedTrip = null;
+        let selectedDate = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tripId = urlParams.get('trip_id');
+            selectedDate = urlParams.get('date') || '';
+
+            if (!tripId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            await loadTripSummary(tripId);
+            setupBookingFormEvents();
+
+            document.addEventListener('langChanged', async () => {
+                await loadTripSummary(tripId);
+            });
+        });
+
+        async function loadTripSummary(tripId) {
+            selectedTrip = await window.db.getTrip(tripId);
+            if (!selectedTrip) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const lang = localStorage.getItem('rahalaty_lang') || 'ar';
+            const title = lang === 'ar' ? selectedTrip.title_ar : selectedTrip.title_en;
+
+            document.getElementById('summaryTripTitle').textContent = title;
+            document.getElementById('summaryTripDate').textContent = selectedDate || (selectedTrip.departure_dates ? selectedTrip.departure_dates[0] : '');
+            
+            updatePriceBreakdown();
+        }
+
+        function setupBookingFormEvents() {
+            // Adults count select
+            document.getElementById('adults').addEventListener('change', updatePriceBreakdown);
+            // Children count select
+            document.getElementById('children').addEventListener('change', updatePriceBreakdown);
+
+            // Payment radio selections
+            const options = document.querySelectorAll('.payment-option');
+            const input = document.getElementById('paymentMethodInput');
+            options.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    options.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    input.value = opt.getAttribute('data-value');
+                });
+            });
+
+            // Form Submit handler
+            const form = document.getElementById('bookingForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Reset errors
+                form.classList.remove('was-validated');
+                
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                
+                let valid = true;
+                
+                if (!name || name.length < 3) {
+                    document.getElementById('name').classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    document.getElementById('name').classList.remove('is-invalid');
+                }
+                
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email || !emailRegex.test(email)) {
+                    document.getElementById('email').classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    document.getElementById('email').classList.remove('is-invalid');
+                }
+
+                if (!phone || phone.length < 8) {
+                    document.getElementById('phone').classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    document.getElementById('phone').classList.remove('is-invalid');
+                }
+
+                if (!valid) return;
+
+                // Disable submit button & show spinner
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('submitText').classList.add('d-none');
+                document.getElementById('submitSpinner').classList.remove('d-none');
+
+                const adults = parseInt(document.getElementById('adults').value);
+                const children = parseInt(document.getElementById('children').value);
+                const paymentMethod = input.value;
+                const notes = document.getElementById('notes').value.trim();
+
+                const adultsPrice = adults * selectedTrip.price;
+                const childrenPrice = children * selectedTrip.price * 0.5;
+                const totalPrice = adultsPrice + childrenPrice;
+
+                const bookingData = {
+                    trip_id: selectedTrip.id,
+                    trip_title: selectedTrip.title_en,
+                    name,
+                    email,
+                    phone,
+                    adults,
+                    children,
+                    travel_date: selectedDate || (selectedTrip.departure_dates ? selectedTrip.departure_dates[0] : ''),
+                    payment_method: paymentMethod,
+                    total_price: totalPrice,
+                    notes
+                };
+
+                try {
+                    const res = await window.db.createBooking(bookingData);
+                    // Redirect on success
+                    window.location.href = `booking-confirmed.html?reference=${res.reference}&price=${totalPrice}&trip_id=${selectedTrip.id}`;
+                } catch (err) {
+                    console.error(err);
+                    alert('عذراً، حدث خطأ أثناء إتمام الحجز. يرجى المحاولة لاحقاً.');
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitText').classList.remove('d-none');
+                    document.getElementById('submitSpinner').classList.add('d-none');
+                }
+            });
+        }
+
+        async function updatePriceBreakdown() {
+            if (!selectedTrip) return;
+
+            const adults = parseInt(document.getElementById('adults').value);
+            const children = parseInt(document.getElementById('children').value);
+            const lang = localStorage.getItem('rahalaty_lang') || 'ar';
+            const savedCurrency = localStorage.getItem('rahalaty_currency') || 'USD';
+
+            const price = parseFloat(selectedTrip.price);
+            const childPrice = price * 0.5;
+
+            const adultsTotal = adults * price;
+            const childrenTotal = children * childPrice;
+            const total = adultsTotal + childrenTotal;
+
+            // Set breakdown labels
+            document.getElementById('adultBreakdownLabel').textContent = lang === 'ar' 
+                ? `سعر البالغين (${adults} × $${price})` 
+                : `Adults Price (${adults} x $${price})`;
+            
+            const abVal = document.getElementById('adultBreakdownVal');
+            abVal.setAttribute('data-price-usd', adultsTotal);
+            abVal.textContent = `$${adultsTotal}`;
+
+            const childRow = document.getElementById('childBreakdownRow');
+            if (children > 0) {
+                childRow.classList.remove('d-none');
+                document.getElementById('childBreakdownLabel').textContent = lang === 'ar'
+                    ? `سعر الأطفال (${children} × $${childPrice})`
+                    : `Children Price (${children} x $${childPrice})`;
+                
+                const cbVal = document.getElementById('childBreakdownVal');
+                cbVal.setAttribute('data-price-usd', childrenTotal);
+                cbVal.textContent = `$${childrenTotal}`;
+            } else {
+                childRow.classList.add('d-none');
+            }
+
+            const totalEl = document.getElementById('totalBookingPrice');
+            totalEl.setAttribute('data-price-usd', total);
+            totalEl.textContent = `$${total}`;
+
+            // Apply conversions
+            await window.selectCurrency(savedCurrency);
+        }
+    </script>
+</body>
+</html>

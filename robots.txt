@@ -1,0 +1,19 @@
+# robots.txt for Rahalaty (https://ra7alaty.com)
+# Optimized for Googlebot, Bingbot and major search crawlers
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /destinations.html
+Allow: /destination-details.html
+Allow: /trip-details.html
+Allow: /survey.html
+Allow: /survey-results.html
+
+# Disallow private/admin pages
+Disallow: /admin.html
+Disallow: /book.html
+Disallow: /booking-confirmed.html
+
+# Sitemap link
+Sitemap: https://ra7alaty.com/sitemap.xml

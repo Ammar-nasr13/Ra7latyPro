@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم — رحلاتي</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f4f7f6;
+        }
+        .admin-sidebar {
+            background: #0d2137;
+            min-height: 100vh;
+            color: white;
+            border-left: 3px solid #c5a028;
+        }
+        .admin-sidebar .nav-link {
+            color: #b8d4f0;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        .admin-sidebar .nav-link:hover, .admin-sidebar .nav-link.active {
+            color: #f0d060;
+            background: rgba(197, 160, 40, 0.15);
+        }
+        .admin-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .stats-badge {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a3a5c;
+        }
+        
+        /* Global reset to remove border radius */
+        * {
+            border-radius: 0 !important;
+        }
+        .btn, button {
+            border-radius: 30px !important;
+        }
+        
+        /* Mobile responsive overrides for admin panel */
+        @media (max-width: 767px) {
+            .admin-sidebar {
+                min-height: auto !important;
+                border-left: none !important;
+                border-bottom: 3px solid #c5a028;
+            }
+            #adminTabs {
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                gap: 0.5rem !important;
+            }
+            #adminTabs .nav-item {
+                flex: 0 0 auto;
+            }
+            #adminTabs .nav-link {
+                white-space: nowrap;
+                padding: 0.6rem 1rem;
+            }
+            #adminTabs .nav-item.mt-4 {
+                margin-top: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            
+            <!-- Sidebar -->
+            <div class="col-12 col-md-3 col-lg-2 admin-sidebar p-3">
+                <div class="d-flex align-items-center gap-2 mb-4 mt-2 justify-content-center justify-content-md-start">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Coat_of_arms_of_Egypt.svg" alt="Eagle" width="28" height="28">
+                    <span class="fw-bold fs-5 text-warning">رحلاتي لوحة التحكم</span>
+                </div>
+                <hr class="bg-secondary">
+                
+                <ul class="nav flex-column" id="adminTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab"><i class="fa-solid fa-chart-line"></i> نظرة عامة</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start" id="bookings-tab" data-bs-toggle="tab" data-bs-target="#bookings" type="button" role="tab"><i class="fa-solid fa-suitcase-rolling"></i> الحجوزات</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start" id="surveys-tab" data-bs-toggle="tab" data-bs-target="#surveys" type="button" role="tab"><i class="fa-solid fa-square-poll-horizontal"></i> الاستبيانات</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start" id="subscribers-tab" data-bs-toggle="tab" data-bs-target="#subscribers" type="button" role="tab"><i class="fa-solid fa-envelope-open-text"></i> المشتركون</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start" id="testimonials-tab" data-bs-toggle="tab" data-bs-target="#testimonials" type="button" role="tab"><i class="fa-solid fa-comments"></i> التقييمات</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start" id="appwrite-tab" data-bs-toggle="tab" data-bs-target="#appwrite" type="button" role="tab"><i class="fa-solid fa-server"></i> إعدادات Appwrite</button>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a href="index.html" class="nav-link text-white border border-secondary border-opacity-35"><i class="fa-solid fa-arrow-right-from-bracket"></i> معاينة الموقع</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Content Panel -->
+            <div class="col-12 col-md-9 col-lg-10 p-4">
+                <div class="tab-content" id="adminTabsContent">
+                    
+                    <!-- 1. OVERVIEW -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <h1 class="h3 fw-bold mb-4 text-dark">نظرة عامة على النظام</h1>
+                        
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="admin-card text-center">
+                                    <div class="text-secondary small mb-2"><i class="fa-solid fa-suitcase-rolling me-1"></i> إجمالي الحجوزات</div>
+                                    <div class="stats-badge" id="statsBookingsCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="admin-card text-center">
+                                    <div class="text-secondary small mb-2"><i class="fa-solid fa-envelope me-1"></i> المشتركون بالقائمة</div>
+                                    <div class="stats-badge" id="statsSubscribersCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="admin-card text-center">
+                                    <div class="text-secondary small mb-2"><i class="fa-solid fa-star me-1"></i> تقييمات العملاء</div>
+                                    <div class="stats-badge" id="statsTestimonialsCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="admin-card text-center">
+                                    <div class="text-secondary small mb-2"><i class="fa-solid fa-wifi me-1"></i> حالة Appwrite</div>
+                                    <div class="stats-badge fs-5 mt-2" id="statsAppwriteStatus">
+                                        <span class="badge bg-secondary">غير متصل</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Configuration summary -->
+                        <div class="admin-card mt-3">
+                            <h2 class="h5 fw-bold text-dark mb-3">أسعار الصرف والعملات المتاحة</h2>
+                            <div class="row g-3">
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-secondary">الدولار مقابل الجنيه (EGP)</label>
+                                    <input type="number" id="rateEGP" class="form-control" value="50.0">
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-secondary">الدولار مقابل اليورو (EUR)</label>
+                                    <input type="number" id="rateEUR" class="form-control" value="0.92">
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-secondary">الدولار مقابل الريال (SAR)</label>
+                                    <input type="number" id="rateSAR" class="form-control" value="3.75">
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <label class="form-label small text-secondary">الدولار مقابل الدرهم (AED)</label>
+                                    <input type="number" id="rateAED" class="form-control" value="3.67">
+                                </div>
+                            </div>
+                            <button class="btn btn-warning mt-3 rounded-pill px-4 fw-bold" onclick="saveAdminSettings()">حفظ أسعار الصرف</button>
+                        </div>
+                    </div>
+
+                    <!-- 2. BOOKINGS -->
+                    <div class="tab-pane fade" id="bookings" role="tabpanel">
+                        <h1 class="h3 fw-bold mb-4 text-dark">إدارة الحجوزات</h1>
+                        <div class="admin-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>المرجع</th>
+                                            <th>العميل</th>
+                                            <th>الرحلة</th>
+                                            <th>التاريخ</th>
+                                            <th>أفراد</th>
+                                            <th>السعر</th>
+                                            <th>الحالة</th>
+                                            <th>إجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminBookingsTable">
+                                        <!-- Loaded by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. SURVEY RESPONSES -->
+                    <div class="tab-pane fade" id="surveys" role="tabpanel">
+                        <h1 class="h3 fw-bold mb-4 text-dark">استجابات الاستبيانات</h1>
+                        <div class="admin-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>العميل</th>
+                                            <th>الرفاق</th>
+                                            <th>الميزانية</th>
+                                            <th>المناخ</th>
+                                            <th>المدة</th>
+                                            <th>الملاحظات</th>
+                                            <th>التاريخ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminSurveysTable">
+                                        <!-- Loaded by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. SUBSCRIBERS -->
+                    <div class="tab-pane fade" id="subscribers" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h1 class="h3 fw-bold mb-0 text-dark">المشتركون في النشرة البريدية</h1>
+                            <button class="btn btn-success rounded-pill px-4 fw-bold" onclick="exportSubscribersCSV()"><i class="fa-solid fa-file-csv me-2"></i>تصدير CSV</button>
+                        </div>
+                        <div class="admin-card">
+                            <div class="table-responsive" style="max-height: 500px;">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>البريد الإلكتروني</th>
+                                            <th>تاريخ الاشتراك</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminSubscribersTable">
+                                        <!-- Loaded by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. TESTIMONIALS / REVIEWS -->
+                    <div class="tab-pane fade" id="testimonials" role="tabpanel">
+                        <h1 class="h3 fw-bold mb-4 text-dark">تقييمات العملاء وآرائهم</h1>
+                        <div class="admin-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>العميل</th>
+                                            <th>مرجع الحجز</th>
+                                            <th>التقييم</th>
+                                            <th>التعليق</th>
+                                            <th>الحالة</th>
+                                            <th>إجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminTestimonialsTable">
+                                        <!-- Loaded by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. APPWRITE SETTINGS & SEEDING -->
+                    <div class="tab-pane fade" id="appwrite" role="tabpanel">
+                        <h1 class="h3 fw-bold mb-4 text-dark">إعدادات الاتصال بـ Appwrite</h1>
+                        
+                        <div class="row g-4">
+                            <!-- Connection form -->
+                            <div class="col-12 col-lg-6">
+                                <div class="admin-card">
+                                    <h2 class="h5 fw-bold text-dark mb-3">بيانات الاتصال بـ API</h2>
+                                    <form id="appwriteConfigForm">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">API Endpoint</label>
+                                            <input type="text" id="appwriteEndpoint" class="form-control" value="https://cloud.appwrite.io/v1" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Project ID</label>
+                                            <input type="text" id="appwriteProjectId" class="form-control" placeholder="أدخل معرف المشروع..." required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Database ID</label>
+                                            <input type="text" id="appwriteDatabaseId" class="form-control" value="rahalaty_db" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">حفظ إعدادات الاتصال</button>
+                                    </form>
+                                </div>
+
+                                <div class="admin-card">
+                                    <h2 class="h5 fw-bold text-dark mb-3">زر تهيئة ورفع البيانات الافتراضية</h2>
+                                    <p class="text-secondary small">سيقوم هذا الخيار بالاتصال بمشروع Appwrite الخاص بك ومحاولة إنشاء وثائق الوجهات والرحلات السياحية الافتراضية (16 رحلة و6 وجهات) داخل مجموعات البيانات الخاصة بك دفعة واحدة.</p>
+                                    <div class="alert alert-warning small">
+                                        <strong>ملاحظة هامة:</strong> يجب إنشاء مجموعات البيانات (Collections) داخل لوحة تحكم Appwrite الخاصة بك أولاً بالمسميات والخصائص الموضحة في الدليل الجانبي قبل الضغط على هذا الزر.
+                                    </div>
+                                    <button class="btn btn-primary rounded-pill px-4 fw-bold" id="seedDbBtn" onclick="seedAppwriteDatabase()">تهيئة قاعدة البيانات (Seed Data)</button>
+                                </div>
+                            </div>
+
+                            <!-- Setup guide and schema -->
+                            <div class="col-12 col-lg-6">
+                                <div class="admin-card" style="background:#fff9e6; border-color:#ffe8a3;">
+                                    <h2 class="h5 fw-bold text-dark mb-3 text-warning-emphasis"><i class="fa-solid fa-circle-info me-1"></i> دليل هيكل بيانات Appwrite (Schema Guide)</h2>
+                                    <p class="small text-secondary">يرجى الدخول إلى لوحة تحكم Appwrite وإنشاء قاعدة بيانات بالمعرف المحدد، ثم إنشاء المجموعات (Collections) التالية وتعيين صلاحيات القراءة والكتابة (Permissions) لها للجميع (role:all أو role:guests) كالتالي:</p>
+                                    
+                                    <div class="accordion accordion-flush" id="schemaAccordion">
+                                        
+                                        <!-- Destinations -->
+                                        <div class="accordion-item bg-transparent">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed py-2 px-1 bg-transparent small fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#schemaDests">
+                                                    1. مجموعة الوجهات: destinations
+                                                </button>
+                                            </h2>
+                                            <div id="schemaDests" class="accordion-collapse collapse" data-bs-parent="#schemaAccordion">
+                                                <div class="accordion-body px-1 py-2 small text-secondary">
+                                                    <strong>الخصائص (Attributes):</strong>
+                                                    <ul>
+                                                        <li><code>id</code> : Integer</li>
+                                                        <li><code>name_ar</code> : String</li>
+                                                        <li><code>name_en</code> : String</li>
+                                                        <li><code>desc_ar</code> : String (size 1000)</li>
+                                                        <li><code>desc_en</code> : String (size 1000)</li>
+                                                        <li><code>category</code> : String</li>
+                                                        <li><code>is_featured</code> : Boolean</li>
+                                                        <li><code>sort_order</code> : Integer</li>
+                                                        <li><code>image</code> : String (URL size 500)</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Trips -->
+                                        <div class="accordion-item bg-transparent">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed py-2 px-1 bg-transparent small fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#schemaTrips">
+                                                    2. مجموعة الرحلات: trips
+                                                </button>
+                                            </h2>
+                                            <div id="schemaTrips" class="accordion-collapse collapse" data-bs-parent="#schemaAccordion">
+                                                <div class="accordion-body px-1 py-2 small text-secondary">
+                                                    <strong>الخصائص (Attributes):</strong>
+                                                    <ul>
+                                                        <li><code>id</code> : Integer</li>
+                                                        <li><code>title_ar</code> : String</li>
+                                                        <li><code>title_en</code> : String</li>
+                                                        <li><code>country_ar</code> : String</li>
+                                                        <li><code>country_en</code> : String</li>
+                                                        <li><code>price</code> : Float</li>
+                                                        <li><code>currency</code> : String</li>
+                                                        <li><code>duration</code> : Integer</li>
+                                                        <li><code>category</code> : String</li>
+                                                        <li><code>climate</code> : String</li>
+                                                        <li><code>travel_type</code> : String (Array)</li>
+                                                        <li><code>budget_tier</code> : String</li>
+                                                        <li><code>is_egyptian</code> : Boolean</li>
+                                                        <li><code>spots_total</code> : Integer</li>
+                                                        <li><code>spots_left</code> : Integer</li>
+                                                        <li><code>departure_dates</code> : String (Array)</li>
+                                                        <li><code>desc_ar</code> : String (size 1000)</li>
+                                                        <li><code>desc_en</code> : String (size 1000)</li>
+                                                        <li><code>highlights_ar</code> : String (Array)</li>
+                                                        <li><code>highlights_en</code> : String (Array)</li>
+                                                        <li><code>destination_id</code> : Integer (Nullable)</li>
+                                                        <li><code>image</code> : String (URL size 500)</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bookings -->
+                                        <div class="accordion-item bg-transparent">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed py-2 px-1 bg-transparent small fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#schemaBookings">
+                                                    3. مجموعة الحجوزات: bookings
+                                                </button>
+                                            </h2>
+                                            <div id="schemaBookings" class="accordion-collapse collapse" data-bs-parent="#schemaAccordion">
+                                                <div class="accordion-body px-1 py-2 small text-secondary">
+                                                    <strong>الخصائص (Attributes):</strong>
+                                                    <ul>
+                                                        <li><code>reference</code> : String</li>
+                                                        <li><code>trip_id</code> : Integer</li>
+                                                        <li><code>trip_title</code> : String</li>
+                                                        <li><code>name</code> : String</li>
+                                                        <li><code>email</code> : String</li>
+                                                        <li><code>phone</code> : String</li>
+                                                        <li><code>adults</code> : Integer</li>
+                                                        <li><code>children</code> : Integer</li>
+                                                        <li><code>travel_date</code> : String</li>
+                                                        <li><code>payment_method</code> : String</li>
+                                                        <li><code>total_price</code> : Float</li>
+                                                        <li><code>notes</code> : String (size 1000)</li>
+                                                        <li><code>status</code> : String</li>
+                                                        <li><code>created_at</code> : String</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+    <script src="js/config.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
