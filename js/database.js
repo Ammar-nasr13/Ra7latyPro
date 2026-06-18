@@ -359,11 +359,22 @@ class DBService {
         this.appwriteConnected = false;
         this.sdk = null;
         this.databases = null;
+        this.staticDestinations = STATIC_DESTINATIONS;
+        this.staticTrips = STATIC_TRIPS;
     }
 
     async init() {
         const conf = window.CONFIG.appwrite;
-        // Check if user set credentials
+        
+        // Load configurations dynamically from localStorage if overridden by admin
+        const storedEndpoint = localStorage.getItem('rahalaty_appwrite_endpoint');
+        const storedProjectId = localStorage.getItem('rahalaty_appwrite_project_id');
+        const storedDatabaseId = localStorage.getItem('rahalaty_appwrite_database_id');
+        
+        if (storedEndpoint) conf.endpoint = storedEndpoint;
+        if (storedProjectId) conf.projectId = storedProjectId;
+        if (storedDatabaseId) conf.databaseId = storedDatabaseId;
+
         if (conf.projectId && conf.projectId.trim() !== '') {
             try {
                 const { Client, Databases } = Appwrite;
@@ -374,44 +385,12 @@ class DBService {
                 this.appwriteConnected = true;
                 console.log('Appwrite initialized successfully.');
             } catch (err) {
-                console.error('Failed to initialize Appwrite SDK. Falling back to local storage.', err);
+                console.error('Failed to initialize Appwrite SDK.', err);
                 this.appwriteConnected = false;
             }
         } else {
-            console.log('Appwrite credentials not found. Using local storage databases.');
+            console.warn('Appwrite credentials not found.');
             this.appwriteConnected = false;
-        }
-
-        // Initialize Local Storage Fallback if needed
-        this._initLocalStore();
-    }
-
-    _initLocalStore() {
-        if (!localStorage.getItem('rahalaty_destinations')) {
-            localStorage.setItem('rahalaty_destinations', JSON.stringify(STATIC_DESTINATIONS));
-        }
-        if (!localStorage.getItem('rahalaty_trips')) {
-            localStorage.setItem('rahalaty_trips', JSON.stringify(STATIC_TRIPS));
-        }
-        if (!localStorage.getItem('rahalaty_bookings')) {
-            localStorage.setItem('rahalaty_bookings', JSON.stringify([]));
-        }
-        if (!localStorage.getItem('rahalaty_testimonials')) {
-            const defaultTestimonials = [
-                { id: 1, name: 'أحمد علي', review: 'رحلة شرم الشيخ كانت خيالية والترتيب ممتاز جداً، أشكر فريق العمل المتعاون.', rating: 5, is_active: true, created_at: new Date().toISOString() },
-                { id: 2, name: 'سارة محمد', review: 'Amazing organization and wonderful trip to Hurghada. Loved every moment!', rating: 5, is_active: true, created_at: new Date().toISOString() }
-            ];
-            localStorage.setItem('rahalaty_testimonials', JSON.stringify(defaultTestimonials));
-        }
-        if (!localStorage.getItem('rahalaty_subscribers')) {
-            localStorage.setItem('rahalaty_subscribers', JSON.stringify([]));
-        }
-        if (!localStorage.getItem('rahalaty_surveys')) {
-            localStorage.setItem('rahalaty_surveys', JSON.stringify([]));
-        }
-        if (!localStorage.getItem('rahalaty_settings')) {
-            const defaultSettings = { exchangeRateEGP: 50.0, exchangeRateEUR: 0.92, exchangeRateSAR: 3.75, siteName: 'رحلاتي' };
-            localStorage.setItem('rahalaty_settings', JSON.stringify(defaultSettings));
         }
     }
 
@@ -419,18 +398,18 @@ class DBService {
         return this.appwriteConnected;
     }
 
+    _assertConnected() {
+        if (!this.appwriteConnected || !this.databases) {
+            throw new Error('Appwrite is not connected. Please check your configuration in the Admin panel.');
+        }
+    }
+
     // ─── Destinations ──────────────────────────────────────────────────
     async getDestinations() {
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const response = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
-                return response.documents;
-            } catch (e) {
-                console.warn('Appwrite listDocuments failed, falling back to local storage.', e);
-            }
-        }
-        return JSON.parse(localStorage.getItem('rahalaty_destinations'));
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
+        return response.documents;
     }
 
     async getDestination(id) {
@@ -440,16 +419,10 @@ class DBService {
 
     // ─── Trips ─────────────────────────────────────────────────────────
     async getTrips() {
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const response = await this.databases.listDocuments(conf.databaseId, conf.collections.trips);
-                return response.documents;
-            } catch (e) {
-                console.warn('Appwrite listDocuments failed, falling back to local storage.', e);
-            }
-        }
-        return JSON.parse(localStorage.getItem('rahalaty_trips'));
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.trips);
+        return response.documents;
     }
 
     async getTrip(id) {
@@ -458,210 +431,196 @@ class DBService {
     }
 
     async updateTripSpots(id, spotsBooked) {
-        let trips = await this.getTrips();
-        let trip = trips.find(t => String(t.id || t.$id) === String(id));
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const trips = await this.getTrips();
+        const trip = trips.find(t => String(t.id || t.$id) === String(id));
         if (trip) {
             trip.spots_left = Math.max(0, (trip.spots_left || 10) - spotsBooked);
-            if (this.appwriteConnected) {
-                try {
-                    const conf = window.CONFIG.appwrite;
-                    await this.databases.updateDocument(conf.databaseId, conf.collections.trips, trip.$id, {
-                        spots_left: trip.spots_left
-                    });
-                    return;
-                } catch (e) {
-                    console.error('Failed to update trip spots in Appwrite:', e);
-                }
-            }
-            localStorage.setItem('rahalaty_trips', JSON.stringify(trips));
+            await this.databases.updateDocument(conf.databaseId, conf.collections.trips, trip.$id, {
+                spots_left: trip.spots_left
+            });
         }
     }
 
     // ─── Bookings ──────────────────────────────────────────────────────
     async getBookings() {
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const response = await this.databases.listDocuments(conf.databaseId, conf.collections.bookings);
-                return response.documents;
-            } catch (e) {
-                console.warn('Appwrite failed to list bookings, using local store', e);
-            }
-        }
-        return JSON.parse(localStorage.getItem('rahalaty_bookings'));
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.bookings);
+        return response.documents;
     }
 
     async createBooking(booking) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
         const ref = 'BK-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         const record = {
-            ...booking,
+            trip_id: parseInt(booking.trip_id),
+            trip_title: booking.trip_title,
+            name: booking.name,
+            email: booking.email,
+            phone: booking.phone,
+            adults: parseInt(booking.adults),
+            children: parseInt(booking.children),
+            travel_date: booking.travel_date,
+            payment_method: booking.payment_method,
+            total_price: parseFloat(booking.total_price),
+            notes: booking.notes || '',
             reference: ref,
             status: 'confirmed',
             created_at: new Date().toISOString()
         };
 
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const doc = await this.databases.createDocument(conf.databaseId, conf.collections.bookings, Appwrite.ID.unique(), record);
-                await this.updateTripSpots(booking.trip_id, parseInt(booking.adults) + parseInt(booking.children));
-                return doc;
-            } catch (e) {
-                console.error('Appwrite save booking failed, saving locally', e);
-            }
-        }
-
-        // Local Fallback
-        const bookings = JSON.parse(localStorage.getItem('rahalaty_bookings'));
-        record.id = bookings.length + 1;
-        bookings.push(record);
-        localStorage.setItem('rahalaty_bookings', JSON.stringify(bookings));
+        const doc = await this.databases.createDocument(conf.databaseId, conf.collections.bookings, Appwrite.ID.unique(), record);
         await this.updateTripSpots(booking.trip_id, parseInt(booking.adults) + parseInt(booking.children));
-        return record;
+        return doc;
+    }
+
+    async cancelBooking(id) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        return await this.databases.updateDocument(conf.databaseId, conf.collections.bookings, id, {
+            status: 'cancelled'
+        });
     }
 
     // ─── Testimonials ──────────────────────────────────────────────────
-    async getTestimonials() {
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const response = await this.databases.listDocuments(conf.databaseId, conf.collections.testimonials);
-                return response.documents.filter(t => t.is_active);
-            } catch (e) {
-                console.warn('Appwrite list testimonials failed', e);
-            }
-        }
-        const t = JSON.parse(localStorage.getItem('rahalaty_testimonials'));
-        return t.filter(item => item.is_active);
+    async getTestimonials(onlyActive = false) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.testimonials);
+        const docs = response.documents;
+        return onlyActive ? docs.filter(t => t.is_active) : docs;
     }
 
     async createTestimonial(testimonial) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
         const record = {
-            ...testimonial,
+            name: testimonial.name,
+            review: testimonial.review,
+            rating: parseInt(testimonial.rating),
             is_active: true,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            reference: testimonial.reference || ''
         };
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                return await this.databases.createDocument(conf.databaseId, conf.collections.testimonials, Appwrite.ID.unique(), record);
-            } catch (e) {
-                console.error('Appwrite save testimonial failed', e);
-            }
-        }
-        const t = JSON.parse(localStorage.getItem('rahalaty_testimonials'));
-        record.id = t.length + 1;
-        t.push(record);
-        localStorage.setItem('rahalaty_testimonials', JSON.stringify(t));
-        return record;
+        return await this.databases.createDocument(conf.databaseId, conf.collections.testimonials, Appwrite.ID.unique(), record);
+    }
+
+    async toggleTestimonialActive(id, status) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        return await this.databases.updateDocument(conf.databaseId, conf.collections.testimonials, id, {
+            is_active: status
+        });
     }
 
     // ─── Subscribers ──────────────────────────────────────────────────
+    async getSubscribers() {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.subscribers);
+        return response.documents;
+    }
+
     async subscribeNewsletter(email) {
-        const record = { email, created_at: new Date().toISOString() };
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                return await this.databases.createDocument(conf.databaseId, conf.collections.subscribers, Appwrite.ID.unique(), record);
-            } catch (e) {
-                console.error('Appwrite newsletter subscription failed', e);
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const record = {
+            email: email,
+            created_at: new Date().toISOString()
+        };
+        
+        try {
+            const existing = await this.databases.listDocuments(conf.databaseId, conf.collections.subscribers, [
+                Appwrite.Query.equal('email', email)
+            ]);
+            if (existing.documents.length > 0) {
+                return existing.documents[0];
             }
+        } catch (e) {
+            console.warn('Subscription check failed or index not ready, saving directly.', e);
         }
-        const subs = JSON.parse(localStorage.getItem('rahalaty_subscribers'));
-        if (!subs.some(s => s.email === email)) {
-            record.id = subs.length + 1;
-            subs.push(record);
-            localStorage.setItem('rahalaty_subscribers', JSON.stringify(subs));
-        }
-        return record;
+
+        return await this.databases.createDocument(conf.databaseId, conf.collections.subscribers, Appwrite.ID.unique(), record);
     }
 
     // ─── Surveys ──────────────────────────────────────────────────────
+    async getSurveys() {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.surveys);
+        return response.documents;
+    }
+
     async createSurveyResponse(survey) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
         const record = {
-            ...survey,
+            name: survey.name,
+            email: survey.email,
+            phone: survey.phone || '',
+            travel_type: survey.travel_type,
+            budget: survey.budget,
+            climate: survey.climate || survey.preferred_climate || '',
+            duration: survey.duration || survey.duration_preference || '',
+            message: survey.message || '',
             created_at: new Date().toISOString()
         };
-        let responseId = '';
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const doc = await this.databases.createDocument(conf.databaseId, conf.collections.surveys, Appwrite.ID.unique(), record);
-                responseId = doc.$id;
-            } catch (e) {
-                console.error('Appwrite survey creation failed', e);
-            }
-        }
+        const doc = await this.databases.createDocument(conf.databaseId, conf.collections.surveys, Appwrite.ID.unique(), record);
         
-        if (!responseId) {
-            const surveys = JSON.parse(localStorage.getItem('rahalaty_surveys'));
-            record.id = surveys.length + 1;
-            surveys.push(record);
-            localStorage.setItem('rahalaty_surveys', JSON.stringify(surveys));
-            responseId = String(record.id);
-        }
-
-        // Save session response id
-        sessionStorage.setItem('survey_response_id', responseId);
-        sessionStorage.setItem('survey_response_data', JSON.stringify(record));
-        return responseId;
+        sessionStorage.setItem('survey_response_id', doc.$id);
+        sessionStorage.setItem('survey_response_data', JSON.stringify(doc));
+        return doc.$id;
     }
 
     async getSurveyResponse(id) {
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                return await this.databases.getDocument(conf.databaseId, conf.collections.surveys, id);
-            } catch (e) {
-                console.warn('Appwrite get survey failed, falling back to session/local storage', e);
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        try {
+            return await this.databases.getDocument(conf.databaseId, conf.collections.surveys, id);
+        } catch (e) {
+            const sessionData = sessionStorage.getItem('survey_response_data');
+            if (sessionData) {
+                const parsed = JSON.parse(sessionData);
+                if (String(parsed.$id || parsed.id) === String(id)) return parsed;
             }
+            throw e;
         }
-        const sessionData = sessionStorage.getItem('survey_response_data');
-        if (sessionData) {
-            const parsed = JSON.parse(sessionData);
-            if (String(parsed.id) === String(id)) return parsed;
-        }
-        const surveys = JSON.parse(localStorage.getItem('rahalaty_surveys'));
-        return surveys.find(s => String(s.id) === String(id));
     }
 
     // ─── Settings ─────────────────────────────────────────────────────
     async getSettings() {
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                const response = await this.databases.listDocuments(conf.databaseId, conf.collections.settings);
-                const settingsObj = {};
-                response.documents.forEach(d => {
-                    settingsObj[d.key] = d.value;
-                });
-                return settingsObj;
-            } catch (e) {
-                console.warn('Appwrite fetch settings failed', e);
-            }
-        }
-        return JSON.parse(localStorage.getItem('rahalaty_settings'));
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.settings);
+        const settingsObj = {};
+        
+        const defaults = {
+            exchangeRateEGP: 50.0,
+            exchangeRateEUR: 0.92,
+            exchangeRateSAR: 3.75,
+            exchangeRateAED: 3.67,
+            siteName: 'رحلاتي'
+        };
+
+        response.documents.forEach(d => {
+            settingsObj[d.key] = d.value;
+        });
+
+        return { ...defaults, ...settingsObj };
     }
 
     async updateSettings(key, value) {
-        const settings = JSON.parse(localStorage.getItem('rahalaty_settings'));
-        settings[key] = value;
-        localStorage.setItem('rahalaty_settings', JSON.stringify(settings));
-
-        if (this.appwriteConnected) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                // Query settings to see if it exists
-                const list = await this.databases.listDocuments(conf.databaseId, conf.collections.settings);
-                const existing = list.documents.find(d => d.key === key);
-                if (existing) {
-                    await this.databases.updateDocument(conf.databaseId, conf.collections.settings, existing.$id, { value: String(value) });
-                } else {
-                    await this.databases.createDocument(conf.databaseId, conf.collections.settings, Appwrite.ID.unique(), { key, value: String(value) });
-                }
-            } catch (e) {
-                console.error('Appwrite update setting failed', e);
-            }
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const list = await this.databases.listDocuments(conf.databaseId, conf.collections.settings);
+        const existing = list.documents.find(d => d.key === key);
+        if (existing) {
+            return await this.databases.updateDocument(conf.databaseId, conf.collections.settings, existing.$id, { value: String(value) });
+        } else {
+            return await this.databases.createDocument(conf.databaseId, conf.collections.settings, Appwrite.ID.unique(), { key, value: String(value) });
         }
     }
 }

@@ -1,18 +1,52 @@
 // Rahalaty Admin Dashboard Panel JavaScript Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Check session safety
+    if (sessionStorage.getItem('rahalaty_admin_logged_in') !== 'true') {
+        window.location.replace('login');
+        return;
+    }
+
+    // Bind logout button
+    const logoutBtn = document.getElementById('adminLogoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('هل تريد بالتأكيد تسجيل الخروج؟')) {
+                sessionStorage.clear();
+                window.location.replace('login');
+            }
+        });
+    }
+
     // Load config values into fields
     loadAppwriteFormConfig();
+
+    // Initialize Database
+    try {
+        await window.db.init();
+    } catch (e) {
+        console.error('Failed to initialize database:', e);
+    }
 
     // Check Appwrite Status
     updateAppwriteConnectionStatus();
 
-    // Load tables
-    await loadOverviewStats();
-    await loadBookingsTable();
-    await loadSurveysTable();
-    await loadSubscribersTable();
-    await loadTestimonialsTable();
+    // Load tables if connected
+    if (window.db.isAppwriteConnected()) {
+        try {
+            await loadOverviewStats();
+            await loadBookingsTable();
+            await loadSurveysTable();
+            await loadSubscribersTable();
+            await loadTestimonialsTable();
+        } catch (err) {
+            console.error('Failed to load admin dashboard tables:', err);
+            alert('حدث خطأ أثناء تحميل البيانات من Appwrite. يرجى التأكد من صحة الجداول والصلاحيات.');
+        }
+    } else {
+        alert('يرجى تهيئة إعدادات الاتصال بـ Appwrite في التبويب الخاص بها للتمكن من إدارة الموقع.');
+    }
 
     // Handle Appwrite Form submit
     const confForm = document.getElementById('appwriteConfigForm');
@@ -25,21 +59,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const databaseId = document.getElementById('appwriteDatabaseId').value.trim();
 
             // Save settings locally
-            await window.db.updateSettings('appwriteEndpoint', endpoint);
-            await window.db.updateSettings('appwriteProjectId', projectId);
-            await window.db.updateSettings('appwriteDatabaseId', databaseId);
+            localStorage.setItem('rahalaty_appwrite_endpoint', endpoint);
+            localStorage.setItem('rahalaty_appwrite_project_id', projectId);
+            localStorage.setItem('rahalaty_appwrite_database_id', databaseId);
 
-            // Update configuration live
-            window.CONFIG.appwrite.endpoint = endpoint;
-            window.CONFIG.appwrite.projectId = projectId;
-            window.CONFIG.appwrite.databaseId = databaseId;
-
-            // Re-initialize database
-            await window.db.init();
-
-            // Refresh UI
-            updateAppwriteConnectionStatus();
-            alert('تم حفظ إعدادات الاتصال بنجاح. جاري محاولة إعادة الاتصال...');
+            alert('تم حفظ إعدادات الاتصال بنجاح. جاري إعادة تحميل الصفحة لتطبيق التغييرات...');
             window.location.reload();
         });
     }
@@ -48,16 +72,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 function loadAppwriteFormConfig() {
     const conf = window.CONFIG.appwrite;
     
-    // Check if we have overrides in settings
     const endpointInput = document.getElementById('appwriteEndpoint');
     const projectInput = document.getElementById('appwriteProjectId');
     const dbInput = document.getElementById('appwriteDatabaseId');
 
-    // Get settings
-    const settings = JSON.parse(localStorage.getItem('rahalaty_settings')) || {};
-    if (settings.appwriteEndpoint) conf.endpoint = settings.appwriteEndpoint;
-    if (settings.appwriteProjectId) conf.projectId = settings.appwriteProjectId;
-    if (settings.appwriteDatabaseId) conf.databaseId = settings.appwriteDatabaseId;
+    const storedEndpoint = localStorage.getItem('rahalaty_appwrite_endpoint');
+    const storedProjectId = localStorage.getItem('rahalaty_appwrite_project_id');
+    const storedDatabaseId = localStorage.getItem('rahalaty_appwrite_database_id');
+
+    if (storedEndpoint) conf.endpoint = storedEndpoint;
+    if (storedProjectId) conf.projectId = storedProjectId;
+    if (storedDatabaseId) conf.databaseId = storedDatabaseId;
 
     if (endpointInput) endpointInput.value = conf.endpoint;
     if (projectInput) projectInput.value = conf.projectId || '';
@@ -72,20 +97,20 @@ function updateAppwriteConnectionStatus() {
     if (connected) {
         statusBadge.innerHTML = '<span class="badge bg-success">متصل بـ Appwrite</span>';
     } else {
-        statusBadge.innerHTML = '<span class="badge bg-danger">تخزين محلي (Fallback)</span>';
+        statusBadge.innerHTML = '<span class="badge bg-danger">غير متصل بـ Appwrite</span>';
     }
 }
 
 async function loadOverviewStats() {
     const bookings = await window.db.getBookings();
-    const subs = JSON.parse(localStorage.getItem('rahalaty_subscribers')) || [];
-    const reviews = await window.db.getTestimonials();
+    const subs = await window.db.getSubscribers();
+    const reviews = await window.db.getTestimonials(false);
 
     document.getElementById('statsBookingsCount').textContent = bookings.length;
     document.getElementById('statsSubscribersCount').textContent = subs.length;
     document.getElementById('statsTestimonialsCount').textContent = reviews.length;
 
-    // Converted rates
+    // Exchange rates
     const settings = await window.db.getSettings();
     document.getElementById('rateEGP').value = settings.exchangeRateEGP || 50.0;
     document.getElementById('rateEUR').value = settings.exchangeRateEUR || 0.92;
@@ -99,12 +124,16 @@ window.saveAdminSettings = async function() {
     const sar = parseFloat(document.getElementById('rateSAR').value);
     const aed = parseFloat(document.getElementById('rateAED').value);
 
-    await window.db.updateSettings('exchangeRateEGP', egp);
-    await window.db.updateSettings('exchangeRateEUR', eur);
-    await window.db.updateSettings('exchangeRateSAR', sar);
-    await window.db.updateSettings('exchangeRateAED', aed);
-
-    alert('تم حفظ أسعار الصرف بنجاح وتحديث أسعار التذاكر.');
+    try {
+        await window.db.updateSettings('exchangeRateEGP', egp);
+        await window.db.updateSettings('exchangeRateEUR', eur);
+        await window.db.updateSettings('exchangeRateSAR', sar);
+        await window.db.updateSettings('exchangeRateAED', aed);
+        alert('تم حفظ أسعار الصرف بنجاح وتحديث أسعار التذاكر.');
+    } catch (e) {
+        console.error(e);
+        alert('فشل حفظ إعدادات أسعار الصرف على Appwrite.');
+    }
 };
 
 // ─── BOOKINGS TABLE ──────────────────────────────────────────────────
@@ -119,14 +148,13 @@ async function loadBookingsTable() {
         return;
     }
 
-    // Sort by created_at desc
     bookings.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
     bookings.forEach(b => {
         const isCancelled = b.status === 'cancelled';
         const cancelBtn = isCancelled
             ? `<span class="badge bg-secondary">ملغى</span>`
-            : `<button class="btn btn-sm btn-outline-danger" onclick="cancelBooking('${b.$id || b.id}')">إلغاء</button>`;
+            : `<button class="btn btn-sm btn-outline-danger" onclick="cancelBooking('${b.$id}')">إلغاء</button>`;
         const statusBadge = isCancelled
             ? `<span class="badge bg-danger">ملغى</span>`
             : `<span class="badge bg-success">مؤكد</span>`;
@@ -146,33 +174,20 @@ async function loadBookingsTable() {
                 <td>${cancelBtn}</td>
             </tr>
         `;
-            });
+    });
 }
 
 window.cancelBooking = async function(id) {
     if (confirm('هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟')) {
-        let bookings = JSON.parse(localStorage.getItem('rahalaty_bookings')) || [];
-        const record = bookings.find(b => String(b.id) === String(id));
-        if (record) {
-            record.status = 'cancelled';
-            localStorage.setItem('rahalaty_bookings', JSON.stringify(bookings));
+        try {
+            await window.db.cancelBooking(id);
+            await loadBookingsTable();
+            await loadOverviewStats();
+            alert('تم إلغاء الحجز بنجاح.');
+        } catch (err) {
+            console.error(err);
+            alert('فشل إلغاء الحجز على Appwrite.');
         }
-
-        if (window.db.isAppwriteConnected()) {
-            try {
-                const conf = window.CONFIG.appwrite;
-                // Query booking first to get appwrite doc ID
-                const bookingDoc = await window.db.databases.getDocument(conf.databaseId, conf.collections.bookings, id);
-                if (bookingDoc) {
-                    await window.db.databases.updateDocument(conf.databaseId, conf.collections.bookings, id, { status: 'cancelled' });
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        await loadBookingsTable();
-        await loadOverviewStats();
     }
 };
 
@@ -182,20 +197,13 @@ async function loadSurveysTable() {
     if (!table) return;
     table.innerHTML = '';
 
-    // Load from local storage for surveys
-    if (window.db.isAppwriteConnected()) {
-        try {
-            const conf = window.CONFIG.appwrite;
-            const res = await window.db.databases.listDocuments(conf.databaseId, conf.collections.surveys);
-            renderSurveys(res.documents);
-            return;
-        } catch (e) {
-            console.error(e);
-        }
+    try {
+        const surveys = await window.db.getSurveys();
+        renderSurveys(surveys);
+    } catch (e) {
+        console.error(e);
+        table.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">فشل تحميل استجابات الاستبيانات.</td></tr>';
     }
-
-    const surveys = JSON.parse(localStorage.getItem('rahalaty_surveys')) || [];
-    renderSurveys(surveys);
 }
 
 function renderSurveys(list) {
@@ -205,7 +213,6 @@ function renderSurveys(list) {
         return;
     }
     
-    // Sort descending
     list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
     list.forEach(s => {
@@ -217,8 +224,8 @@ function renderSurveys(list) {
                 </td>
                 <td class="text-capitalize">${s.travel_type}</td>
                 <td class="text-capitalize">${s.budget}</td>
-                <td class="text-capitalize">${s.preferred_climate || s.climate}</td>
-                <td class="text-capitalize">${s.duration_preference || s.duration}</td>
+                <td class="text-capitalize">${s.preferred_climate || s.climate || ''}</td>
+                <td class="text-capitalize">${s.duration_preference || s.duration || ''}</td>
                 <td><p class="small text-secondary mb-0 text-wrap" style="max-width:250px;">${s.message || '-'}</p></td>
                 <td>${s.created_at ? s.created_at.slice(0, 10) : '-'}</td>
             </tr>
@@ -232,20 +239,13 @@ async function loadSubscribersTable() {
     if (!table) return;
     table.innerHTML = '';
 
-    // Appwrite
-    if (window.db.isAppwriteConnected()) {
-        try {
-            const conf = window.CONFIG.appwrite;
-            const res = await window.db.databases.listDocuments(conf.databaseId, conf.collections.subscribers);
-            renderSubscribers(res.documents);
-            return;
-        } catch (e) {
-            console.error(e);
-        }
+    try {
+        const subs = await window.db.getSubscribers();
+        renderSubscribers(subs);
+    } catch (e) {
+        console.error(e);
+        table.innerHTML = '<tr><td colspan="3" class="text-center text-danger py-4">فشل تحميل قائمة المشتركين.</td></tr>';
     }
-
-    const subs = JSON.parse(localStorage.getItem('rahalaty_subscribers')) || [];
-    renderSubscribers(subs);
 }
 
 function renderSubscribers(list) {
@@ -268,27 +268,32 @@ function renderSubscribers(list) {
     });
 }
 
-window.exportSubscribersCSV = function() {
-    const list = JSON.parse(localStorage.getItem('rahalaty_subscribers')) || [];
-    if (list.length === 0) {
-        alert('لا توجد بيانات لتصديرها.');
-        return;
+window.exportSubscribersCSV = async function() {
+    try {
+        const list = await window.db.getSubscribers();
+        if (list.length === 0) {
+            alert('لا توجد بيانات لتصديرها.');
+            return;
+        }
+
+        let csvContent = 'data:text/csv;charset=utf-8,';
+        csvContent += 'Email,Subscribed At\n';
+
+        list.forEach(s => {
+            csvContent += `"${s.email}","${s.created_at}"\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'subscribers_list.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (e) {
+        console.error(e);
+        alert('حدث خطأ أثناء تصدير المشتركين.');
     }
-
-    let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'Email,Subscribed At\n';
-
-    list.forEach(s => {
-        csvContent += `"${s.email}","${s.created_at}"\n`;
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'subscribers_list.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 };
 
 // ─── TESTIMONIALS / REVIEWS TABLE ────────────────────────────────────
@@ -297,54 +302,50 @@ async function loadTestimonialsTable() {
     if (!table) return;
     table.innerHTML = '';
 
-    const list = await window.db.getTestimonials();
-    if (list.length === 0) {
-        table.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">لا توجد تقييمات معروضة حالياً.</td></tr>';
-        return;
+    try {
+        const list = await window.db.getTestimonials(false); // get all testimonials for admin
+        if (list.length === 0) {
+            table.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">لا توجد تقييمات معروضة حالياً.</td></tr>';
+            return;
+        }
+
+        list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+        list.forEach(t => {
+            const toggleBtn = t.is_active 
+                ? `<button class="btn btn-sm btn-outline-secondary" onclick="toggleReviewActive('${t.$id}', false)">إخفاء التقييم</button>`
+                : `<button class="btn btn-sm btn-outline-success" onclick="toggleReviewActive('${t.$id}', true)">إظهار التقييم</button>`;
+            const badge = t.is_active 
+                ? `<span class="badge bg-success">نشط</span>` 
+                : `<span class="badge bg-secondary">مخفي</span>`;
+
+            table.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${t.name}</td>
+                    <td class="small text-muted">${t.reference || '-'}</td>
+                    <td><span class="text-warning">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</span></td>
+                    <td><p class="small text-secondary mb-0 text-wrap" style="max-width:300px;">"${t.review}"</p></td>
+                    <td>${badge}</td>
+                    <td>${toggleBtn}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        console.error(e);
+        table.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">فشل تحميل التقييمات.</td></tr>';
     }
-
-    list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-
-    list.forEach(t => {
-        const toggleBtn = t.is_active 
-            ? `<button class="btn btn-sm btn-outline-secondary" onclick="toggleReviewActive('${t.$id || t.id}', false)">إخفاء التقييم</button>`
-            : `<button class="btn btn-sm btn-outline-success" onclick="toggleReviewActive('${t.$id || t.id}', true)">إظهار التقييم</button>`;
-        const badge = t.is_active 
-            ? `<span class="badge bg-success">نشط</span>` 
-            : `<span class="badge bg-secondary">مخفي</span>`;
-
-        table.innerHTML += `
-            <tr>
-                <td class="fw-bold">${t.name}</td>
-                <td class="small text-muted">${t.reference || '-'}</td>
-                <td><span class="text-warning">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</span></td>
-                <td><p class="small text-secondary mb-0 text-wrap" style="max-width:300px;">"${t.review}"</p></td>
-                <td>${badge}</td>
-                <td>${toggleBtn}</td>
-            </tr>
-        `;
-    });
 }
 
 window.toggleReviewActive = async function(id, status) {
-    let list = JSON.parse(localStorage.getItem('rahalaty_testimonials')) || [];
-    const record = list.find(t => String(t.id) === String(id));
-    if (record) {
-        record.is_active = status;
-        localStorage.setItem('rahalaty_testimonials', JSON.stringify(list));
+    try {
+        await window.db.toggleTestimonialActive(id, status);
+        await loadTestimonialsTable();
+        await loadOverviewStats();
+        alert(status ? 'تم تفعيل التقييم وعرضه.' : 'تم إخفاء التقييم بنجاح.');
+    } catch (e) {
+        console.error(e);
+        alert('فشل تحديث حالة التقييم على Appwrite.');
     }
-
-    if (window.db.isAppwriteConnected()) {
-        try {
-            const conf = window.CONFIG.appwrite;
-            await window.db.databases.updateDocument(conf.databaseId, conf.collections.testimonials, id, { is_active: status });
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    await loadTestimonialsTable();
-    await loadOverviewStats();
 };
 
 // ─── SEED APPWRITE DATABASE ──────────────────────────────────────────
@@ -363,35 +364,31 @@ window.seedAppwriteDatabase = async function() {
 
     try {
         // 1. Upload Destinations
-        const dests = JSON.parse(localStorage.getItem('rahalaty_destinations')) || [];
+        const dests = window.db.staticDestinations;
         for (const d of dests) {
-            // Check if document already exists
+            // Check if document already exists by querying custom attributes
             const list = await window.db.databases.listDocuments(dbId, conf.collections.destinations);
             const exists = list.documents.some(doc => parseInt(doc.id) === parseInt(d.id));
             if (!exists) {
-                // Remove local ID auto increments to prevent Appwrite crash
                 const payload = { ...d };
-                delete payload.$id;
-                delete payload.$collectionId;
-                delete payload.$databaseId;
-                delete payload.$permissions;
+                delete payload.id; // Appwrite custom key mapping
+                payload.id = parseInt(d.id);
 
                 await window.db.databases.createDocument(dbId, conf.collections.destinations, Appwrite.ID.unique(), payload);
             }
         }
 
         // 2. Upload Trips
-        const trips = JSON.parse(localStorage.getItem('rahalaty_trips')) || [];
+        const trips = window.db.staticTrips;
         for (const t of trips) {
             const list = await window.db.databases.listDocuments(dbId, conf.collections.trips);
             const exists = list.documents.some(doc => parseInt(doc.id) === parseInt(t.id));
             if (!exists) {
                 const payload = { ...t };
-                delete payload.$id;
-                delete payload.$collectionId;
-                delete payload.$databaseId;
-                delete payload.$permissions;
-                
+                delete payload.id;
+                payload.id = parseInt(t.id);
+                if (t.destination_id) payload.destination_id = parseInt(t.destination_id);
+
                 await window.db.databases.createDocument(dbId, conf.collections.trips, Appwrite.ID.unique(), payload);
             }
         }

@@ -404,19 +404,21 @@ function setupNavbar() {
         `;
         document.body.appendChild(bottomNav);
 
-        // Highlight active page link in the bottom nav bar
         const updateActiveTab = () => {
-            const activePath = window.location.pathname.split('/').pop() || 'index.html';
+            const activePath = (window.location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '');
             const currentHash = window.location.hash || '';
             
             bottomNav.querySelectorAll('.bottom-nav-link').forEach(link => {
                 const href = link.getAttribute('href');
                 const [linkPath, linkHash] = href.split('#');
-                const normalizedLinkPath = linkPath || 'index.html';
-                const normalizedActivePath = activePath === '' ? 'index.html' : activePath;
+                const normalizedLinkPath = (linkPath || 'index.html').replace(/\.html$/, '');
+                const normalizedActivePath = activePath === '' ? 'index' : activePath;
+                
+                const p1 = normalizedLinkPath === '' ? 'index' : normalizedLinkPath;
+                const p2 = normalizedActivePath === '' ? 'index' : normalizedActivePath;
                 
                 let isActive = false;
-                if (normalizedLinkPath === normalizedActivePath) {
+                if (p1 === p2) {
                     if (linkHash) {
                         isActive = currentHash === '#' + linkHash;
                     } else {
@@ -469,6 +471,47 @@ window.selectCurrency = async function(code) {
 
 // ─── INITIALIZATION ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+    // Clean URL in address bar by removing .html if present (visual cleanup)
+    if (window.location.pathname.endsWith('.html')) {
+        let cleanPath = window.location.pathname.replace(/\.html$/, '');
+        if (cleanPath.endsWith('/index')) {
+            cleanPath = cleanPath.slice(0, -5);
+        }
+        window.history.replaceState({}, '', cleanPath + window.location.search + window.location.hash);
+    }
+
+    // Intercept internal links for clean navigation in local file environments
+    document.addEventListener('click', (e) => {
+        const anchor = e.target.closest('a');
+        if (!anchor) return;
+        
+        const href = anchor.getAttribute('href');
+        if (!href) return;
+        
+        if (href.startsWith('http') && !href.startsWith(window.location.origin)) return;
+        if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+        
+        const isLocalFile = window.location.protocol === 'file:';
+        if (isLocalFile) {
+            e.preventDefault();
+            
+            let [path, query] = href.split('?');
+            let [cleanPath, hash] = path.split('#');
+            
+            if (cleanPath && !cleanPath.endsWith('.html') && cleanPath !== '/' && cleanPath !== './') {
+                cleanPath += '.html';
+            } else if (cleanPath === '/' || cleanPath === './') {
+                cleanPath = 'index.html';
+            }
+            
+            let finalHref = cleanPath;
+            if (query) finalHref += '?' + query;
+            if (hash) finalHref += '#' + hash;
+            
+            window.location.href = finalHref;
+        }
+    });
+
     // 1. Initialize Database & Appwrite SDK
     await window.db.init();
 

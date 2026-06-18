@@ -1,0 +1,16 @@
+# Apache Configuration for Rahalaty Clean URLs
+RewriteEngine On
+RewriteBase /
+
+# Force trailing slash off for extensionless URLs
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Redirect index.html to root
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*/)?index\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Serve clean URLs internally
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*?)/?$ $1.html [NC,L]

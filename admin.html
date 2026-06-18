@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+        if (sessionStorage.getItem('rahalaty_admin_logged_in') !== 'true') {
+            window.location.replace('login');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم — رحلاتي</title>
@@ -117,7 +122,10 @@
                         <button class="nav-link w-100 border-0 text-start" id="appwrite-tab" data-bs-toggle="tab" data-bs-target="#appwrite" type="button" role="tab"><i class="fa-solid fa-server"></i> إعدادات Appwrite</button>
                     </li>
                     <li class="nav-item mt-4">
-                        <a href="index.html" class="nav-link text-white border border-secondary border-opacity-35"><i class="fa-solid fa-arrow-right-from-bracket"></i> معاينة الموقع</a>
+                        <a href="./" class="nav-link text-white border border-secondary border-opacity-35"><i class="fa-solid fa-arrow-right-from-bracket"></i> معاينة الموقع</a>
+                    </li>
+                    <li class="nav-item mt-1">
+                        <a href="#" id="adminLogoutBtn" class="nav-link text-danger border border-danger border-opacity-25"><i class="fa-solid fa-power-off"></i> تسجيل الخروج</a>
                     </li>
                 </ul>
             </div>
