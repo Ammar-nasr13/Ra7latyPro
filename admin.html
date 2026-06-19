@@ -119,6 +119,9 @@
                         <button class="nav-link w-100 border-0 text-start" id="testimonials-tab" data-bs-toggle="tab" data-bs-target="#testimonials" type="button" role="tab"><i class="fa-solid fa-comments"></i> التقييمات</button>
                     </li>
                     <li class="nav-item">
+                        <button class="nav-link w-100 border-0 text-start" id="countries-tab" data-bs-toggle="tab" data-bs-target="#countries" type="button" role="tab"><i class="fa-solid fa-earth-americas"></i> الدول</button>
+                    </li>
+                    <li class="nav-item">
                         <button class="nav-link w-100 border-0 text-start" id="destinations-tab" data-bs-toggle="tab" data-bs-target="#destinations" type="button" role="tab"><i class="fa-solid fa-map-location-dot"></i> الوجهات</button>
                     </li>
                     <li class="nav-item">
@@ -296,6 +299,35 @@
                         </div>
                     </div>
 
+                    <!-- 5. COUNTRIES MANAGEMENT -->
+                    <div class="tab-pane fade" id="countries" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <h1 class="h3 fw-bold mb-0 text-dark"><i class="fa-solid fa-earth-americas me-2 text-warning"></i>إدارة الدول</h1>
+                            <button class="btn btn-warning rounded-pill px-4 fw-bold" onclick="showAddCountryModal()">
+                                <i class="fa-solid fa-plus me-1"></i>إضافة دولة
+                            </button>
+                        </div>
+                        <div class="admin-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>العلم</th>
+                                            <th>الاسم (عربي)</th>
+                                            <th>الاسم (إنجليزي)</th>
+                                            <th>الرابط (Slug)</th>
+                                            <th>إجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminCountriesTable">
+                                        <tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 6. DESTINATIONS MANAGEMENT -->
                     <div class="tab-pane fade" id="destinations" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -327,28 +359,70 @@
                         </div>
                     </div>
 
+                    <!-- Modal: Add/Edit Country -->
+                    <div class="modal fade" id="countryModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-dark text-white">
+                                    <h5 class="modal-title fw-bold" id="countryModalTitle"><i class="fa-solid fa-earth-americas me-2 text-warning"></i>إضافة دولة جديدة</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form id="countryForm">
+                                <div class="modal-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">اسم الدولة (عربي) *</label>
+                                            <input type="text" class="form-control" id="country_name_ar" placeholder="مثال: مصر" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">اسم الدولة (إنجليزي) *</label>
+                                            <input type="text" class="form-control" id="country_name_en" placeholder="Example: Egypt" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">الرابط (Slug) *</label>
+                                            <input type="text" class="form-control" id="country_slug" placeholder="مثال: egypt" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">العلم (Flag Emoji/Code) *</label>
+                                            <input type="text" class="form-control" id="country_flag" placeholder="مثال: 🇪🇬 أو Eg" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">إلغاء</button>
+                                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold" id="saveCountryBtn">
+                                        <i class="fa-solid fa-save me-1"></i>حفظ الدولة
+                                    </button>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Modal: Add Destination -->
                     <div class="modal fade" id="addDestinationModal" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header bg-dark text-white">
-                                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة دولة/وجهة جديدة</h5>
+                                    <h5 class="modal-title fw-bold" id="destinationModalTitle"><i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة وجهة جديدة</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
                                 <form id="addDestinationForm">
                                 <div class="modal-body">
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">اسم الدولة (عربي) *</label>
-                                            <input type="text" class="form-control" id="dest_name_ar" placeholder="مثال: مصر" required>
+                                            <label class="form-label fw-semibold">اسم الوجهة (عربي) *</label>
+                                            <input type="text" class="form-control" id="dest_name_ar" placeholder="مثال: الغردقة" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">اسم الدولة (إنجليزي) *</label>
-                                            <input type="text" class="form-control" id="dest_name_en" placeholder="Example: Egypt" required>
+                                            <label class="form-label fw-semibold">اسم الوجهة (إنجليزي) *</label>
+                                            <input type="text" class="form-control" id="dest_name_en" placeholder="Example: Hurghada" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">معرف الدولة الرقمي (ID) *</label>
-                                            <input type="number" class="form-control" id="dest_country_id" placeholder="مثال: 7" required>
+                                            <label class="form-label fw-semibold">الدولة التابع لها *</label>
+                                            <select class="form-select" id="dest_country_id" required>
+                                                <option value="">جاري تحميل الدول...</option>
+                                            </select>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">ترتيب العرض *</label>
@@ -371,11 +445,11 @@
                                             </select>
                                         </div>
                                         <div class="col-md-12">
-                                            <label class="form-label fw-semibold">وصف الدولة (عربي) *</label>
+                                            <label class="form-label fw-semibold">وصف الوجهة (عربي) *</label>
                                             <textarea class="form-control" id="dest_description_ar" rows="2" placeholder="وصف تفصيلي..." required></textarea>
                                         </div>
                                         <div class="col-md-12">
-                                            <label class="form-label fw-semibold">وصف الدولة (إنجليزي) *</label>
+                                            <label class="form-label fw-semibold">وصف الوجهة (إنجليزي) *</label>
                                             <textarea class="form-control" id="dest_description_en" rows="2" placeholder="Detailed description..." required></textarea>
                                         </div>
                                         <div class="col-md-12">
@@ -430,7 +504,7 @@
                         <div class="modal-dialog modal-xl">
                             <div class="modal-content">
                                 <div class="modal-header bg-dark text-white">
-                                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-plane me-2 text-warning"></i>إضافة رحلة جديدة</h5>
+                                    <h5 class="modal-title fw-bold" id="tripModalTitle"><i class="fa-solid fa-plane me-2 text-warning"></i>إضافة رحلة جديدة</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
                                 <form id="addTripForm">

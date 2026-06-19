@@ -1,5 +1,22 @@
 // Rahalaty Database & Appwrite Service Layer
 
+const STATIC_COUNTRIES = [
+    { id: 'egypt', name_ar: 'مصر', name_en: 'Egypt', slug: 'egypt', flag: '🇪🇬' },
+    { id: 'france', name_ar: 'فرنسا', name_en: 'France', slug: 'france', flag: '🇫🇷' },
+    { id: 'italy', name_ar: 'إيطاليا', name_en: 'Italy', slug: 'italy', flag: '🇮🇹' },
+    { id: 'spain', name_ar: 'إسبانيا', name_en: 'Spain', slug: 'spain', flag: '🇪🇸' },
+    { id: 'uae', name_ar: 'الإمارات', name_en: 'UAE', slug: 'uae', flag: '🇦🇪' },
+    { id: 'turkey', name_ar: 'تركيا', name_en: 'Turkey', slug: 'turkey', flag: '🇹🇷' },
+    { id: 'indonesia', name_ar: 'إندونيسيا', name_en: 'Indonesia', slug: 'indonesia', flag: '🇮🇩' },
+    { id: 'usa', name_ar: 'أمريكا', name_en: 'USA', slug: 'usa', flag: '🇺🇸' },
+    { id: 'maldives', name_ar: 'جزر المالديف', name_en: 'Maldives', slug: 'maldives', flag: '🇲🇻' },
+    { id: 'japan', name_ar: 'اليابان', name_en: 'Japan', slug: 'japan', flag: '🇯🇵' },
+    { id: 'morocco', name_ar: 'المغرب', name_en: 'Morocco', slug: 'morocco', flag: '🇲🇦' },
+    { id: 'greece', name_ar: 'اليونان', name_en: 'Greece', slug: 'greece', flag: '🇬🇷' },
+    { id: 'switzerland', name_ar: 'سويسرا', name_en: 'Switzerland', slug: 'switzerland', flag: '🇨🇭' },
+    { id: 'albania', name_ar: 'ألبانيا', name_en: 'Albania', slug: 'albania', flag: '🇦🇱' }
+];
+
 const STATIC_DESTINATIONS = [
     {
         id: 1,
@@ -359,6 +376,7 @@ class DBService {
         this.appwriteConnected = false;
         this.sdk = null;
         this.databases = null;
+        this.staticCountries = STATIC_COUNTRIES;
         this.staticDestinations = STATIC_DESTINATIONS;
         this.staticTrips = STATIC_TRIPS;
     }
@@ -401,82 +419,120 @@ class DBService {
         if (!this.appwriteConnected || !this.databases) return;
         const conf = window.CONFIG.appwrite;
         try {
-            // Check destinations count
-            const destsRes = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
-            if (destsRes.total > 0) return; // Already has data, no need to seed
-
-            console.log("Database is empty. Starting automatic database seeding...");
-            const destIdMap = {};
-
-            // 1. Seed Destinations
-            for (const d of this.staticDestinations) {
-                const payload = {
-                    country_id: String(d.id),
-                    name_ar: d.name_ar,
-                    name_en: d.name_en,
-                    description_ar: d.desc_ar,
-                    description_en: d.desc_en,
-                    category: d.category,
-                    is_featured: d.is_featured,
-                    sort_order: d.sort_order,
-                    image_url: d.image,
-                    meta_title_ar: d.name_ar,
-                    meta_title_en: d.name_en,
-                    meta_desc_ar: d.desc_ar ? d.desc_ar.slice(0, 150) : '',
-                    meta_desc_en: d.desc_en ? d.desc_en.slice(0, 150) : '',
-                    meta_keywords_ar: d.name_ar,
-                    meta_keywords_en: d.name_en
-                };
-                const newDoc = await this.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
-                destIdMap[d.id] = newDoc.$id;
+            // 1. Seed Countries
+            const countriesRes = await this.databases.listDocuments(conf.databaseId, conf.collections.countries);
+            const countryIdMap = {};
+            if (countriesRes.total === 0) {
+                console.log("Seeding default countries...");
+                for (const c of this.staticCountries) {
+                    const payload = {
+                        name_ar: c.name_ar,
+                        name_en: c.name_en,
+                        slug: c.slug,
+                        flag: c.flag
+                    };
+                    const doc = await this.databases.createDocument(conf.databaseId, conf.collections.countries, Appwrite.ID.unique(), payload);
+                    countryIdMap[c.id] = doc.$id;
+                }
+            } else {
+                countriesRes.documents.forEach(c => {
+                    countryIdMap[c.slug] = c.$id;
+                    const staticCountry = this.staticCountries.find(sc => sc.slug === c.slug);
+                    if (staticCountry) {
+                        countryIdMap[staticCountry.id] = c.$id;
+                    }
+                });
             }
 
-            // 2. Seed Trips
-            for (const t of this.staticTrips) {
-                const destId = destIdMap[t.destination_id] || '';
-                const payload = {
-                    destination_id: destId,
-                    title_ar: t.title_ar,
-                    title_en: t.title_en,
-                    desc_ar: t.desc_ar || '',
-                    desc_en: t.desc_en || '',
-                    highlights_ar: t.highlights_ar || [],
-                    highlights_en: t.highlights_en || [],
-                    included_ar: [],
-                    included_en: [],
-                    excluded_ar: [],
-                    excluded_en: [],
-                    itinerary_ar: [],
-                    itinerary_en: [],
-                    price: parseFloat(t.price) || 0,
-                    currency: t.currency || '$',
-                    duration: String(t.duration) + ' أيام',
-                    category: t.category || 'beach',
-                    climate: t.climate || 'beach',
-                    travel_type: t.travel_type || [],
-                    budget_tier: t.budget_tier || 'medium',
-                    color_from: t.color_from || '#0099CC',
-                    color_to: t.color_to || '#FF6633',
-                    is_egyptian: t.is_egyptian || false,
-                    spots_total: parseInt(t.spots_total) || 20,
-                    spots_left: parseInt(t.spots_left) || 20,
-                    departure_dates: t.departure_dates || [],
-                    is_active: true,
-                    sort_order: parseInt(t.id) || 0,
-                    meta_title_ar: t.title_ar,
-                    meta_title_en: t.title_en,
-                    meta_desc_ar: t.desc_ar ? t.desc_ar.slice(0, 150) : '',
-                    meta_desc_en: t.desc_en ? t.desc_en.slice(0, 150) : '',
-                    meta_keywords_ar: t.title_ar,
-                    meta_keywords_en: t.title_en,
-                    image_url: t.image || ''
-                };
-                await this.databases.createDocument(conf.databaseId, conf.collections.trips, Appwrite.ID.unique(), payload);
+            // 2. Seed Destinations
+            const destsRes = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
+            const destIdMap = {};
+            if (destsRes.total === 0) {
+                console.log("Seeding default destinations...");
+                const egyptDocId = countryIdMap['egypt'] || '';
+                for (const d of this.staticDestinations) {
+                    const payload = {
+                        country_id: egyptDocId, // Default destinations belong to Egypt
+                        name_ar: d.name_ar,
+                        name_en: d.name_en,
+                        description_ar: d.desc_ar,
+                        description_en: d.desc_en,
+                        category: d.category,
+                        is_featured: d.is_featured,
+                        sort_order: d.sort_order,
+                        image_url: d.image,
+                        meta_title_ar: d.name_ar,
+                        meta_title_en: d.name_en,
+                        meta_desc_ar: d.desc_ar ? d.desc_ar.slice(0, 150) : '',
+                        meta_desc_en: d.desc_en ? d.desc_en.slice(0, 150) : '',
+                        meta_keywords_ar: d.name_ar,
+                        meta_keywords_en: d.name_en
+                    };
+                    const doc = await this.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
+                    destIdMap[d.id] = doc.$id;
+                }
+            } else {
+                destsRes.documents.forEach(d => {
+                    const staticDest = this.staticDestinations.find(sd => sd.name_en === d.name_en);
+                    if (staticDest) {
+                        destIdMap[staticDest.id] = d.$id;
+                    } else {
+                        destIdMap[d.$id] = d.$id;
+                    }
+                });
+            }
+
+            // 3. Seed Trips
+            const tripsRes = await this.databases.listDocuments(conf.databaseId, conf.collections.trips);
+            if (tripsRes.total === 0) {
+                console.log("Seeding default trips...");
+                for (const t of this.staticTrips) {
+                    const destId = destIdMap[t.destination_id] || '';
+                    const payload = {
+                        destination_id: destId,
+                        title_ar: t.title_ar,
+                        title_en: t.title_en,
+                        desc_ar: t.desc_ar || '',
+                        desc_en: t.desc_en || '',
+                        highlights_ar: t.highlights_ar || [],
+                        highlights_en: t.highlights_en || [],
+                        included_ar: [],
+                        included_en: [],
+                        excluded_ar: [],
+                        excluded_en: [],
+                        itinerary_ar: [],
+                        itinerary_en: [],
+                        price: parseFloat(t.price) || 0,
+                        currency: t.currency || '$',
+                        duration: String(t.duration) + ' أيام',
+                        category: t.category || 'beach',
+                        climate: t.climate || 'beach',
+                        travel_type: t.travel_type || [],
+                        budget_tier: t.budget_tier || 'medium',
+                        color_from: t.color_from || '#0099CC',
+                        color_to: t.color_to || '#FF6633',
+                        is_egyptian: t.is_egyptian || false,
+                        spots_total: parseInt(t.spots_total) || 20,
+                        spots_left: parseInt(t.spots_left) || 20,
+                        departure_dates: t.departure_dates || [],
+                        is_active: true,
+                        sort_order: parseInt(t.id) || 0,
+                        meta_title_ar: t.title_ar,
+                        meta_title_en: t.title_en,
+                        meta_desc_ar: t.desc_ar ? t.desc_ar.slice(0, 150) : '',
+                        meta_desc_en: t.desc_en ? t.desc_en.slice(0, 150) : '',
+                        meta_keywords_ar: t.title_ar,
+                        meta_keywords_en: t.title_en,
+                        image_url: t.image || ''
+                    };
+                    await this.databases.createDocument(conf.databaseId, conf.collections.trips, Appwrite.ID.unique(), payload);
+                }
             }
 
             console.log("Automatic database seeding finished successfully.");
             
             // Refresh tables if loaded in Admin view
+            if (typeof window.loadCountriesTable === 'function') window.loadCountriesTable();
             if (typeof window.loadDestinationsTable === 'function') window.loadDestinationsTable();
             if (typeof window.loadTripsTable === 'function') window.loadTripsTable();
         } catch (err) {
@@ -495,11 +551,27 @@ class DBService {
     }
 
     // ─── Destinations ──────────────────────────────────────────────────
+    // ─── Countries ─────────────────────────────────────────────────────
+    async getCountries() {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const response = await this.databases.listDocuments(conf.databaseId, conf.collections.countries);
+        return response.documents;
+    }
+
+    // ─── Destinations ──────────────────────────────────────────────────
     async getDestinations() {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         const response = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
         const docs = response.documents;
+        
+        let countries = [];
+        try {
+            countries = await this.getCountries();
+        } catch (err) {
+            console.warn('Failed to load countries in getDestinations:', err);
+        }
         
         const FLAG_LOOKUP = {
             'egypt': '🇪🇬', 'مصر': '🇪🇬',
@@ -519,11 +591,22 @@ class DBService {
         };
 
         docs.forEach(d => {
-            d.id = d.country_id || d.$id;
+            d.id = d.$id;
             d.desc_ar = d.description_ar || '';
             d.desc_en = d.description_en || '';
             d.image = d.image_url || '';
-            d.flag = d.flag || FLAG_LOOKUP[String(d.name_en).toLowerCase()] || FLAG_LOOKUP[d.name_ar] || '🌍';
+            
+            // Find country details
+            const country = countries.find(c => c.$id === d.country_id);
+            if (country) {
+                d.country_name_ar = country.name_ar;
+                d.country_name_en = country.name_en;
+                d.flag = country.flag || FLAG_LOOKUP[String(country.name_en).toLowerCase()] || FLAG_LOOKUP[country.name_ar] || '🌍';
+            } else {
+                d.country_name_ar = '';
+                d.country_name_en = '';
+                d.flag = d.flag || FLAG_LOOKUP[String(d.name_en).toLowerCase()] || FLAG_LOOKUP[d.name_ar] || '🌍';
+            }
             d.slug = d.slug || String(d.name_en).toLowerCase().replace(/[^a-z0-9]/g, '-');
         });
         return docs;
@@ -531,7 +614,7 @@ class DBService {
 
     async getDestination(id) {
         const dests = await this.getDestinations();
-        return dests.find(d => String(d.id || d.country_id || d.$id) === String(id));
+        return dests.find(d => String(d.$id) === String(id));
     }
 
     // ─── Trips ─────────────────────────────────────────────────────────
@@ -547,15 +630,19 @@ class DBService {
             trips.forEach(t => {
                 t.id = t.$id;
                 t.image = t.image_url || t.image || '';
-                const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.country_id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
+                const dest = dests.find(d => String(d.$id) === String(t.destination_id));
                 if (dest) {
-                    t.country_ar = dest.name_ar;
-                    t.country_en = dest.name_en;
+                    t.destination_name_ar = dest.name_ar;
+                    t.destination_name_en = dest.name_en;
+                    t.country_ar = dest.country_name_ar;
+                    t.country_en = dest.country_name_en;
                     t.flag = dest.flag;
                 } else {
-                    t.country_ar = t.country_ar || '';
-                    t.country_en = t.country_en || '';
-                    t.flag = t.flag || '🌍';
+                    t.destination_name_ar = '';
+                    t.destination_name_en = '';
+                    t.country_ar = '';
+                    t.country_en = '';
+                    t.flag = '🌍';
                 }
             });
         } catch (err) {
@@ -563,6 +650,11 @@ class DBService {
             trips.forEach(t => {
                 t.id = t.$id;
                 t.image = t.image_url || t.image || '';
+                t.destination_name_ar = '';
+                t.destination_name_en = '';
+                t.country_ar = '';
+                t.country_en = '';
+                t.flag = '🌍';
             });
         }
         

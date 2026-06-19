@@ -8,6 +8,7 @@ const CONFIG = {
         projectId: '6a32ee5e0018a83516bc',
         databaseId: '6a32ee91000b40dd8d3c',
         collections: {
+            countries: 'countries',
             destinations: 'destinations',
             trips: 'trips',
             bookings: 'bookings',

@@ -240,8 +240,9 @@
                 if (allowedBudgets.includes(trip.budget_tier)) score += 3;
                 if (trip.travel_type.includes(survey.travel_type)) score += 3;
                 if (trip.climate === survey.preferred_climate) score += 2;
-                if (trip.duration <= maxDays) score += 1;
-                if (trip.duration <= maxDays + 2) score += 0.5;
+                const tripDuration = parseInt(trip.duration) || 0;
+                if (tripDuration <= maxDays) score += 1;
+                if (tripDuration <= maxDays + 2) score += 0.5;
 
                 return { ...trip, score };
             });
@@ -268,7 +269,8 @@
                 const title = lang === 'ar' ? trip.title_ar : trip.title_en;
                 const country = lang === 'ar' ? trip.country_ar : trip.country_en;
                 const desc = lang === 'ar' ? trip.desc_ar : trip.desc_en;
-                const duration = lang === 'ar' ? `${trip.duration} أيام` : `${trip.duration} days`;
+                const durationNum = parseInt(trip.duration) || 0;
+                const duration = lang === 'ar' ? `${durationNum} أيام` : `${durationNum} days`;
                 const bookLabel = lang === 'ar' ? 'التفاصيل' : 'Details';
                 const waLabel = lang === 'ar' ? 'واتساب' : 'WhatsApp';
 

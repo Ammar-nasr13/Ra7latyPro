@@ -693,7 +693,8 @@
                 const title = lang === 'ar' ? trip.title_ar : trip.title_en;
                 const country = lang === 'ar' ? trip.country_ar : trip.country_en;
                 const desc = lang === 'ar' ? trip.desc_ar : trip.desc_en;
-                const duration = lang === 'ar' ? `${trip.duration} أيام` : `${trip.duration} days`;
+                const durationNum = parseInt(trip.duration) || 0;
+                const duration = lang === 'ar' ? `${durationNum} أيام` : `${durationNum} days`;
                 const bookLabel = lang === 'ar' ? 'التفاصيل' : 'Details';
                 const waLabel = lang === 'ar' ? 'واتساب' : 'WhatsApp';
                 

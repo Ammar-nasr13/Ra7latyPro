@@ -367,14 +367,37 @@ window.seedAppwriteDatabase = async function() {
     try {
         const { Query } = Appwrite;
 
-        // 1. Upload Destinations
+        // 1. Upload Countries
+        const countries = window.db.staticCountries;
+        const countryIdMap = {};
+        for (const c of countries) {
+            const list = await window.db.databases.listDocuments(dbId, conf.collections.countries, [
+                Query.equal('slug', [c.slug])
+            ]);
+            let docId;
+            if (list.documents.length > 0) {
+                docId = list.documents[0].$id;
+            } else {
+                const payload = {
+                    name_ar: c.name_ar,
+                    name_en: c.name_en,
+                    slug: c.slug,
+                    flag: c.flag
+                };
+                const newDoc = await window.db.databases.createDocument(dbId, conf.collections.countries, Appwrite.ID.unique(), payload);
+                docId = newDoc.$id;
+            }
+            countryIdMap[c.id] = docId;
+        }
+
+        // 2. Upload Destinations
         const dests = window.db.staticDestinations;
         const destIdMap = {};
+        const egyptDocId = countryIdMap['egypt'] || '';
 
         for (const d of dests) {
-            // Check if exists by country_id
             const list = await window.db.databases.listDocuments(dbId, conf.collections.destinations, [
-                Query.equal('country_id', [String(d.id)])
+                Query.equal('name_en', [d.name_en])
             ]);
             
             let docId;
@@ -382,7 +405,7 @@ window.seedAppwriteDatabase = async function() {
                 docId = list.documents[0].$id;
             } else {
                 const payload = {
-                    country_id: String(d.id),
+                    country_id: egyptDocId,
                     name_ar: d.name_ar,
                     name_en: d.name_en,
                     description_ar: d.desc_ar,
@@ -404,10 +427,9 @@ window.seedAppwriteDatabase = async function() {
             destIdMap[d.id] = docId;
         }
 
-        // 2. Upload Trips
+        // 3. Upload Trips
         const trips = window.db.staticTrips;
         for (const t of trips) {
-            // Check if already exists
             const list = await window.db.databases.listDocuments(dbId, conf.collections.trips, [
                 Query.equal('title_en', [t.title_en])
             ]);
@@ -456,12 +478,13 @@ window.seedAppwriteDatabase = async function() {
             }
         }
 
-        alert('تم تهيئة قاعدة البيانات ورفع جميع الوجهات (6) والرحلات (16) الافتراضية إلى مشروع Appwrite الخاص بك بنجاح!');
+        alert('تم تهيئة قاعدة البيانات ورفع جميع الدول والوجهات والرحلات الافتراضية بنجاح!');
+        if (typeof window.loadCountriesTable === 'function') await window.loadCountriesTable();
         if (typeof window.loadDestinationsTable === 'function') await window.loadDestinationsTable();
         if (typeof window.loadTripsTable === 'function') await window.loadTripsTable();
     } catch (err) {
         console.error(err);
-        alert(`عذراً، حدث خطأ أثناء الرفع: \n${err.message}\nيرجى التأكد من تعيين صلاحيات الكتابة والقراءة لجميع المستخدمين (role:all أو role:guests) للمجموعات!`);
+        alert(`عذراً، حدث خطأ أثناء الرفع: \n${err.message}`);
     } finally {
         seedBtn.disabled = false;
         seedBtn.textContent = 'تهيئة قاعدة البيانات (Seed Data)';
@@ -497,6 +520,9 @@ window.loadDestinationsTable = async function () {
                 <td class="text-muted small">${d.slug || '—'}</td>
                 <td><span class="badge bg-secondary">${d.category || '—'}</span></td>
                 <td>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick="editDestination('${d.$id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteDestination('${d.$id}')">
                         <i class="fa-solid fa-trash-alt"></i>
                     </button>
@@ -529,21 +555,21 @@ window.loadDestinationsDropdown = async function () {
         const docs = await window.db.getDestinations();
         
         if (!docs.length) {
-            select.innerHTML = '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
+            select.innerHTML = '<option value="">لا توجد وجهات مضافة بعد. أضف وجهة أولاً!</option>';
             return;
         }
         
-        select.innerHTML = '<option value="">اختر الدولة...</option>' + 
+        select.innerHTML = '<option value="">اختر الوجهة...</option>' + 
             docs.map(d => `<option value="${d.$id}">${d.flag || ''} ${d.name_ar} (${d.name_en})</option>`).join('');
     } catch (err) {
         console.error('Error loading destinations dropdown:', err);
-        select.innerHTML = '<option value="">فشل تحميل الدول</option>';
+        select.innerHTML = '<option value="">فشل تحميل الوجهات</option>';
     }
 };
 
 // Wire forms
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Add Destination Form
+    // 1. Add/Edit Destination Form
     const destForm = document.getElementById('addDestinationForm');
     if (destForm) {
         destForm.addEventListener('submit', async (e) => {
@@ -558,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nameEn = document.getElementById('dest_name_en').value.trim();
                 const descAr = document.getElementById('dest_description_ar').value.trim();
                 const descEn = document.getElementById('dest_description_en').value.trim();
-                const countryId = document.getElementById('dest_country_id').value.trim();
+                const countryId = document.getElementById('dest_country_id').value;
                 const sortOrder = parseInt(document.getElementById('dest_sort_order').value) || 0;
                 const category = document.getElementById('dest_category').value;
                 const isFeatured = document.getElementById('dest_is_featured').value === 'true';
@@ -582,10 +608,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     meta_keywords_en: nameEn
                 };
 
-                await window.db.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
+                const editId = destForm.dataset.editId;
+                if (editId) {
+                    await window.db.databases.updateDocument(conf.databaseId, conf.collections.destinations, editId, payload);
+                } else {
+                    await window.db.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
+                }
 
                 bootstrap.Modal.getInstance(document.getElementById('addDestinationModal')).hide();
                 destForm.reset();
+                delete destForm.dataset.editId;
+
                 await window.loadDestinationsTable();
                 await window.loadDestinationsDropdown();
                 await window.loadOverviewStats();
@@ -599,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Add Trip Form
+    // 2. Add/Edit Trip Form
     const tripForm = document.getElementById('addTripForm');
     if (tripForm) {
         tripForm.addEventListener('submit', async (e) => {
@@ -665,10 +698,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     meta_keywords_en: document.getElementById('trip_meta_keywords_en').value.trim()
                 };
 
-                await databases.createDocument(conf.databaseId, conf.collections.trips, ID.unique(), payload);
+                const editId = tripForm.dataset.editId;
+                if (editId) {
+                    await databases.updateDocument(conf.databaseId, conf.collections.trips, editId, payload);
+                } else {
+                    await databases.createDocument(conf.databaseId, conf.collections.trips, ID.unique(), payload);
+                }
 
                 bootstrap.Modal.getInstance(document.getElementById('addTripModal')).hide();
                 tripForm.reset();
+                delete tripForm.dataset.editId;
+
                 // Reset tab back to basic
                 const basicTab = document.querySelector('#trip-basic-tab');
                 if (basicTab) {
@@ -688,13 +728,68 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 3. Add/Edit Country Form
+    const countryForm = document.getElementById('countryForm');
+    if (countryForm) {
+        countryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveCountryBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري الحفظ...';
+
+            try {
+                const conf = window.CONFIG.appwrite;
+                const nameAr = document.getElementById('country_name_ar').value.trim();
+                const nameEn = document.getElementById('country_name_en').value.trim();
+                const slug = document.getElementById('country_slug').value.trim();
+                const flag = document.getElementById('country_flag').value.trim();
+
+                const payload = {
+                    name_ar: nameAr,
+                    name_en: nameEn,
+                    slug: slug,
+                    flag: flag
+                };
+
+                const editId = countryForm.dataset.editId;
+                if (editId) {
+                    await window.db.databases.updateDocument(conf.databaseId, conf.collections.countries, editId, payload);
+                } else {
+                    await window.db.databases.createDocument(conf.databaseId, conf.collections.countries, Appwrite.ID.unique(), payload);
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('countryModal')).hide();
+                countryForm.reset();
+                delete countryForm.dataset.editId;
+
+                await window.loadCountriesTable();
+                await window.loadCountriesDropdown();
+                await window.loadOverviewStats();
+
+            } catch (err) {
+                alert('خطأ في الحفظ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الدولة';
+            }
+        });
+    }
+
     // Load initial dropdowns
     window.loadDestinationsDropdown();
+    window.loadCountriesDropdown();
 
     // Wire shown.bs.tab events for lazy loading
+    const countriesTabBtn = document.getElementById('countries-tab');
+    if (countriesTabBtn) {
+        countriesTabBtn.addEventListener('shown.bs.tab', () => window.loadCountriesTable());
+    }
     const destTabBtn = document.getElementById('destinations-tab');
     if (destTabBtn) {
-        destTabBtn.addEventListener('shown.bs.tab', () => window.loadDestinationsTable());
+        destTabBtn.addEventListener('shown.bs.tab', () => {
+            window.loadDestinationsTable();
+            window.loadCountriesDropdown();
+        });
     }
     const tripsTabBtn = document.getElementById('trips-tab');
     if (tripsTabBtn) {
@@ -757,6 +852,9 @@ window.loadTripsTable = async function () {
                         </span>
                     </td>
                     <td>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick="editTrip('${t.$id}')">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
                         <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteTrip('${t.$id}')">
                             <i class="fa-solid fa-trash-alt"></i>
                         </button>
@@ -784,3 +882,264 @@ window.deleteTrip = async function (docId) {
         alert('خطأ في الحذف: ' + err.message);
     }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COUNTRIES CRUD & MODALS
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.loadCountriesTable = async function () {
+    const tbody = document.getElementById('adminCountriesTable');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
+
+    try {
+        const docs = await window.db.getCountries();
+
+        if (!docs.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-earth-americas fa-2x mb-2 d-block opacity-25"></i>لا توجد دول بعد. أضف أول دولة!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = docs.map((c, i) => `
+            <tr>
+                <td class="fw-bold text-muted">${i + 1}</td>
+                <td class="fs-4">${c.flag || '—'}</td>
+                <td class="fw-semibold">${c.name_ar || '—'}</td>
+                <td class="text-muted small">${c.name_en || '—'}</td>
+                <td class="text-muted small">${c.slug || '—'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick="editCountry('${c.$id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteCountry('${c.$id}')">
+                        <i class="fa-solid fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Countries load error:', err);
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
+    }
+};
+
+window.loadCountriesDropdown = async function() {
+    const select = document.getElementById('dest_country_id');
+    if (!select) return;
+    try {
+        const countries = await window.db.getCountries();
+        if (!countries.length) {
+            select.innerHTML = '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
+            return;
+        }
+        select.innerHTML = '<option value="">اختر الدولة...</option>' + 
+            countries.map(c => `<option value="${c.$id}">${c.flag || ''} ${c.name_ar} (${c.name_en})</option>`).join('');
+    } catch (err) {
+        console.error('Error loading countries dropdown:', err);
+        select.innerHTML = '<option value="">فشل تحميل الدول</option>';
+    }
+};
+
+window.showAddCountryModal = function() {
+    const form = document.getElementById('countryForm');
+    if (form) {
+        form.reset();
+        delete form.dataset.editId;
+    }
+    document.getElementById('countryModalTitle').innerHTML = '<i class="fa-solid fa-earth-americas me-2 text-warning"></i>إضافة دولة جديدة';
+    document.getElementById('saveCountryBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الدولة';
+    new bootstrap.Modal(document.getElementById('countryModal')).show();
+};
+
+window.editCountry = async function(id) {
+    try {
+        const conf = window.CONFIG.appwrite;
+        const doc = await window.db.databases.getDocument(conf.databaseId, conf.collections.countries, id);
+        
+        const form = document.getElementById('countryForm');
+        if (form) {
+            form.dataset.editId = id;
+            document.getElementById('country_name_ar').value = doc.name_ar || '';
+            document.getElementById('country_name_en').value = doc.name_en || '';
+            document.getElementById('country_slug').value = doc.slug || '';
+            document.getElementById('country_flag').value = doc.flag || '';
+            
+            document.getElementById('countryModalTitle').innerHTML = '<i class="fa-solid fa-earth-americas me-2 text-warning"></i>تعديل الدولة';
+            document.getElementById('saveCountryBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>تعديل';
+            new bootstrap.Modal(document.getElementById('countryModal')).show();
+        }
+    } catch (err) {
+        alert('خطأ في تحميل بيانات الدولة: ' + err.message);
+    }
+};
+
+window.deleteCountry = async function(id) {
+    if (!confirm('هل تريد حذف هذه الدولة؟ سيؤدي ذلك إلى خلل في الوجهات التابعة لها! لا يمكن التراجع!')) return;
+    try {
+        const conf = window.CONFIG.appwrite;
+        await window.db.databases.deleteDocument(conf.databaseId, conf.collections.countries, id);
+        await window.loadCountriesTable();
+        await window.loadCountriesDropdown();
+    } catch (err) {
+        alert('خطأ في الحذف: ' + err.message);
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESTINATIONS EDIT/DELETE
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.editDestination = async function(id) {
+    try {
+        const conf = window.CONFIG.appwrite;
+        const doc = await window.db.databases.getDocument(conf.databaseId, conf.collections.destinations, id);
+        
+        const form = document.getElementById('addDestinationForm');
+        if (form) {
+            await window.loadCountriesDropdown();
+            form.dataset.editId = id;
+            document.getElementById('dest_name_ar').value = doc.name_ar || '';
+            document.getElementById('dest_name_en').value = doc.name_en || '';
+            document.getElementById('dest_country_id').value = doc.country_id || '';
+            document.getElementById('dest_sort_order').value = doc.sort_order || 0;
+            document.getElementById('dest_category').value = doc.category || 'beach';
+            document.getElementById('dest_is_featured').value = String(doc.is_featured);
+            document.getElementById('dest_description_ar').value = doc.description_ar || '';
+            document.getElementById('dest_description_en').value = doc.description_en || '';
+            document.getElementById('dest_image_url').value = doc.image_url || '';
+            
+            document.getElementById('destinationModalTitle').innerHTML = '<i class="fa-solid fa-map-pin me-2 text-warning"></i>تعديل الوجهة';
+            document.getElementById('saveDestBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>تعديل';
+            new bootstrap.Modal(document.getElementById('addDestinationModal')).show();
+        }
+    } catch (err) {
+        alert('خطأ في تحميل بيانات الوجهة: ' + err.message);
+    }
+};
+
+window.deleteDestination = async function (docId) {
+    if (!confirm('هل تريد حذف هذه الوجهة؟ لا يمكن التراجع!')) return;
+    try {
+        const conf = window.CONFIG.appwrite;
+        await window.db.databases.deleteDocument(conf.databaseId, conf.collections.destinations, docId);
+        await window.loadDestinationsTable();
+        await window.loadDestinationsDropdown();
+    } catch (err) {
+        alert('خطأ في الحذف: ' + err.message);
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRIPS EDIT
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.editTrip = async function(id) {
+    try {
+        const conf = window.CONFIG.appwrite;
+        const { Client, Databases } = Appwrite;
+        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
+        const databases = new Databases(client);
+        
+        const doc = await databases.getDocument(conf.databaseId, conf.collections.trips, id);
+        
+        const form = document.getElementById('addTripForm');
+        if (form) {
+            await window.loadDestinationsDropdown();
+            form.dataset.editId = id;
+            
+            document.getElementById('trip_destination_id').value = doc.destination_id || '';
+            document.getElementById('trip_title_ar').value = doc.title_ar || '';
+            document.getElementById('trip_title_en').value = doc.title_en || '';
+            document.getElementById('trip_desc_ar').value = doc.desc_ar || '';
+            document.getElementById('trip_desc_en').value = doc.desc_en || '';
+            document.getElementById('trip_price').value = doc.price || 0;
+            document.getElementById('trip_currency').value = doc.currency || '$';
+            document.getElementById('trip_duration').value = doc.duration || '';
+            document.getElementById('trip_spots_total').value = doc.spots_total || 20;
+            document.getElementById('trip_spots_left').value = doc.spots_left || 20;
+            document.getElementById('trip_category').value = doc.category || 'beach';
+            document.getElementById('trip_climate').value = doc.climate || 'beach';
+            document.getElementById('trip_travel_type').value = (doc.travel_type || []).join(',');
+            document.getElementById('trip_budget_tier').value = doc.budget_tier || 'medium';
+            document.getElementById('trip_is_egyptian').value = String(doc.is_egyptian);
+            document.getElementById('trip_is_active').value = String(doc.is_active);
+            document.getElementById('trip_sort_order').value = doc.sort_order || 0;
+            document.getElementById('trip_color_from').value = doc.color_from || '#0099CC';
+            document.getElementById('trip_color_to').value = doc.color_to || '#FF6633';
+            document.getElementById('trip_image_url').value = doc.image_url || '';
+            
+            document.getElementById('trip_highlights_ar').value = (doc.highlights_ar || []).join('\n');
+            document.getElementById('trip_highlights_en').value = (doc.highlights_en || []).join('\n');
+            document.getElementById('trip_included_ar').value = (doc.included_ar || []).join('\n');
+            document.getElementById('trip_included_en').value = (doc.included_en || []).join('\n');
+            document.getElementById('trip_excluded_ar').value = (doc.excluded_ar || []).join('\n');
+            document.getElementById('trip_excluded_en').value = (doc.excluded_en || []).join('\n');
+            document.getElementById('trip_itinerary_ar').value = (doc.itinerary_ar || []).join('\n');
+            document.getElementById('trip_itinerary_en').value = (doc.itinerary_en || []).join('\n');
+            
+            document.getElementById('trip_meta_title_ar').value = doc.meta_title_ar || '';
+            document.getElementById('trip_meta_title_en').value = doc.meta_title_en || '';
+            document.getElementById('trip_meta_desc_ar').value = doc.meta_desc_ar || '';
+            document.getElementById('trip_meta_desc_en').value = doc.meta_desc_en || '';
+            document.getElementById('trip_meta_keywords_ar').value = doc.meta_keywords_ar || '';
+            document.getElementById('trip_meta_keywords_en').value = doc.meta_keywords_en || '';
+
+            document.getElementById('tripModalTitle').innerHTML = '<i class="fa-solid fa-plane me-2 text-warning"></i>تعديل الرحلة';
+            document.getElementById('saveTripBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>تعديل';
+            new bootstrap.Modal(document.getElementById('addTripModal')).show();
+        }
+    } catch (err) {
+        alert('خطأ في تحميل بيانات الرحلة: ' + err.message);
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOTSTRAP MODALS AUTO-RESET / AUTO-LOAD EVENT LISTENERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+    const destModalEl = document.getElementById('addDestinationModal');
+    if (destModalEl) {
+        destModalEl.addEventListener('hidden.bs.modal', () => {
+            const form = document.getElementById('addDestinationForm');
+            if (form) {
+                form.reset();
+                delete form.dataset.editId;
+            }
+            document.getElementById('destinationModalTitle').innerHTML = '<i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة وجهة جديدة';
+            document.getElementById('saveDestBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الوجهة';
+        });
+        destModalEl.addEventListener('show.bs.modal', () => {
+            window.loadCountriesDropdown();
+        });
+    }
+
+    const tripModalEl = document.getElementById('addTripModal');
+    if (tripModalEl) {
+        tripModalEl.addEventListener('hidden.bs.modal', () => {
+            const form = document.getElementById('addTripForm');
+            if (form) {
+                form.reset();
+                delete form.dataset.editId;
+            }
+            document.getElementById('tripModalTitle').innerHTML = '<i class="fa-solid fa-plane me-2 text-warning"></i>إضافة رحلة جديدة';
+            document.getElementById('saveTripBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
+        });
+        tripModalEl.addEventListener('show.bs.modal', () => {
+            window.loadDestinationsDropdown();
+        });
+    }
+
+    const countryModalEl = document.getElementById('countryModal');
+    if (countryModalEl) {
+        countryModalEl.addEventListener('hidden.bs.modal', () => {
+            const form = document.getElementById('countryForm');
+            if (form) {
+                form.reset();
+                delete form.dataset.editId;
+            }
+            document.getElementById('countryModalTitle').innerHTML = '<i class="fa-solid fa-earth-americas me-2 text-warning"></i>إضافة دولة جديدة';
+            document.getElementById('saveCountryBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الدولة';
+        });
+    }
+});
