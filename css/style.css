@@ -1020,3 +1020,74 @@ body.ltr-layout .search-icon-btn {
 #newsletterEmail::placeholder {
     color: rgba(255, 255, 255, 0.45) !important;
 }
+
+/* Fix select arrow overlapping with text in RTL mode */
+body.rtl-layout select.form-select,
+[dir="rtl"] select.form-select {
+    background-position: left 0.75rem center !important;
+    padding-left: 2.25rem !important;
+    padding-right: 0.75rem !important;
+    text-align: right !important;
+}
+
+body.ltr-layout select.form-select,
+[dir="ltr"] select.form-select {
+    background-position: right 0.75rem center !important;
+    padding-right: 2.25rem !important;
+    padding-left: 0.75rem !important;
+    text-align: left !important;
+}
+
+/* Guest counter widget styling in booking form */
+.guest-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FDFAF4;
+    border: 2px solid var(--color-sand-dark);
+    border-radius: 50px !important;
+    padding: 0.35rem 0.5rem;
+    max-width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guest-counter:focus-within {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 8px rgba(197, 160, 40, 0.25);
+}
+
+.counter-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50% !important;
+    border: none;
+    background: white;
+    color: var(--color-nile);
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(13, 33, 55, 0.08);
+    transition: all 0.2s ease;
+}
+
+.counter-btn:hover {
+    background: var(--color-gold);
+    color: white;
+    transform: scale(1.05);
+}
+
+.counter-btn:active {
+    transform: scale(0.95);
+}
+
+.counter-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-nile-dark);
+    user-select: none;
+    min-width: 30px;
+    text-align: center;
+}

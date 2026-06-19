@@ -171,7 +171,7 @@
             border-radius: 10px !important;
             border: 1px solid #cbd5e1;
             /* Adjust padding in RTL to keep space on left for select arrow */
-            padding: 0.65rem 1.75rem 0.65rem 1rem !important;
+            padding: 0.65rem 1rem 0.65rem 2.25rem !important;
             background-position: left 0.75rem center !important;
             transition: all 0.2s ease;
         }
@@ -726,10 +726,16 @@
                                                     <label class="form-label fw-semibold">عنوان الرحلة (إنجليزي) *</label>
                                                     <input type="text" class="form-control" id="trip_title_en" placeholder="Example: Hurghada Magic" required>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label fw-semibold">الدولة / الوجهة *</label>
-                                                    <select class="form-select" id="trip_destination_id" required>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">الدولة *</label>
+                                                    <select class="form-select" id="trip_country_id" required>
                                                         <option value="">جاري تحميل الدول...</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">الوجهة *</label>
+                                                    <select class="form-select" id="trip_destination_id" required>
+                                                        <option value="">الرجاء اختيار الدولة أولاً...</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-4">
@@ -744,11 +750,11 @@
                                                     <label class="form-label fw-semibold">المدة (نص) *</label>
                                                     <input type="text" class="form-control" id="trip_duration" placeholder="مثال: 5 أيام أو 7 Days" value="5 أيام" required>
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-6">
                                                     <label class="form-label fw-semibold">إجمالي المقاعد *</label>
                                                     <input type="number" class="form-control" id="trip_spots_total" value="20" min="1" required>
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-6">
                                                     <label class="form-label fw-semibold">مقاعد متبقية *</label>
                                                     <input type="number" class="form-control" id="trip_spots_left" value="20" min="0" required>
                                                 </div>

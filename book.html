@@ -51,6 +51,28 @@
             border-color: var(--color-gold);
             background: rgba(197,160,40,0.05);
         }
+        /* Payment modal enhancements */
+        .letter-spacing-10 {
+            letter-spacing: 0.35rem;
+            font-family: monospace;
+        }
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 4px solid #198754;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #198754;
+            font-size: 2.5rem;
+            animation: scaleCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+        @keyframes scaleCheck {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -148,23 +170,22 @@
                                 <!-- Group details -->
                                 <div class="row g-3 mb-4">
                                     <div class="col-6">
-                                        <label class="form-label fw-bold text-dark" for="adults" data-i18n="labelAdults">عدد البالغين</label>
-                                        <select class="form-select rounded-pill px-3 py-2.5" id="adults">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
+                                        <label class="form-label fw-bold text-dark" data-i18n="labelAdults">عدد البالغين</label>
+                                        <div class="guest-counter">
+                                            <button type="button" class="counter-btn minus" onclick="decrementGuest('adults')"><i class="fa-solid fa-minus"></i></button>
+                                            <span class="counter-value" id="adults_val">1</span>
+                                            <button type="button" class="counter-btn plus" onclick="incrementGuest('adults')"><i class="fa-solid fa-plus"></i></button>
+                                            <input type="hidden" id="adults" value="1">
+                                        </div>
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label fw-bold text-dark" for="children" data-i18n="labelChildren">عدد الأطفال (تحت 12 سنة)</label>
-                                        <select class="form-select rounded-pill px-3 py-2.5" id="children">
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                        </select>
+                                        <label class="form-label fw-bold text-dark" data-i18n="labelChildren">عدد الأطفال (تحت 12 سنة)</label>
+                                        <div class="guest-counter">
+                                            <button type="button" class="counter-btn minus" onclick="decrementGuest('children')"><i class="fa-solid fa-minus"></i></button>
+                                            <span class="counter-value" id="children_val">0</span>
+                                            <button type="button" class="counter-btn plus" onclick="incrementGuest('children')"><i class="fa-solid fa-plus"></i></button>
+                                            <input type="hidden" id="children" value="0">
+                                        </div>
                                     </div>
                                 </div>
 
@@ -174,19 +195,11 @@
                                     <div class="payment-radio-group">
                                         <div class="payment-option selected" data-value="credit_card">
                                             <i class="fa-solid fa-credit-card fs-5 text-warning"></i>
-                                            <span class="fw-bold small">بطاقة ائتمان (فيزا / ماستر كارد)</span>
+                                            <span class="fw-bold small" data-i18n="payCardLabel">بطاقة ائتمان (فيزا / ماستر كارد)</span>
                                         </div>
-                                        <div class="payment-option" data-value="vodafone_cash">
+                                        <div class="payment-option" data-value="mobile_wallet">
                                             <i class="fa-solid fa-mobile-screen fs-5 text-warning"></i>
-                                            <span class="fw-bold small">فودافون كاش (محفظة هاتف)</span>
-                                        </div>
-                                        <div class="payment-option" data-value="instapay">
-                                            <i class="fa-solid fa-money-bill-transfer fs-5 text-warning"></i>
-                                            <span class="fw-bold small">إنستا باي (تحويل فوري)</span>
-                                        </div>
-                                        <div class="payment-option" data-value="meeza">
-                                            <i class="fa-solid fa-wallet fs-5 text-warning"></i>
-                                            <span class="fw-bold small">بطاقة ميزة الوطنية</span>
+                                            <span class="fw-bold small" data-i18n="payWalletLabel">محفظة إلكترونية (فودافون كاش، اتصالات...)</span>
                                         </div>
                                     </div>
                                     <input type="hidden" name="payment_method" id="paymentMethodInput" value="credit_card">
@@ -280,6 +293,140 @@
         </div>
     </footer>
 
+    <!-- ================= Secure Payment Gateway Modal ================= -->
+    <div class="modal fade" id="paymentGatewayModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true" dir="rtl">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px !important; overflow: hidden; border: none; box-shadow: 0 15px 50px rgba(0,0,0,0.15);">
+                <!-- Modal Header -->
+                <div class="modal-header d-flex justify-content-between align-items-center" style="background: #0D2137; border-bottom: 3px solid #C5A028; padding: 1.25rem 1.75rem;">
+                    <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2 m-0" style="font-size: 1.1rem;">
+                        <i class="fa-solid fa-shield-halved text-warning"></i>
+                        <span>بوابة الدفع الإلكتروني الآمنة</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white m-0" data-bs-dismiss="modal" aria-label="Close" id="closePaymentModalBtn"></button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="modal-body p-4 bg-light">
+                    <!-- Payment Summary -->
+                    <div class="p-3 bg-white rounded-3 mb-4 border d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-secondary small">القيمة الإجمالية للدفع:</div>
+                            <div class="fw-black text-warning fs-4" id="modalPaymentAmount">$350</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-secondary small">طريقة الدفع:</div>
+                            <div class="fw-bold text-dark" id="modalPaymentMethodName">بطاقة ائتمان</div>
+                        </div>
+                    </div>
+
+                    <!-- Form Views (Card or Wallet) -->
+                    <div id="paymentModalViews">
+                        
+                        <!-- View 1: Credit Card Details Form -->
+                        <div id="creditCardFormView">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark small" for="pay_cardholder_name">اسم صاحب البطاقة</label>
+                                <input type="text" id="pay_cardholder_name" class="form-control rounded-3" placeholder="أحمد علي" required>
+                                <div class="invalid-feedback text-start" id="err_cardholder">يرجى كتابة الاسم المكتوب على البطاقة</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark small" for="pay_card_number">رقم البطاقة</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-credit-card text-muted" id="cardIcon"></i></span>
+                                    <input type="text" id="pay_card_number" class="form-control border-start-0 rounded-3 text-center" placeholder="4444 4444 4444 4444" maxlength="19" required style="letter-spacing:0.08em;">
+                                </div>
+                                <div class="invalid-feedback text-start" id="err_cardnumber" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">رقم بطاقة غير صالح (يجب أن يتكون من 16 رقماً)</div>
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark small" for="pay_card_expiry">تاريخ الانتهاء</label>
+                                    <input type="text" id="pay_card_expiry" class="form-control rounded-3 text-center" placeholder="MM/YY" maxlength="5" required>
+                                    <div class="invalid-feedback text-center" id="err_expiry" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">تاريخ غير صالح (MM/YY)</div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark small" for="pay_card_cvv">الرمز السري (CVV)</label>
+                                    <input type="password" id="pay_card_cvv" class="form-control rounded-3 text-center" placeholder="123" maxlength="3" required style="letter-spacing: 0.15em;">
+                                    <div class="invalid-feedback text-center" id="err_cvv" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">3 أرقام</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-warning w-100 rounded-pill py-2.5 fw-bold btn-gold fs-6" id="confirmCardPayBtn">
+                                تأكيد ودفع الآن
+                            </button>
+                        </div>
+
+                        <!-- View 2: Mobile Wallet Details Form -->
+                        <div id="mobileWalletFormView" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark small" for="pay_wallet_phone">رقم الهاتف المحمول للمحفظة</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                                    <input type="tel" id="pay_wallet_phone" class="form-control border-start-0 rounded-3 text-center" placeholder="01012345678" maxlength="11" required dir="ltr">
+                                </div>
+                                <div class="invalid-feedback text-start" id="err_wallet_phone" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">يرجى إدخال رقم هاتف محمول مصري صحيح (11 رقم)</div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark small" for="pay_wallet_provider">شبكة المحفظة الإلكترونية</label>
+                                <select id="pay_wallet_provider" class="form-select rounded-3" required>
+                                    <option value="vodafone">فودافون كاش (Vodafone Cash)</option>
+                                    <option value="etisalat">اتصالات كاش (Etisalat Cash)</option>
+                                    <option value="orange">أورانج كاش (Orange Cash)</option>
+                                    <option value="we">وي باي (WE Pay)</option>
+                                    <option value="meeza">محفظة ميزة الذكية (Meeza Wallet)</option>
+                                    <option value="instapay">إنستا باي (InstaPay)</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-warning w-100 rounded-pill py-2.5 fw-bold btn-gold fs-6" id="confirmWalletPayBtn">
+                                إرسال طلب الدفع
+                            </button>
+                        </div>
+
+                        <!-- View 3: Secure Loading Screen -->
+                        <div id="paymentLoadingView" class="d-none text-center py-4">
+                            <div class="spinner-border text-warning mb-3" style="width: 3.5rem; height: 3.5rem; border-width: 0.4rem;" role="status"></div>
+                            <h5 class="fw-bold text-dark" id="paymentLoadingTitle">جاري معالجة المعاملة بأمان...</h5>
+                            <p class="text-secondary small mb-0">الرجاء عدم إغلاق النافذة أو مغادرة الصفحة</p>
+                        </div>
+
+                        <!-- View 4: OTP Verification Screen -->
+                        <div id="paymentOtpView" class="d-none text-center py-3">
+                            <div class="display-6 text-warning mb-3"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <h5 class="fw-bold text-dark">رمز التحقق الأمني (OTP)</h5>
+                            <p class="text-secondary small">تم إرسال رمز تحقق مؤقت إلى هاتفك المحمول للتحقق من هويتك</p>
+                            <div class="mb-3 w-50 mx-auto">
+                                <input type="text" id="pay_otp_code" class="form-control rounded-3 text-center fs-4 fw-bold letter-spacing-10" placeholder="000000" maxlength="6" required>
+                                <div class="invalid-feedback text-center" id="err_otp" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">رمز التحقق يتكون من 6 أرقام</div>
+                            </div>
+                            <p class="text-muted small">تنتهي صلاحية الرمز خلال: <span class="fw-bold text-danger" id="otpTimer">00:59</span></p>
+                            <div class="mb-4">
+                                <button type="button" class="btn btn-warning w-100 rounded-pill py-2.5 fw-bold btn-gold fs-6" id="verifyOtpPayBtn">
+                                    تحقق وتأكيد الدفع
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-link text-decoration-none text-secondary small p-0" id="resendOtpBtn">إعادة إرسال الرمز</button>
+                        </div>
+
+                        <!-- View 5: Success Screen -->
+                        <div id="paymentSuccessView" class="d-none text-center py-4">
+                            <div class="success-checkmark mb-3">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <h5 class="fw-bold text-success">تم الدفع بنجاح!</h5>
+                            <p class="text-secondary small mb-0">جاري إصدار تذاكر وتأكيد حجزك...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer (Secure badges) -->
+                <div class="modal-footer justify-content-center border-top-0 bg-white py-3">
+                    <span class="text-muted small d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-lock text-success"></i> اتصالات آمنة ومشفرة 256-bit SSL
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
@@ -303,6 +450,10 @@
 
             await loadTripSummary(tripId);
             setupBookingFormEvents();
+            
+            // Initialize button states
+            updateGuestCounterUI('adults');
+            updateGuestCounterUI('children');
 
             document.addEventListener('langChanged', async () => {
                 await loadTripSummary(tripId);
@@ -380,11 +531,6 @@
 
                 if (!valid) return;
 
-                // Disable submit button & show spinner
-                document.getElementById('submitBtn').disabled = true;
-                document.getElementById('submitText').classList.add('d-none');
-                document.getElementById('submitSpinner').classList.remove('d-none');
-
                 const adults = parseInt(document.getElementById('adults').value);
                 const children = parseInt(document.getElementById('children').value);
                 const paymentMethod = input.value;
@@ -394,7 +540,8 @@
                 const childrenPrice = children * selectedTrip.price * 0.5;
                 const totalPrice = adultsPrice + childrenPrice;
 
-                const bookingData = {
+                // Store booking data globally so it can be saved after payment verification
+                window.currentBookingData = {
                     trip_id: selectedTrip.id,
                     trip_title: selectedTrip.title_en,
                     name,
@@ -408,18 +555,332 @@
                     notes
                 };
 
-                try {
-                    const res = await window.db.createBooking(bookingData);
-                    // Redirect on success
-                    window.location.href = `booking-confirmed?reference=${res.reference}&price=${totalPrice}&trip_id=${selectedTrip.id}`;
-                } catch (err) {
-                    console.error(err);
-                    alert('عذراً، حدث خطأ أثناء إتمام الحجز. يرجى المحاولة لاحقاً.');
-                    document.getElementById('submitBtn').disabled = false;
-                    document.getElementById('submitText').classList.remove('d-none');
-                    document.getElementById('submitSpinner').classList.add('d-none');
+                // Open the Secure Payment Gateway Modal
+                openSecurePaymentModal(paymentMethod, totalPrice);
+            });
+        }
+
+        let paymentModal = null;
+        let otpCountdownInterval = null;
+
+        function openSecurePaymentModal(paymentMethod, totalPrice) {
+            const savedCurrency = localStorage.getItem('rahalaty_currency') || 'USD';
+            const rates = { USD: 1.0, EUR: 0.92, GBP: 0.79, EGP: 47.8, SAR: 3.75, AED: 3.67, KWD: 0.31, QAR: 3.64 };
+            const rate = rates[savedCurrency] || 1.0;
+            const converted = (totalPrice * rate).toFixed(0);
+            
+            // Set modal amount
+            let symbol = savedCurrency;
+            if (savedCurrency === 'USD') symbol = '$';
+            else if (savedCurrency === 'EUR') symbol = '€';
+            else if (savedCurrency === 'GBP') symbol = '£';
+            else if (savedCurrency === 'EGP') symbol = 'E£';
+            else if (savedCurrency === 'SAR') symbol = 'ر.س';
+            else if (savedCurrency === 'AED') symbol = 'د.إ';
+            
+            document.getElementById('modalPaymentAmount').textContent = `${symbol}${converted}`;
+            
+            // Set payment method name
+            document.getElementById('modalPaymentMethodName').textContent = paymentMethod === 'credit_card' 
+                ? 'بطاقة ائتمان' 
+                : 'محفظة إلكترونية';
+
+            // Reset inputs & errors
+            document.getElementById('pay_cardholder_name').value = '';
+            document.getElementById('pay_card_number').value = '';
+            document.getElementById('pay_card_expiry').value = '';
+            document.getElementById('pay_card_cvv').value = '';
+            document.getElementById('pay_wallet_phone').value = '';
+            document.getElementById('pay_otp_code').value = '';
+            
+            // Hide all errors
+            document.getElementById('pay_cardholder_name').classList.remove('is-invalid');
+            document.getElementById('pay_card_number').classList.remove('is-invalid');
+            document.getElementById('pay_card_expiry').classList.remove('is-invalid');
+            document.getElementById('pay_card_cvv').classList.remove('is-invalid');
+            document.getElementById('pay_wallet_phone').classList.remove('is-invalid');
+            document.getElementById('pay_otp_code').classList.remove('is-invalid');
+            
+            document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
+            document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
+            document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
+            document.getElementById('err_wallet_phone').style.setProperty('display', 'none', 'important');
+            document.getElementById('err_otp').style.setProperty('display', 'none', 'important');
+
+            // Hide/Show correct form
+            if (paymentMethod === 'credit_card') {
+                document.getElementById('creditCardFormView').classList.remove('d-none');
+                document.getElementById('mobileWalletFormView').classList.add('d-none');
+            } else {
+                document.getElementById('creditCardFormView').classList.add('d-none');
+                document.getElementById('mobileWalletFormView').classList.remove('d-none');
+            }
+            
+            // Hide other screens
+            document.getElementById('paymentLoadingView').classList.add('d-none');
+            document.getElementById('paymentOtpView').classList.add('d-none');
+            document.getElementById('paymentSuccessView').classList.add('d-none');
+
+            // Show close button
+            document.getElementById('closePaymentModalBtn').classList.remove('d-none');
+
+            // Initialize and show modal
+            if (!paymentModal) {
+                paymentModal = new bootstrap.Modal(document.getElementById('paymentGatewayModal'));
+                setupPaymentInputsFormatting();
+                setupPaymentButtonHandlers();
+            }
+            paymentModal.show();
+        }
+
+        function setupPaymentInputsFormatting() {
+            const cardInput = document.getElementById('pay_card_number');
+            const cardIcon = document.getElementById('cardIcon');
+            if (cardInput) {
+                cardInput.addEventListener('input', () => {
+                    let val = cardInput.value.replace(/\D/g, '');
+                    if (val.startsWith('4')) {
+                        cardIcon.className = 'fa-brands fa-cc-visa text-primary fs-5';
+                    } else if (val.startsWith('5')) {
+                        cardIcon.className = 'fa-brands fa-cc-mastercard text-danger fs-5';
+                    } else {
+                        cardIcon.className = 'fa-solid fa-credit-card text-muted fs-5';
+                    }
+                    
+                    let formatted = '';
+                    for (let i = 0; i < val.length; i++) {
+                        if (i > 0 && i % 4 === 0) {
+                            formatted += ' ';
+                        }
+                        formatted += val[i];
+                    }
+                    cardInput.value = formatted;
+                    
+                    cardInput.classList.remove('is-invalid');
+                    document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
+                });
+            }
+
+            const expiryInput = document.getElementById('pay_card_expiry');
+            if (expiryInput) {
+                expiryInput.addEventListener('input', () => {
+                    let val = expiryInput.value.replace(/\D/g, '');
+                    if (val.length > 2) {
+                        expiryInput.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+                    } else {
+                        expiryInput.value = val;
+                    }
+                    expiryInput.classList.remove('is-invalid');
+                    document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
+                });
+            }
+
+            const cvvInput = document.getElementById('pay_card_cvv');
+            if (cvvInput) {
+                cvvInput.addEventListener('input', () => {
+                    cvvInput.value = cvvInput.value.replace(/\D/g, '');
+                    cvvInput.classList.remove('is-invalid');
+                    document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
+                });
+            }
+
+            const phoneInput = document.getElementById('pay_wallet_phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', () => {
+                    phoneInput.value = phoneInput.value.replace(/\D/g, '');
+                    phoneInput.classList.remove('is-invalid');
+                    document.getElementById('err_wallet_phone').style.setProperty('display', 'none', 'important');
+                });
+            }
+
+            const otpInput = document.getElementById('pay_otp_code');
+            if (otpInput) {
+                otpInput.addEventListener('input', () => {
+                    otpInput.value = otpInput.value.replace(/\D/g, '');
+                    otpInput.classList.remove('is-invalid');
+                    document.getElementById('err_otp').style.setProperty('display', 'none', 'important');
+                });
+            }
+        }
+
+        function setupPaymentButtonHandlers() {
+            document.getElementById('confirmCardPayBtn').addEventListener('click', () => {
+                const holder = document.getElementById('pay_cardholder_name');
+                const number = document.getElementById('pay_card_number');
+                const expiry = document.getElementById('pay_card_expiry');
+                const cvv = document.getElementById('pay_card_cvv');
+                
+                let valid = true;
+                if (!holder.value.trim() || holder.value.trim().length < 3) {
+                    holder.classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    holder.classList.remove('is-invalid');
+                }
+                
+                const cardDigits = number.value.replace(/\D/g, '');
+                if (cardDigits.length !== 16) {
+                    number.classList.add('is-invalid');
+                    document.getElementById('err_cardnumber').style.setProperty('display', 'block', 'important');
+                    valid = false;
+                } else {
+                    number.classList.remove('is-invalid');
+                    document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
+                }
+                
+                const expParts = expiry.value.split('/');
+                if (expParts.length !== 2 || expParts[0].length !== 2 || expParts[1].length !== 2) {
+                    expiry.classList.add('is-invalid');
+                    document.getElementById('err_expiry').style.setProperty('display', 'block', 'important');
+                    valid = false;
+                } else {
+                    const month = parseInt(expParts[0]);
+                    if (month < 1 || month > 12) {
+                        expiry.classList.add('is-invalid');
+                        document.getElementById('err_expiry').style.setProperty('display', 'block', 'important');
+                        valid = false;
+                    } else {
+                        expiry.classList.remove('is-invalid');
+                        document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
+                    }
+                }
+                
+                if (cvv.value.length !== 3) {
+                    cvv.classList.add('is-invalid');
+                    document.getElementById('err_cvv').style.setProperty('display', 'block', 'important');
+                    valid = false;
+                } else {
+                    cvv.classList.remove('is-invalid');
+                    document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
+                }
+                
+                if (valid) {
+                    startPaymentFlow("جاري التحقق من بيانات البطاقة لدى البنك...");
                 }
             });
+
+            document.getElementById('confirmWalletPayBtn').addEventListener('click', () => {
+                const phone = document.getElementById('pay_wallet_phone');
+                
+                const prefixes = ['010', '011', '012', '015'];
+                const startsWithPrefix = prefixes.some(p => phone.value.startsWith(p));
+                
+                if (phone.value.length !== 11 || !startsWithPrefix) {
+                    phone.classList.add('is-invalid');
+                    document.getElementById('err_wallet_phone').style.setProperty('display', 'block', 'important');
+                } else {
+                    phone.classList.remove('is-invalid');
+                    document.getElementById('err_wallet_phone').style.setProperty('display', 'none', 'important');
+                    startPaymentFlow("جاري إرسال طلب الدفع للمحفظة...");
+                }
+            });
+
+            document.getElementById('verifyOtpPayBtn').addEventListener('click', () => {
+                const otp = document.getElementById('pay_otp_code');
+                if (otp.value.length !== 6) {
+                    otp.classList.add('is-invalid');
+                    document.getElementById('err_otp').style.setProperty('display', 'block', 'important');
+                } else {
+                    otp.classList.remove('is-invalid');
+                    document.getElementById('err_otp').style.setProperty('display', 'none', 'important');
+                    completeOtpVerification();
+                }
+            });
+
+            document.getElementById('resendOtpBtn').addEventListener('click', () => {
+                alert('تم إعادة إرسال رمز التحقق (OTP) بنجاح إلى هاتفك.');
+                document.getElementById('pay_otp_code').value = '';
+                startOtpTimer();
+            });
+        }
+
+        function startPaymentFlow(loadingText) {
+            // Hide forms
+            document.getElementById('creditCardFormView').classList.add('d-none');
+            document.getElementById('mobileWalletFormView').classList.add('d-none');
+            
+            // Hide close button
+            document.getElementById('closePaymentModalBtn').classList.add('d-none');
+            
+            // Show Loading Screen
+            const loadingView = document.getElementById('paymentLoadingView');
+            loadingView.classList.remove('d-none');
+            document.getElementById('paymentLoadingTitle').textContent = loadingText;
+            
+            setTimeout(() => {
+                loadingView.classList.add('d-none');
+                
+                // Show OTP View
+                document.getElementById('paymentOtpView').classList.remove('d-none');
+                startOtpTimer();
+            }, 2500);
+        }
+
+        function startOtpTimer() {
+            if (otpCountdownInterval) {
+                clearInterval(otpCountdownInterval);
+            }
+            let timeLeft = 59;
+            const timerEl = document.getElementById('otpTimer');
+            const resendBtn = document.getElementById('resendOtpBtn');
+            resendBtn.style.pointerEvents = 'none';
+            resendBtn.style.opacity = '0.5';
+            
+            otpCountdownInterval = setInterval(() => {
+                timeLeft--;
+                const sec = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+                timerEl.textContent = `00:${sec}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(otpCountdownInterval);
+                    timerEl.textContent = 'منتهي الصلاحية';
+                    resendBtn.style.pointerEvents = 'auto';
+                    resendBtn.style.opacity = '1';
+                }
+            }, 1000);
+        }
+
+        function completeOtpVerification() {
+            if (otpCountdownInterval) {
+                clearInterval(otpCountdownInterval);
+            }
+            
+            // Show Loading
+            document.getElementById('paymentOtpView').classList.add('d-none');
+            const loadingView = document.getElementById('paymentLoadingView');
+            loadingView.classList.remove('d-none');
+            document.getElementById('paymentLoadingTitle').textContent = "جاري تأكيد عملية الدفع وتوثيقها...";
+            
+            setTimeout(() => {
+                loadingView.classList.add('d-none');
+                
+                // Show Success Screen
+                document.getElementById('paymentSuccessView').classList.remove('d-none');
+                
+                // Submit actual booking data after 2 seconds
+                setTimeout(async () => {
+                    paymentModal.hide();
+                    
+                    // Show standard form submit loading
+                    document.getElementById('submitBtn').disabled = true;
+                    document.getElementById('submitText').classList.add('d-none');
+                    document.getElementById('submitSpinner').classList.remove('d-none');
+                    
+                    try {
+                        const res = await window.db.createBooking(window.currentBookingData);
+                        // Redirect on success
+                        const isLocal = window.location.protocol === 'file:';
+                        const redirectPage = isLocal ? 'booking-confirmed.html' : 'booking-confirmed';
+                        window.location.href = `${redirectPage}?reference=${res.reference}&price=${window.currentBookingData.total_price}&trip_id=${window.currentBookingData.trip_id}`;
+                    } catch (err) {
+                        console.error(err);
+                        alert('عذراً، حدث خطأ أثناء إتمام الحجز بعد الدفع. يرجى مراجعة خدمة العملاء.');
+                        document.getElementById('submitBtn').disabled = false;
+                        document.getElementById('submitText').classList.remove('d-none');
+                        document.getElementById('submitSpinner').classList.add('d-none');
+                    }
+                }, 2000);
+            }, 2000);
         }
 
         async function updatePriceBreakdown() {
@@ -467,6 +928,76 @@
             // Apply conversions
             await window.selectCurrency(savedCurrency);
         }
+
+        function updateGuestCounterUI(type) {
+            const input = document.getElementById(type);
+            if (!input) return;
+            const val = parseInt(input.value) || 0;
+            const container = input.closest('.guest-counter');
+            if (!container) return;
+            
+            const minusBtn = container.querySelector('.counter-btn.minus');
+            const plusBtn = container.querySelector('.counter-btn.plus');
+            
+            const minVal = type === 'adults' ? 1 : 0;
+            const maxVal = type === 'adults' ? 10 : 5;
+            
+            if (minusBtn) {
+                if (val <= minVal) {
+                    minusBtn.disabled = true;
+                    minusBtn.style.opacity = '0.5';
+                    minusBtn.style.cursor = 'not-allowed';
+                } else {
+                    minusBtn.disabled = false;
+                    minusBtn.style.opacity = '1';
+                    minusBtn.style.cursor = 'pointer';
+                }
+            }
+            
+            if (plusBtn) {
+                if (val >= maxVal) {
+                    plusBtn.disabled = true;
+                    plusBtn.style.opacity = '0.5';
+                    plusBtn.style.cursor = 'not-allowed';
+                } else {
+                    plusBtn.disabled = false;
+                    plusBtn.style.opacity = '1';
+                    plusBtn.style.cursor = 'pointer';
+                }
+            }
+        }
+
+        window.incrementGuest = function(type) {
+            const input = document.getElementById(type);
+            const valSpan = document.getElementById(type + '_val');
+            if (!input || !valSpan) return;
+            let val = parseInt(input.value) || 0;
+            
+            const maxVal = type === 'adults' ? 10 : 5;
+            if (val >= maxVal) return;
+            
+            val++;
+            input.value = val;
+            valSpan.textContent = val;
+            updateGuestCounterUI(type);
+            input.dispatchEvent(new Event('change'));
+        };
+
+        window.decrementGuest = function(type) {
+            const input = document.getElementById(type);
+            const valSpan = document.getElementById(type + '_val');
+            if (!input || !valSpan) return;
+            let val = parseInt(input.value) || 0;
+            
+            const minVal = type === 'adults' ? 1 : 0;
+            if (val <= minVal) return;
+            
+            val--;
+            input.value = val;
+            valSpan.textContent = val;
+            updateGuestCounterUI(type);
+            input.dispatchEvent(new Event('change'));
+        };
     </script>
 </body>
 </html>

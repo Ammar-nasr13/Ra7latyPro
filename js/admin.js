@@ -702,6 +702,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Wire Trip country dropdown change event to filter destinations
+    const tripCountrySelect = document.getElementById('trip_country_id');
+    if (tripCountrySelect) {
+        tripCountrySelect.addEventListener('change', (e) => {
+            window.filterDestinationsByCountry(e.target.value);
+        });
+    }
+
     // 2. Add/Edit Trip Form
     const tripForm = document.getElementById('addTripForm');
     if (tripForm) {
@@ -1004,19 +1012,53 @@ window.loadCountriesTable = async function () {
 };
 
 window.loadCountriesDropdown = async function() {
-    const select = document.getElementById('dest_country_id');
-    if (!select) return;
+    const destSelect = document.getElementById('dest_country_id');
+    const tripSelect = document.getElementById('trip_country_id');
     try {
         const countries = await window.db.getCountries();
-        if (!countries.length) {
-            select.innerHTML = '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
-            return;
-        }
-        select.innerHTML = '<option value="">اختر الدولة...</option>' + 
+        const optionsHtml = '<option value="">اختر الدولة...</option>' + 
             countries.map(c => `<option value="${c.$id}">${c.flag || ''} ${c.name_ar} (${c.name_en})</option>`).join('');
+            
+        if (destSelect) {
+            destSelect.innerHTML = countries.length ? optionsHtml : '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
+        }
+        if (tripSelect) {
+            tripSelect.innerHTML = countries.length ? optionsHtml : '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
+        }
     } catch (err) {
         console.error('Error loading countries dropdown:', err);
-        select.innerHTML = '<option value="">فشل تحميل الدول</option>';
+        if (destSelect) destSelect.innerHTML = '<option value="">فشل تحميل الدول</option>';
+        if (tripSelect) tripSelect.innerHTML = '<option value="">فشل تحميل الدول</option>';
+    }
+};
+
+window.filterDestinationsByCountry = async function (countryId, selectedDestId = '') {
+    const select = document.getElementById('trip_destination_id');
+    if (!select) return;
+    
+    if (!countryId) {
+        select.innerHTML = '<option value="">الرجاء اختيار الدولة أولاً...</option>';
+        return;
+    }
+    
+    try {
+        const docs = await window.db.getDestinations();
+        const filteredDocs = docs.filter(d => String(d.country_id) === String(countryId));
+        
+        if (!filteredDocs.length) {
+            select.innerHTML = '<option value="">لا توجد وجهات مضافة لهذه الدولة. أضف وجهة أولاً!</option>';
+            return;
+        }
+        
+        select.innerHTML = '<option value="">اختر الوجهة...</option>' + 
+            filteredDocs.map(d => `<option value="${d.$id}">${d.flag || ''} ${d.name_ar} (${d.name_en})</option>`).join('');
+            
+        if (selectedDestId) {
+            select.value = selectedDestId;
+        }
+    } catch (err) {
+        console.error('Error filtering destinations by country:', err);
+        select.innerHTML = '<option value="">فشل تحميل الوجهات</option>';
     }
 };
 
@@ -1138,10 +1180,27 @@ window.editTrip = async function(id) {
         
         const form = document.getElementById('addTripForm');
         if (form) {
-            await window.loadDestinationsDropdown();
             form.dataset.editId = id;
             
-            document.getElementById('trip_destination_id').value = doc.destination_id || '';
+            // Load countries dropdown
+            await window.loadCountriesDropdown();
+            
+            // Get destination country mapping
+            let countryId = '';
+            if (doc.destination_id) {
+                try {
+                    const destDoc = await databases.getDocument(conf.databaseId, conf.collections.destinations, doc.destination_id);
+                    countryId = destDoc.country_id || '';
+                } catch (e) {
+                    console.error('Error fetching destination country mapping for trip:', e);
+                }
+            }
+            
+            const countrySelect = document.getElementById('trip_country_id');
+            if (countrySelect) countrySelect.value = countryId;
+            
+            // Load and filter destinations belonging to this country
+            await window.filterDestinationsByCountry(countryId, doc.destination_id);
             document.getElementById('trip_title_ar').value = doc.title_ar || '';
             document.getElementById('trip_title_en').value = doc.title_en || '';
             document.getElementById('trip_desc_ar').value = doc.desc_ar || '';
@@ -1261,8 +1320,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tripModalTitle').innerHTML = '<i class="fa-solid fa-plane me-2 text-warning"></i>إضافة رحلة جديدة';
             document.getElementById('saveTripBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
         });
-        tripModalEl.addEventListener('show.bs.modal', () => {
-            window.loadDestinationsDropdown();
+        tripModalEl.addEventListener('show.bs.modal', async () => {
+            const form = document.getElementById('addTripForm');
+            if (form && !form.dataset.editId) {
+                await window.loadCountriesDropdown();
+                const countrySel = document.getElementById('trip_country_id');
+                if (countrySel) countrySel.value = '';
+                const destSel = document.getElementById('trip_destination_id');
+                if (destSel) destSel.innerHTML = '<option value="">الرجاء اختيار الدولة أولاً...</option>';
+            }
         });
     }
 
