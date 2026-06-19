@@ -165,7 +165,7 @@
             const responseId = urlParams.get('id');
 
             if (!responseId) {
-                window.location.href = 'survey';
+                window.location.href = 'survey.html';
                 return;
             }
 
@@ -179,7 +179,7 @@
         async function loadRecommendations(responseId) {
             const response = await window.db.getSurveyResponse(responseId);
             if (!response) {
-                window.location.href = 'survey';
+                window.location.href = 'survey.html';
                 return;
             }
 

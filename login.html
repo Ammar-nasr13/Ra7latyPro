@@ -318,7 +318,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Check if already logged in, redirect immediately
             if (sessionStorage.getItem('rahalaty_admin_logged_in') === 'true') {
-                window.location.href = 'admin';
+                window.location.href = 'admin.html';
                 return;
             }
 
@@ -414,7 +414,7 @@
                         showAlert('تم تسجيل الدخول بنجاح! جاري التحويل للوحة التحكم...', 'success');
 
                         setTimeout(() => {
-                            window.location.href = 'admin';
+                            window.location.href = 'admin.html';
                         }, 1200);
                     } else {
                         showAlert('عذراً، البريد الإلكتروني أو كلمة المرور غير صحيحة.');

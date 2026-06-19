@@ -226,7 +226,7 @@
             const id = urlParams.get('id');
             
             if (!id) {
-                window.location.href = 'destinations';
+                window.location.href = 'destinations.html';
                 return;
             }
 
@@ -240,7 +240,7 @@
         async function loadDestinationDetails(id) {
             const d = await window.db.getDestination(id);
             if (!d) {
-                window.location.href = 'destinations';
+                window.location.href = 'destinations.html';
                 return;
             }
 

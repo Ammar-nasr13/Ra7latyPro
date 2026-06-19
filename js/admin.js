@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Check session safety
     if (sessionStorage.getItem('rahalaty_admin_logged_in') !== 'true') {
-        window.location.replace('login');
+        window.location.replace('login.html');
         return;
     }
 
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             if (confirm('هل تريد بالتأكيد تسجيل الخروج؟')) {
                 sessionStorage.clear();
-                window.location.replace('login');
+                window.location.replace('login.html');
             }
         });
     }
