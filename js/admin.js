@@ -353,7 +353,7 @@ window.toggleReviewActive = async function(id, status) {
 // ─── SEED APPWRITE DATABASE ──────────────────────────────────────────
 window.seedAppwriteDatabase = async function() {
     if (!window.db.isAppwriteConnected()) {
-        alert('يرجى الاتصال وإدخال معرف مشروع Appwrite صالح أولاً!');
+        alert('يرجى الاتصال وإدخل معرف مشروع Appwrite صالح أولاً!');
         return;
     }
 
@@ -365,40 +365,103 @@ window.seedAppwriteDatabase = async function() {
     const dbId = conf.databaseId;
 
     try {
+        const { Query } = Appwrite;
+
         // 1. Upload Destinations
         const dests = window.db.staticDestinations;
-        for (const d of dests) {
-            // Check if document already exists by querying custom attributes
-            const list = await window.db.databases.listDocuments(dbId, conf.collections.destinations);
-            const exists = list.documents.some(doc => parseInt(doc.id) === parseInt(d.id));
-            if (!exists) {
-                const payload = { ...d };
-                delete payload.id; // Appwrite custom key mapping
-                payload.id = parseInt(d.id);
+        const destIdMap = {};
 
-                await window.db.databases.createDocument(dbId, conf.collections.destinations, Appwrite.ID.unique(), payload);
+        for (const d of dests) {
+            // Check if exists by country_id
+            const list = await window.db.databases.listDocuments(dbId, conf.collections.destinations, [
+                Query.equal('country_id', [String(d.id)])
+            ]);
+            
+            let docId;
+            if (list.documents.length > 0) {
+                docId = list.documents[0].$id;
+            } else {
+                const payload = {
+                    country_id: String(d.id),
+                    name_ar: d.name_ar,
+                    name_en: d.name_en,
+                    description_ar: d.desc_ar,
+                    description_en: d.desc_en,
+                    category: d.category,
+                    is_featured: d.is_featured,
+                    sort_order: d.sort_order,
+                    image_url: d.image,
+                    meta_title_ar: d.name_ar,
+                    meta_title_en: d.name_en,
+                    meta_desc_ar: d.desc_ar ? d.desc_ar.slice(0, 150) : '',
+                    meta_desc_en: d.desc_en ? d.desc_en.slice(0, 150) : '',
+                    meta_keywords_ar: d.name_ar,
+                    meta_keywords_en: d.name_en
+                };
+                const newDoc = await window.db.databases.createDocument(dbId, conf.collections.destinations, Appwrite.ID.unique(), payload);
+                docId = newDoc.$id;
             }
+            destIdMap[d.id] = docId;
         }
 
         // 2. Upload Trips
         const trips = window.db.staticTrips;
         for (const t of trips) {
-            const list = await window.db.databases.listDocuments(dbId, conf.collections.trips);
-            const exists = list.documents.some(doc => parseInt(doc.id) === parseInt(t.id));
-            if (!exists) {
-                const payload = { ...t };
-                delete payload.id;
-                payload.id = parseInt(t.id);
-                if (t.destination_id) payload.destination_id = parseInt(t.destination_id);
-
+            // Check if already exists
+            const list = await window.db.databases.listDocuments(dbId, conf.collections.trips, [
+                Query.equal('title_en', [t.title_en])
+            ]);
+            
+            if (list.documents.length === 0) {
+                const destId = destIdMap[t.destination_id] || '';
+                const payload = {
+                    destination_id: destId,
+                    title_ar: t.title_ar,
+                    title_en: t.title_en,
+                    desc_ar: t.desc_ar || '',
+                    desc_en: t.desc_en || '',
+                    highlights_ar: t.highlights_ar || [],
+                    highlights_en: t.highlights_en || [],
+                    included_ar: [],
+                    included_en: [],
+                    excluded_ar: [],
+                    excluded_en: [],
+                    itinerary_ar: [],
+                    itinerary_en: [],
+                    price: parseFloat(t.price) || 0,
+                    currency: t.currency || '$',
+                    duration: String(t.duration) + ' أيام',
+                    category: t.category || 'beach',
+                    climate: t.climate || 'beach',
+                    travel_type: t.travel_type || [],
+                    budget_tier: t.budget_tier || 'medium',
+                    color_from: t.color_from || '#0099CC',
+                    color_to: t.color_to || '#FF6633',
+                    is_egyptian: t.is_egyptian || false,
+                    spots_total: parseInt(t.spots_total) || 20,
+                    spots_left: parseInt(t.spots_left) || 20,
+                    departure_dates: t.departure_dates || [],
+                    is_active: true,
+                    sort_order: parseInt(t.id) || 0,
+                    meta_title_ar: t.title_ar,
+                    meta_title_en: t.title_en,
+                    meta_desc_ar: t.desc_ar ? t.desc_ar.slice(0, 150) : '',
+                    meta_desc_en: t.desc_en ? t.desc_en.slice(0, 150) : '',
+                    meta_keywords_ar: t.title_ar,
+                    meta_keywords_en: t.title_en,
+                    image_url: t.image || ''
+                };
+                
                 await window.db.databases.createDocument(dbId, conf.collections.trips, Appwrite.ID.unique(), payload);
             }
         }
 
-        alert('تم تهيئة قاعدة البيانات ورفع جميع الوجهات (6) والرحلات (16) إلى مشروع Appwrite الخاص بك بنجاح!');
+        alert('تم تهيئة قاعدة البيانات ورفع جميع الوجهات (6) والرحلات (16) الافتراضية إلى مشروع Appwrite الخاص بك بنجاح!');
+        if (typeof window.loadDestinationsTable === 'function') await window.loadDestinationsTable();
+        if (typeof window.loadTripsTable === 'function') await window.loadTripsTable();
     } catch (err) {
         console.error(err);
-        alert(`عذراً، حدث خطأ أثناء الرفع: \n${err.message}\nيرجى التأكد من إنشاء الخصائص (Attributes) بالمسميات الصحيحة وتعيين صلاحيات الكتابة!`);
+        alert(`عذراً، حدث خطأ أثناء الرفع: \n${err.message}\nيرجى التأكد من تعيين صلاحيات الكتابة والقراءة لجميع المستخدمين (role:all أو role:guests) للمجموعات!`);
     } finally {
         seedBtn.disabled = false;
         seedBtn.textContent = 'تهيئة قاعدة البيانات (Seed Data)';
@@ -412,28 +475,27 @@ window.seedAppwriteDatabase = async function() {
 window.loadDestinationsTable = async function () {
     const tbody = document.getElementById('adminDestinationsTable');
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>جاري التحميل...</td></tr>`;
 
     try {
-        const conf = window.CONFIG.appwrite;
-        const { Client, Databases } = Appwrite;
-        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
-        const databases = new Databases(client);
-        const res = await databases.listDocuments(conf.databaseId, conf.collections.destinations);
-        const docs = res.documents;
+        const docs = await window.db.getDestinations();
 
         if (!docs.length) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-map-location-dot fa-2x mb-2 d-block opacity-25"></i>لا توجد وجهات بعد. أضف أول وجهة!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted"><i class="fa-solid fa-map-location-dot fa-2x mb-2 d-block opacity-25"></i>لا توجد وجهات بعد. أضف أول وجهة!</td></tr>`;
             return;
         }
 
         tbody.innerHTML = docs.map((d, i) => `
             <tr>
                 <td class="fw-bold text-muted">${i + 1}</td>
+                <td>
+                    ${d.image ? `<img src="${d.image}" style="width:70px;height:50px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none'">` : '<span class="text-muted">—</span>'}
+                </td>
                 <td class="fs-4">${d.flag || '—'}</td>
                 <td class="fw-semibold">${d.name_ar || '—'}</td>
                 <td class="text-muted small">${d.name_en || '—'}</td>
                 <td class="text-muted small">${d.slug || '—'}</td>
+                <td><span class="badge bg-secondary">${d.category || '—'}</span></td>
                 <td>
                     <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteDestination('${d.$id}')">
                         <i class="fa-solid fa-trash-alt"></i>
@@ -443,7 +505,7 @@ window.loadDestinationsTable = async function () {
         `).join('');
     } catch (err) {
         console.error('Destinations load error:', err);
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">خطأ في التحميل: ${err.message}</td></tr>`;
     }
 };
 
@@ -451,10 +513,7 @@ window.deleteDestination = async function (docId) {
     if (!confirm('هل تريد حذف هذه الوجهة؟ لا يمكن التراجع!')) return;
     try {
         const conf = window.CONFIG.appwrite;
-        const { Client, Databases } = Appwrite;
-        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
-        const databases = new Databases(client);
-        await databases.deleteDocument(conf.databaseId, conf.collections.destinations, docId);
+        await window.db.databases.deleteDocument(conf.databaseId, conf.collections.destinations, docId);
         await window.loadDestinationsTable();
         await window.loadDestinationsDropdown();
     } catch (err) {
@@ -467,12 +526,7 @@ window.loadDestinationsDropdown = async function () {
     if (!select) return;
     
     try {
-        const conf = window.CONFIG.appwrite;
-        const { Client, Databases } = Appwrite;
-        const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
-        const databases = new Databases(client);
-        const res = await databases.listDocuments(conf.databaseId, conf.collections.destinations);
-        const docs = res.documents;
+        const docs = await window.db.getDestinations();
         
         if (!docs.length) {
             select.innerHTML = '<option value="">لا توجد دول مضافة بعد. أضف دولة أولاً!</option>';
@@ -500,18 +554,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const conf = window.CONFIG.appwrite;
-                const { Client, Databases, ID } = Appwrite;
-                const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
-                const databases = new Databases(client);
+                const nameAr = document.getElementById('dest_name_ar').value.trim();
+                const nameEn = document.getElementById('dest_name_en').value.trim();
+                const descAr = document.getElementById('dest_description_ar').value.trim();
+                const descEn = document.getElementById('dest_description_en').value.trim();
+                const countryId = document.getElementById('dest_country_id').value.trim();
+                const sortOrder = parseInt(document.getElementById('dest_sort_order').value) || 0;
+                const category = document.getElementById('dest_category').value;
+                const isFeatured = document.getElementById('dest_is_featured').value === 'true';
+                const imageUrl = document.getElementById('dest_image_url').value.trim();
 
                 const payload = {
-                    name_ar: document.getElementById('dest_name_ar').value.trim(),
-                    name_en: document.getElementById('dest_name_en').value.trim(),
-                    slug: document.getElementById('dest_slug').value.trim(),
-                    flag: document.getElementById('dest_flag').value.trim()
+                    country_id: countryId,
+                    name_ar: nameAr,
+                    name_en: nameEn,
+                    description_ar: descAr,
+                    description_en: descEn,
+                    category: category,
+                    is_featured: isFeatured,
+                    sort_order: sortOrder,
+                    image_url: imageUrl,
+                    meta_title_ar: nameAr,
+                    meta_title_en: nameEn,
+                    meta_desc_ar: descAr.slice(0, 150),
+                    meta_desc_en: descEn.slice(0, 150),
+                    meta_keywords_ar: nameAr,
+                    meta_keywords_en: nameEn
                 };
 
-                await databases.createDocument(conf.databaseId, conf.collections.destinations, ID.unique(), payload);
+                await window.db.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
 
                 bootstrap.Modal.getInstance(document.getElementById('addDestinationModal')).hide();
                 destForm.reset();

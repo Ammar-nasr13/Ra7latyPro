@@ -409,12 +409,39 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         const response = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
-        return response.documents;
+        const docs = response.documents;
+        
+        const FLAG_LOOKUP = {
+            'egypt': '🇪🇬', 'مصر': '🇪🇬',
+            'france': '🇫🇷', 'فرنسا': '🇫🇷',
+            'italy': '🇮🇹', 'إيطاليا': '🇮🇹',
+            'spain': '🇪🇸', 'إسبانيا': '🇪🇸',
+            'uae': '🇦🇪', 'الإمارات': '🇦🇪',
+            'turkey': '🇹🇷', 'تركيا': '🇹🇷',
+            'indonesia': '🇮🇩', 'إندونيسيا': '🇮🇩',
+            'usa': '🇺🇸', 'أمريكا': '🇺🇸',
+            'maldives': '🇲🇻', 'جزر المالديف': '🇲🇻',
+            'japan': '🇯🇵', 'اليابان': '🇯🇵',
+            'morocco': '🇲🇦', 'المغرب': '🇲🇦',
+            'greece': '🇬🇷', 'اليونان': '🇬🇷',
+            'switzerland': '🇨🇭', 'سويسرا': '🇨🇭',
+            'albania': '🇦🇱', 'ألبانيا': '🇦🇱'
+        };
+
+        docs.forEach(d => {
+            d.id = d.country_id || d.$id;
+            d.desc_ar = d.description_ar || '';
+            d.desc_en = d.description_en || '';
+            d.image = d.image_url || '';
+            d.flag = d.flag || FLAG_LOOKUP[String(d.name_en).toLowerCase()] || FLAG_LOOKUP[d.name_ar] || '🌍';
+            d.slug = d.slug || String(d.name_en).toLowerCase().replace(/[^a-z0-9]/g, '-');
+        });
+        return docs;
     }
 
     async getDestination(id) {
         const dests = await this.getDestinations();
-        return dests.find(d => String(d.id || d.$id) === String(id));
+        return dests.find(d => String(d.id || d.country_id || d.$id) === String(id));
     }
 
     // ─── Trips ─────────────────────────────────────────────────────────
@@ -425,12 +452,11 @@ class DBService {
         const trips = response.documents;
         
         try {
-            const destsResponse = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
-            const dests = destsResponse.documents;
+            const dests = await this.getDestinations();
             
             trips.forEach(t => {
                 t.image = t.image_url || t.image || '';
-                const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
+                const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.country_id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
                 if (dest) {
                     t.country_ar = dest.name_ar;
                     t.country_en = dest.name_en;
@@ -438,7 +464,7 @@ class DBService {
                 } else {
                     t.country_ar = t.country_ar || '';
                     t.country_en = t.country_en || '';
-                    t.flag = t.flag || '';
+                    t.flag = t.flag || '🌍';
                 }
             });
         } catch (err) {

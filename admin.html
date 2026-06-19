@@ -310,10 +310,12 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>#</th>
+                                            <th>الصورة</th>
                                             <th>العلم</th>
                                             <th>الاسم (عربي)</th>
                                             <th>الاسم (إنجليزي)</th>
-                                            <th>الرابط الدلالي (Slug)</th>
+                                            <th>الرابط (Slug)</th>
+                                            <th>التصنيف</th>
                                             <th>إجراء</th>
                                         </tr>
                                     </thead>
@@ -336,21 +338,49 @@
                                 <form id="addDestinationForm">
                                 <div class="modal-body">
                                     <div class="row g-3">
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <label class="form-label fw-semibold">اسم الدولة (عربي) *</label>
                                             <input type="text" class="form-control" id="dest_name_ar" placeholder="مثال: مصر" required>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <label class="form-label fw-semibold">اسم الدولة (إنجليزي) *</label>
                                             <input type="text" class="form-control" id="dest_name_en" placeholder="Example: Egypt" required>
                                         </div>
-                                        <div class="col-md-12">
-                                            <label class="form-label fw-semibold">الرابط الدلالي (Slug) *</label>
-                                            <input type="text" class="form-control" id="dest_slug" placeholder="Example: egypt" required>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">معرف الدولة الرقمي (ID) *</label>
+                                            <input type="number" class="form-control" id="dest_country_id" placeholder="مثال: 7" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">ترتيب العرض *</label>
+                                            <input type="number" class="form-control" id="dest_sort_order" placeholder="مثال: 1" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">التصنيف *</label>
+                                            <select class="form-select" id="dest_category" required>
+                                                <option value="beach">beach</option>
+                                                <option value="culture">culture</option>
+                                                <option value="heritage">heritage</option>
+                                                <option value="adventure">adventure</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">وجهة مميزة (تظهر في الرئيسية) *</label>
+                                            <select class="form-select" id="dest_is_featured" required>
+                                                <option value="true">نعم</option>
+                                                <option value="false">لا</option>
+                                            </select>
                                         </div>
                                         <div class="col-md-12">
-                                            <label class="form-label fw-semibold">العلم (Emoji) *</label>
-                                            <input type="text" class="form-control" id="dest_flag" placeholder="مثال: 🇪🇬" maxlength="10" required>
+                                            <label class="form-label fw-semibold">وصف الدولة (عربي) *</label>
+                                            <textarea class="form-control" id="dest_description_ar" rows="2" placeholder="وصف تفصيلي..." required></textarea>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">وصف الدولة (إنجليزي) *</label>
+                                            <textarea class="form-control" id="dest_description_en" rows="2" placeholder="Detailed description..." required></textarea>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">رابط صورة الوجهة *</label>
+                                            <input type="url" class="form-control" id="dest_image_url" placeholder="https://example.com/image.jpg" required>
                                         </div>
                                     </div>
                                 </div>
