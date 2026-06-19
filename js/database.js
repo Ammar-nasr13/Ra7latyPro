@@ -872,13 +872,21 @@ class DBService {
             list.forEach(b => {
                 const trip = trips.find(t => String(t.$id) === String(b.trip_id) || String(t.id) === String(b.trip_id));
                 b.trip_title = trip ? trip.title_ar : 'رحلة غير معروفة';
-                b.reference = b.$id;
                 b.status = b.booking_status || 'confirmed';
                 
+                // Extract booking reference from special_requests, fallback to formatted ID
+                b.reference = 'غير متاح';
                 b.travel_date = 'غير محدد';
                 if (b.special_requests) {
+                    const matchRef = b.special_requests.match(/رقم المرجع:\s*([^\n]+)/);
+                    if (matchRef) b.reference = matchRef[1].trim();
+                    
                     const matchDate = b.special_requests.match(/التاريخ المختار:\s*([^\n]+)/);
                     if (matchDate) b.travel_date = matchDate[1].trim();
+                }
+                // If still no reference, generate a fallback from $id
+                if (b.reference === 'غير متاح') {
+                    b.reference = 'BK-' + b.$id.substring(0, 8).toUpperCase();
                 }
                 b.created_at = b.$createdAt;
             });
@@ -886,9 +894,11 @@ class DBService {
             console.warn('Failed to map trips to bookings:', err);
             list.forEach(b => {
                 b.trip_title = 'رحلة';
-                b.reference = b.$id;
                 b.status = b.booking_status || 'confirmed';
                 b.travel_date = 'غير محدد';
+                b.reference = b.special_requests
+                    ? (b.special_requests.match(/رقم المرجع:\s*([^\n]+)/)?.[1]?.trim() || 'BK-' + b.$id.substring(0, 8).toUpperCase())
+                    : ('BK-' + b.$id.substring(0, 8).toUpperCase());
                 b.created_at = b.$createdAt;
             });
         }
@@ -899,6 +909,13 @@ class DBService {
     async createBooking(booking) {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
+
+        // Generate a unique booking reference number: BK-YYYYMMDD-XXXX
+        const now = new Date();
+        const datePart = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        const randPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const bookingRef = `BK-${datePart}-${randPart}`;
+
         const record = {
             trip_id: String(booking.trip_id),
             name: booking.name,
@@ -907,10 +924,10 @@ class DBService {
             adults: parseInt(booking.adults) || 1,
             children: parseInt(booking.children) || 0,
             total_price: parseFloat(booking.total_price) || 0,
-            payment_status: 'pending',
+            payment_status: 'confirmed',
             booking_status: 'confirmed',
-            payment_id: booking.payment_method || 'cod',
-            special_requests: `التاريخ المختار: ${booking.travel_date || 'غير محدد'}\nطريقة الدفع: ${booking.payment_method || 'غير محدد'}\nملاحظات: ${booking.notes || ''}`
+            payment_id: booking.payment_method || 'card',
+            special_requests: `رقم المرجع: ${bookingRef}\nالتاريخ المختار: ${booking.travel_date || 'غير محدد'}\nطريقة الدفع: ${booking.payment_method || 'غير محدد'}\nملاحظات: ${booking.notes || ''}`
         };
 
         const doc = await this.databases.createDocument(conf.databaseId, conf.collections.bookings, Appwrite.ID.unique(), record);
@@ -921,6 +938,8 @@ class DBService {
             console.error('Error updating spots:', spotsErr);
         }
         
+        // Attach the generated reference to the returned document
+        doc.reference = bookingRef;
         return doc;
     }
 
@@ -1034,23 +1053,36 @@ class DBService {
     async getSurveyResponse(id) {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
+
+        const _normalize = (doc) => {
+            // Normalize: Appwrite stores 'climate' but survey-results expects 'preferred_climate'
+            if (!doc.preferred_climate) {
+                doc.preferred_climate = doc.climate || '';
+            }
+            // Normalize: Appwrite stores 'duration' (int) but survey-results expects 'duration_preference' (string key)
+            if (!doc.duration_preference) {
+                const durInt = parseInt(doc.duration) || 0;
+                if (durInt <= 3)       doc.duration_preference = 'weekend';
+                else if (durInt <= 7)  doc.duration_preference = 'week';
+                else if (durInt <= 14) doc.duration_preference = 'twoweeks';
+                else                   doc.duration_preference = 'month';
+            }
+            // Preferred country from sessionStorage
+            doc.preferred_country = sessionStorage.getItem('survey_pref_country_' + doc.$id) ||
+                                    sessionStorage.getItem('survey_pref_country_' + doc.email) ||
+                                    doc.preferred_country || 'all';
+            return doc;
+        };
+
         try {
             const doc = await this.databases.getDocument(conf.databaseId, conf.collections.surveys, id);
-            doc.preferred_country = sessionStorage.getItem('survey_pref_country_' + id) || 
-                                    sessionStorage.getItem('survey_pref_country_' + doc.email) || 
-                                    'all';
-            return doc;
+            return _normalize(doc);
         } catch (e) {
             const sessionData = sessionStorage.getItem('survey_response_data');
             if (sessionData) {
                 const parsed = JSON.parse(sessionData);
                 if (String(parsed.$id || parsed.id) === String(id)) {
-                    if (!parsed.preferred_country) {
-                        parsed.preferred_country = sessionStorage.getItem('survey_pref_country_' + id) || 
-                                                sessionStorage.getItem('survey_pref_country_' + parsed.email) || 
-                                                'all';
-                    }
-                    return parsed;
+                    return _normalize(parsed);
                 }
             }
             throw e;

@@ -250,31 +250,37 @@
             const allowedBudgets = BUDGET_MAP[survey.budget] || ['low', 'medium', 'high', 'luxury'];
             const maxDays = DURATION_MAP[survey.duration_preference] || 35;
 
-            // Strict filter: Climate must match the preferred climate
-            let filteredTrips = allTrips.filter(trip => trip.climate === survey.preferred_climate);
+            // Helper: check if a trip matches the selected country
+            const tripMatchesCountry = (trip, country) => {
+                if (!country || country === 'all') return true;
+                const c = country.toLowerCase();
+                return (trip.country_en && trip.country_en.toLowerCase() === c) ||
+                       (trip.country_ar && trip.country_ar === country);
+            };
 
-            // Filter by preferred country if not 'all'
+            // ── STEP 1: STRICT country filter (if selected) ──────────────
+            let countryPool;
             if (survey.preferred_country && survey.preferred_country !== 'all') {
-                const countryFiltered = filteredTrips.filter(trip => 
-                    (trip.country_en && trip.country_en.toLowerCase() === survey.preferred_country.toLowerCase()) ||
-                    (trip.country_ar && trip.country_ar === survey.preferred_country)
-                );
-                
-                if (countryFiltered.length > 0) {
-                    filteredTrips = countryFiltered;
-                } else {
-                    // Fallback to match country trips even if climate differs
-                    const justCountry = allTrips.filter(trip => 
-                        (trip.country_en && trip.country_en.toLowerCase() === survey.preferred_country.toLowerCase()) ||
-                        (trip.country_ar && trip.country_ar === survey.preferred_country)
-                    );
-                    if (justCountry.length > 0) {
-                        filteredTrips = justCountry;
-                    }
+                countryPool = allTrips.filter(t => tripMatchesCountry(t, survey.preferred_country));
+                // If no trips at all in that country, fall back to all trips
+                if (countryPool.length === 0) {
+                    countryPool = allTrips;
+                }
+            } else {
+                countryPool = allTrips;
+            }
+
+            // ── STEP 2: Try to further filter by climate within country pool ─
+            let filteredTrips = countryPool;
+            if (survey.preferred_climate) {
+                const climateFiltered = countryPool.filter(trip => trip.climate === survey.preferred_climate);
+                // Only apply climate filter if it returns results; otherwise keep all country trips
+                if (climateFiltered.length > 0) {
+                    filteredTrips = climateFiltered;
                 }
             }
 
-            // If no exact matches, fallback to all
+            // If still empty, fallback to all
             if (filteredTrips.length === 0) {
                 filteredTrips = allTrips;
             }

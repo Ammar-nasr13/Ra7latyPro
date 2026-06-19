@@ -210,54 +210,150 @@
                                     
                                     <!-- Credit Card Inline Form -->
                                     <div id="creditCardInlineForm">
-                                        <h5 class="fw-bold text-nile mb-3" style="font-size: 1rem; border-bottom: 2px solid var(--color-gold); padding-bottom: 0.4rem; display: inline-block;">
-                                            <i class="fa-solid fa-credit-card text-warning me-1"></i> بيانات بطاقة الائتمان
-                                        </h5>
+                                        <!-- ═══════════════════════════════════════
+                                             3D FLIP CREDIT CARD
+                                        ════════════════════════════════════════ -->
+                                        <div class="card-flip-wrapper">
+                                            <div class="card-flip-inner" id="cardFlipInner">
 
-                                        <!-- Interactive Digital Card Visual -->
-                                        <div class="payment-card-visual mb-4">
-                                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                                <div class="card-visual-chip"></div>
-                                                <div class="fs-4"><i class="fa-solid fa-credit-card text-white-50" id="cardVisualIcon"></i></div>
-                                            </div>
-                                            <div class="card-visual-number" id="cardVisualNumber">•••• •••• •••• ••••</div>
-                                            <div class="card-visual-bottom">
-                                                <div class="flex-grow-1 me-2 text-truncate" style="max-width: 70%;">
-                                                    <div class="card-visual-label">حامل البطاقة</div>
-                                                    <div class="card-visual-value text-truncate" id="cardVisualName">NAME SURNAME</div>
+                                                <!-- FRONT FACE -->
+                                                <div class="card-face card-face-front">
+                                                    <!-- Top row: Bank name + contactless -->
+                                                    <div class="card-front-top">
+                                                        <div class="card-front-logo">
+                                                            <span>RA7LATY</span> BANK
+                                                        </div>
+                                                        <!-- Contactless SVG -->
+                                                        <svg class="card-contactless" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" fill="none"/>
+                                                            <path d="M8.5 8.5a5 5 0 010 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+                                                            <path d="M11 7a7 7 0 010 10" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
+                                                            <path d="M13.5 5.5a9.5 9.5 0 010 13" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.35"/>
+                                                        </svg>
+                                                    </div>
+
+                                                    <!-- Chip row -->
+                                                    <div class="d-flex align-items-center gap-3" style="position:relative; z-index:1;">
+                                                        <div class="card-chip"></div>
+                                                    </div>
+
+                                                    <!-- Card number -->
+                                                    <div class="card-front-number" id="cardVisualNumber">
+                                                        •••• &nbsp;•••• &nbsp;•••• &nbsp;••••
+                                                    </div>
+
+                                                    <!-- Bottom row: Name + Expiry + Brand -->
+                                                    <div class="card-front-bottom">
+                                                        <div>
+                                                            <div class="card-info-label">Card Holder</div>
+                                                            <div class="card-info-value" id="cardVisualName">FULL NAME</div>
+                                                        </div>
+                                                        <div style="text-align:center;">
+                                                            <div class="card-info-label">Expires</div>
+                                                            <div class="card-info-value" id="cardVisualExpiry">MM/YY</div>
+                                                        </div>
+                                                        <!-- Brand logo -->
+                                                        <div id="cardBrandDisplay">
+                                                            <!-- default: generic card icon -->
+                                                            <svg width="52" height="32" viewBox="0 0 52 32" fill="none" id="cardBrandDefault">
+                                                                <rect x="1" y="1" width="50" height="30" rx="5" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                                                                <rect x="1" y="9" width="50" height="8" fill="rgba(255,255,255,0.12)"/>
+                                                            </svg>
+                                                            <!-- Visa -->
+                                                            <div class="visa-logo-text d-none" id="cardBrandVisa">VISA</div>
+                                                            <!-- Mastercard -->
+                                                            <div class="mastercard-circles d-none" id="cardBrandMaster"></div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="text-end">
-                                                    <div class="card-visual-label">الانتهاء</div>
-                                                    <div class="card-visual-value" id="cardVisualExpiry">MM/YY</div>
+
+                                                <!-- BACK FACE -->
+                                                <div class="card-face card-face-back">
+                                                    <!-- Magnetic strip -->
+                                                    <div class="card-mag-strip"></div>
+
+                                                    <!-- Signature + CVV -->
+                                                    <div class="card-back-body">
+                                                        <div class="card-signature-row">
+                                                            <div class="card-signature-strip">
+                                                                <span class="card-signature-text" id="cardBackName">Authorized Signature</span>
+                                                            </div>
+                                                            <div class="card-cvv-box">
+                                                                <div class="card-cvv-label">CVV</div>
+                                                                <div class="card-cvv-value" id="cardVisualCvv">•••</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-back-brand">
+                                                            <span class="card-back-ssl">
+                                                                <svg width="10" height="12" viewBox="0 0 10 12"><rect x="1" y="5" width="8" height="7" rx="1.5" fill="rgba(255,255,255,0.5)"/><path d="M2.5 5V3.5a2.5 2.5 0 015 0V5" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" fill="none"/></svg>
+                                                                SSL SECURED
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
+
                                             </div>
                                         </div>
 
+                                        <!-- ═══ INPUT FIELDS ═══ -->
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold text-dark small" for="pay_cardholder_name">اسم صاحب البطاقة</label>
-                                            <input type="text" id="pay_cardholder_name" class="form-control rounded-3 py-2" placeholder="الاسم المكتوب على البطاقة...">
+                                            <label class="form-label fw-bold text-dark small" for="pay_cardholder_name">
+                                                <i class="fa-solid fa-user text-warning me-1"></i> اسم حامل البطاقة
+                                            </label>
+                                            <input type="text" id="pay_cardholder_name" class="form-control rounded-3 py-2" placeholder="e.g. AHMED KHALED" autocomplete="cc-name" style="letter-spacing:0.04em; text-transform:uppercase;">
                                             <div class="invalid-feedback text-start" id="err_cardholder" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">يرجى كتابة الاسم المكتوب على البطاقة بشكل صحيح</div>
                                         </div>
+
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold text-dark small" for="pay_card_number">رقم البطاقة</label>
+                                            <label class="form-label fw-bold text-dark small" for="pay_card_number">
+                                                <i class="fa-solid fa-credit-card text-warning me-1"></i> رقم البطاقة
+                                            </label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-credit-card text-muted" id="cardIcon"></i></span>
-                                                <input type="text" id="pay_card_number" class="form-control border-start-0 rounded-3 py-2 text-center" placeholder="4444 4444 4444 4444" maxlength="19" style="letter-spacing:0.08em;">
+                                                <span class="input-group-text bg-white border-end-0 border-2" style="border-color:#dee2e6;">
+                                                    <i class="fa-solid fa-credit-card text-muted" id="cardIcon"></i>
+                                                </span>
+                                                <input type="text" id="pay_card_number"
+                                                    class="form-control border-start-0 py-2 fw-semibold"
+                                                    placeholder=""
+                                                    maxlength="19"
+                                                    autocomplete="cc-number"
+                                                    inputmode="numeric"
+                                                    style="letter-spacing:0.15em; font-size:1.05rem; border-left:none !important;">
                                             </div>
                                             <div class="invalid-feedback text-start" id="err_cardnumber" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">رقم بطاقة غير صالح (يجب أن يتكون من 16 رقماً)</div>
                                         </div>
+
                                         <div class="row g-3">
-                                            <div class="col-6">
-                                                <label class="form-label fw-bold text-dark small" for="pay_card_expiry">تاريخ الانتهاء</label>
-                                                <input type="text" id="pay_card_expiry" class="form-control rounded-3 py-2 text-center" placeholder="MM/YY" maxlength="5">
+                                            <div class="col-7">
+                                                <label class="form-label fw-bold text-dark small" for="pay_card_expiry">
+                                                    <i class="fa-regular fa-calendar text-warning me-1"></i> تاريخ الانتهاء
+                                                </label>
+                                                <input type="text" id="pay_card_expiry"
+                                                    class="form-control rounded-3 py-2 text-center fw-semibold"
+                                                    placeholder="MM / YY"
+                                                    maxlength="5"
+                                                    autocomplete="cc-exp"
+                                                    inputmode="numeric"
+                                                    style="letter-spacing:0.12em; font-size:1rem;">
                                                 <div class="invalid-feedback text-center" id="err_expiry" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">تاريخ غير صالح (MM/YY)</div>
                                             </div>
-                                            <div class="col-6">
-                                                <label class="form-label fw-bold text-dark small" for="pay_card_cvv">الرمز السري (CVV)</label>
-                                                <input type="password" id="pay_card_cvv" class="form-control rounded-3 py-2 text-center" placeholder="123" maxlength="3" style="letter-spacing: 0.15em;">
-                                                <div class="invalid-feedback text-center" id="err_cvv" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">3 أرقام</div>
+                                            <div class="col-5">
+                                                <label class="form-label fw-bold text-dark small" for="pay_card_cvv">
+                                                    <i class="fa-solid fa-lock text-warning me-1"></i> CVV
+                                                </label>
+                                                <div class="position-relative">
+                                                    <input type="password" id="pay_card_cvv"
+                                                        class="form-control rounded-3 py-2 text-center fw-bold"
+                                                        placeholder="•••"
+                                                        maxlength="4"
+                                                        autocomplete="cc-csc"
+                                                        inputmode="numeric"
+                                                        style="letter-spacing:0.25em; font-size:1rem;">
+                                                    <div class="invalid-feedback text-center" id="err_cvv" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">3–4 أرقام</div>
+                                                </div>
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <!-- Mobile Wallet Inline Form -->
@@ -785,72 +881,110 @@
         }
 
         function setupPaymentInputsFormatting() {
-            // Card mockup sync
-            const holderInput = document.getElementById('pay_cardholder_name');
-            const cardVisualName = document.getElementById('cardVisualName');
-            if (holderInput && cardVisualName) {
+            const cardFlip     = document.getElementById('cardFlipInner');
+            const holderInput  = document.getElementById('pay_cardholder_name');
+            const cardInput    = document.getElementById('pay_card_number');
+            const expiryInput  = document.getElementById('pay_card_expiry');
+            const cvvInput     = document.getElementById('pay_card_cvv');
+            const cardIcon     = document.getElementById('cardIcon');
+
+            // Visual elements
+            const vNumber  = document.getElementById('cardVisualNumber');
+            const vName    = document.getElementById('cardVisualName');
+            const vExpiry  = document.getElementById('cardVisualExpiry');
+            const vCvv     = document.getElementById('cardVisualCvv');
+            const vBackName= document.getElementById('cardBackName');
+
+            // Brand logos
+            const brandDefault = document.getElementById('cardBrandDefault');
+            const brandVisa    = document.getElementById('cardBrandVisa');
+            const brandMaster  = document.getElementById('cardBrandMaster');
+
+            // ── Helper: detect brand ─────────────────────────
+            function detectBrand(val) {
+                if (/^4/.test(val)) return 'visa';
+                if (/^5[1-5]/.test(val) || /^2[2-7]/.test(val)) return 'mastercard';
+                return 'default';
+            }
+
+            function setBrand(brand) {
+                brandDefault.classList.add('d-none');
+                brandVisa.classList.add('d-none');
+                brandMaster.classList.add('d-none');
+
+                if (brand === 'visa') {
+                    brandVisa.classList.remove('d-none');
+                    if (cardIcon) cardIcon.className = 'fa-brands fa-cc-visa text-primary';
+                } else if (brand === 'mastercard') {
+                    brandMaster.classList.remove('d-none');
+                    if (cardIcon) cardIcon.className = 'fa-brands fa-cc-mastercard text-danger';
+                } else {
+                    brandDefault.classList.remove('d-none');
+                    if (cardIcon) cardIcon.className = 'fa-solid fa-credit-card text-muted';
+                }
+            }
+
+            // ── Helper: format number groups on card ─────────
+            function formatNumberGroups(digits) {
+                const padded = digits.padEnd(16, '•');
+                const g = [padded.slice(0,4), padded.slice(4,8), padded.slice(8,12), padded.slice(12,16)];
+                return g.join('\u00A0\u00A0');
+            }
+
+            // ── Card Holder Name ─────────────────────────────
+            if (holderInput) {
                 holderInput.addEventListener('input', () => {
-                    cardVisualName.textContent = holderInput.value.trim().toUpperCase() || 'NAME SURNAME';
+                    const val = holderInput.value.toUpperCase();
+                    holderInput.value = val;
+                    const display = val.trim() || 'FULL NAME';
+                    if (vName) vName.textContent = display;
+                    if (vBackName) vBackName.textContent = val.trim() ? val : 'Authorized Signature';
                 });
             }
 
-            const cardInput = document.getElementById('pay_card_number');
-            const cardIcon = document.getElementById('cardIcon');
-            const cardVisualNumber = document.getElementById('cardVisualNumber');
-            const cardVisualIcon = document.getElementById('cardVisualIcon');
+            // ── Card Number ──────────────────────────────────
             if (cardInput) {
                 cardInput.addEventListener('input', () => {
-                    let val = cardInput.value.replace(/\D/g, '');
-                    if (val.startsWith('4')) {
-                        cardIcon.className = 'fa-brands fa-cc-visa text-primary fs-5';
-                        if (cardVisualIcon) cardVisualIcon.className = 'fa-brands fa-cc-visa text-white';
-                    } else if (val.startsWith('5')) {
-                        cardIcon.className = 'fa-brands fa-cc-mastercard text-danger fs-5';
-                        if (cardVisualIcon) cardVisualIcon.className = 'fa-brands fa-cc-mastercard text-white';
-                    } else {
-                        cardIcon.className = 'fa-solid fa-credit-card text-muted fs-5';
-                        if (cardVisualIcon) cardVisualIcon.className = 'fa-solid fa-credit-card text-white-50';
-                    }
-                    
-                    let formatted = '';
-                    for (let i = 0; i < val.length; i++) {
-                        if (i > 0 && i % 4 === 0) {
-                            formatted += ' ';
-                        }
-                        formatted += val[i];
-                    }
+                    let digits = cardInput.value.replace(/\D/g, '').slice(0, 16);
+                    let formatted = digits.match(/.{1,4}/g)?.join('  ') || digits;
                     cardInput.value = formatted;
-                    if (cardVisualNumber) {
-                        cardVisualNumber.textContent = formatted || '•••• •••• •••• ••••';
-                    }
-                    
+
+                    setBrand(detectBrand(digits));
+
+                    if (vNumber) vNumber.innerHTML = formatNumberGroups(digits);
+
                     cardInput.classList.remove('is-invalid');
                     document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
                 });
             }
 
-            const expiryInput = document.getElementById('pay_card_expiry');
-            const cardVisualExpiry = document.getElementById('cardVisualExpiry');
+            // ── Expiry ───────────────────────────────────────
             if (expiryInput) {
-                expiryInput.addEventListener('input', () => {
+                expiryInput.addEventListener('input', (e) => {
                     let val = expiryInput.value.replace(/\D/g, '');
                     if (val.length > 2) {
                         expiryInput.value = val.substring(0, 2) + '/' + val.substring(2, 4);
                     } else {
                         expiryInput.value = val;
                     }
-                    if (cardVisualExpiry) {
-                        cardVisualExpiry.textContent = expiryInput.value || 'MM/YY';
-                    }
+                    if (vExpiry) vExpiry.textContent = expiryInput.value || 'MM/YY';
                     expiryInput.classList.remove('is-invalid');
                     document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
                 });
             }
 
-            const cvvInput = document.getElementById('pay_card_cvv');
+            // ── CVV — flip card on focus ─────────────────────
             if (cvvInput) {
+                cvvInput.addEventListener('focus', () => {
+                    if (cardFlip) cardFlip.classList.add('is-flipped');
+                });
+                cvvInput.addEventListener('blur', () => {
+                    if (cardFlip) cardFlip.classList.remove('is-flipped');
+                });
                 cvvInput.addEventListener('input', () => {
-                    cvvInput.value = cvvInput.value.replace(/\D/g, '');
+                    let val = cvvInput.value.replace(/\D/g, '').slice(0, 4);
+                    cvvInput.value = val;
+                    if (vCvv) vCvv.textContent = val ? '•'.repeat(val.length) : '•••';
                     cvvInput.classList.remove('is-invalid');
                     document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
                 });

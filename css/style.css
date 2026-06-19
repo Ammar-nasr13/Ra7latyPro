@@ -1132,67 +1132,360 @@ body.ltr-layout select.form-select,
     border-bottom-right-radius: 0 !important;
 }
 
-/* Interactive Payment Card Mockup Design */
-.payment-card-visual {
-    background: linear-gradient(135deg, var(--color-nile-dark), var(--color-nile));
-    border: 1px solid rgba(197, 160, 40, 0.35);
-    border-radius: 15px !important;
-    padding: 1.5rem;
-    color: white;
-    font-family: 'Courier New', Courier, monospace;
-    box-shadow: 0 10px 30px rgba(13, 33, 55, 0.25);
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.05em;
+
+/* ===================================================
+   PROFESSIONAL 3D FLIP CREDIT CARD
+   =================================================== */
+
+/* Card flip container */
+.card-flip-wrapper {
+    perspective: 1200px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 1.75rem;
+    height: 230px;
 }
 
-.payment-card-visual::before {
+.card-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    transform-style: preserve-3d;
+}
+
+.card-flip-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+/* Card faces */
+.card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        0 6px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* ── FRONT FACE ─────────────────────────────── */
+.card-face-front {
+    background: linear-gradient(135deg, #0D2137 0%, #1A3A5C 45%, #12345A 100%);
+    padding: 1.5rem 1.6rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.04em;
+}
+
+/* Holographic shimmer overlay */
+.card-face-front::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(197, 160, 40, 0.12) 0%, transparent 65%);
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(197,160,40,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(100,180,255,0.12) 0%, transparent 50%);
     pointer-events: none;
 }
 
-.card-visual-chip {
-    width: 42px;
-    height: 32px;
-    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
-    border-radius: 6px !important;
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+/* Subtle pattern overlay */
+.card-face-front::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 28px,
+            rgba(255,255,255,0.018) 28px,
+            rgba(255,255,255,0.018) 30px
+        );
+    pointer-events: none;
 }
 
-.card-visual-number {
-    font-size: 1.35rem;
-    letter-spacing: 0.12em;
-    margin-bottom: 1.25rem;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-    min-height: 24px;
+.card-front-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+}
+
+.card-front-logo {
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+}
+.card-front-logo span {
+    color: #C5A028;
+}
+
+/* Contactless icon */
+.card-contactless {
+    width: 22px;
+    height: 22px;
+    opacity: 0.6;
+}
+
+/* EMV Chip */
+.card-chip {
+    position: relative;
+    z-index: 1;
+    width: 48px;
+    height: 36px;
+    background: linear-gradient(145deg, #D4AF37 0%, #F5D769 35%, #B8941E 65%, #E8C44A 100%);
+    border-radius: 7px;
+    box-shadow:
+        inset 0 1px 3px rgba(255,255,255,0.45),
+        inset 0 -1px 2px rgba(0,0,0,0.3),
+        0 2px 8px rgba(0,0,0,0.4);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 2px;
+    padding: 5px 4px;
+    align-self: center;
+}
+.card-chip::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 1px;
+    background: rgba(0,0,0,0.15);
+    transform: translateX(-50%);
+}
+.card-chip::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 1px;
+    background: rgba(0,0,0,0.15);
+    transform: translateY(-50%);
+}
+
+/* Card number */
+.card-front-number {
+    position: relative;
+    z-index: 1;
+    font-size: 1.32rem;
+    letter-spacing: 0.22em;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+    font-weight: 600;
     direction: ltr;
     text-align: left;
+    margin: 0.1rem 0;
+    min-height: 28px;
+    word-spacing: 0.3em;
 }
 
-.card-visual-bottom {
+.card-front-bottom {
+    position: relative;
+    z-index: 1;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
 }
 
-.card-visual-label {
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.5);
+.card-info-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
     margin-bottom: 3px;
-    letter-spacing: 0.08em;
 }
 
-.card-visual-value {
+.card-info-value {
     font-size: 0.9rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.92);
     text-transform: uppercase;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    letter-spacing: 0.07em;
     min-height: 18px;
-    font-weight: 600;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
+/* Card brand logo area */
+.card-brand-logo {
+    text-align: right;
+}
+.card-brand-logo img,
+.card-brand-logo svg {
+    height: 40px;
+    width: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* ── BACK FACE ──────────────────────────────── */
+.card-face-back {
+    background: linear-gradient(160deg, #1a2a3a 0%, #0f1f30 100%);
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Magnetic strip */
+.card-mag-strip {
+    width: 100%;
+    height: 46px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #333 40%, #111 100%);
+    margin-top: 28px;
+    flex-shrink: 0;
+}
+
+/* Signature + CVV area */
+.card-back-body {
+    padding: 0.9rem 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.card-signature-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-signature-strip {
+    flex: 1;
+    height: 36px;
+    background: repeating-linear-gradient(
+        -45deg,
+        #f0f0f0,
+        #f0f0f0 3px,
+        #e0e0e0 3px,
+        #e0e0e0 6px
+    );
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.card-signature-text {
+    font-size: 0.72rem;
+    color: rgba(0,0,0,0.35);
+    font-style: italic;
+    letter-spacing: 0.04em;
+    font-family: 'Georgia', serif;
+    user-select: none;
+}
+
+.card-cvv-box {
+    background: white;
+    border-radius: 5px;
+    padding: 0.25rem 0.75rem;
+    text-align: center;
+    min-width: 58px;
+    flex-shrink: 0;
+}
+
+.card-cvv-label {
+    font-size: 0.52rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1px;
+}
+
+.card-cvv-value {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0D2137;
+    letter-spacing: 0.2em;
+    min-height: 20px;
+    font-family: 'Courier New', monospace;
+}
+
+.card-back-brand {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 1.5rem;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.card-back-ssl {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Visa brand SVG inline */
+.visa-logo-text {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-style: italic;
+    color: white;
+    letter-spacing: -0.02em;
+    font-family: 'Times New Roman', serif;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, #fff 40%, #e8e8e8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.mastercard-circles {
+    position: relative;
+    width: 50px;
+    height: 30px;
+    flex-shrink: 0;
+}
+.mastercard-circles::before,
+.mastercard-circles::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+}
+.mastercard-circles::before {
+    left: 0;
+    background: #EB001B;
+    opacity: 0.92;
+}
+.mastercard-circles::after {
+    right: 0;
+    background: #F79E1B;
+    opacity: 0.92;
+}
+
+/* Card input field focus glow */
+.card-input-focused {
+    box-shadow: 0 0 0 3px rgba(197,160,40,0.3), 0 2px 6px rgba(0,0,0,0.08) !important;
+    border-color: #C5A028 !important;
+}
+
+/* Removed old classes */
+.payment-card-visual { display: none; }
+.card-visual-chip,
+.card-visual-number,
+.card-visual-bottom,
+.card-visual-label,
+.card-visual-value { display: none; }
