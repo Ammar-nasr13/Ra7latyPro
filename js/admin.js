@@ -223,17 +223,54 @@ function renderSurveys(list) {
 
     list.forEach(s => {
         const dateStr = s.$createdAt || s.created_at;
+        
+        // Map raw values to detailed Arabic text for clarity
+        const travelTypeMap = {
+            family: 'مع العائلة 👨‍👩‍👧‍👦',
+            couple: 'مع الشريك 💑',
+            solo: 'منفرداً 👤',
+            friends: 'مع الأصدقاء 👥'
+        };
+        const budgetMap = {
+            low: 'اقتصادي (أقل من 500$)',
+            medium: 'متوسط (من 500$ إلى 1500$)',
+            high: 'مرتفع (من 1500$ إلى 3000$)',
+            luxury: 'فاخر (أكثر من 3000$)'
+        };
+        const climateMap = {
+            beach: 'شاطئ وبحر 🏖️',
+            desert: 'صحراء وتاريخ 🏜️',
+            mountain: 'جبال وطبيعة 🏔️',
+            city: 'مدن ومعالم 🏙️'
+        };
+        const durationMap = {
+            weekend: 'عطلة نهاية الأسبوع (2-3 أيام)',
+            week: 'أسبوع (4-7 أيام)',
+            twoweeks: 'أسبوعين (8-14 يوم)',
+            month: 'شهر أو أكثر 📅'
+        };
+
+        const tType = travelTypeMap[s.travel_type] || s.travel_type || '-';
+        const bgt = budgetMap[s.budget] || s.budget || '-';
+        const clm = climateMap[s.preferred_climate || s.climate] || s.preferred_climate || s.climate || '-';
+        const dur = durationMap[s.duration_preference || s.duration] || s.duration_preference || s.duration || '-';
+
         table.innerHTML += `
             <tr>
                 <td>
-                    <div class="fw-bold">${s.name}</div>
-                    <div class="small text-muted" dir="ltr">${s.phone || ''} | ${s.email}</div>
+                    <div class="fw-bold" style="color: #0D2137; font-size: 0.95rem;">${s.name}</div>
+                    <div class="small text-muted mb-1" dir="ltr">${s.phone || ''} | ${s.email}</div>
+                    ${s.message ? `
+                        <div class="mt-1 p-2 rounded bg-light border-start border-warning border-3 small text-secondary" style="font-style: italic; max-width: 320px; font-size: 0.82rem;">
+                            <strong>ملاحظات العميل:</strong> "${s.message}"
+                        </div>
+                    ` : ''}
                 </td>
-                <td class="text-capitalize">${s.travel_type}</td>
-                <td class="text-capitalize">${s.budget}</td>
-                <td class="text-capitalize">${s.preferred_climate || s.climate || ''}</td>
-                <td class="text-capitalize">${s.duration_preference || s.duration || ''}</td>
-                <td>${dateStr ? dateStr.slice(0, 10) : '-'}</td>
+                <td class="small fw-bold text-dark">${tType}</td>
+                <td class="small fw-bold text-dark">${bgt}</td>
+                <td class="small fw-bold text-dark">${clm}</td>
+                <td class="small fw-bold text-dark">${dur}</td>
+                <td class="small text-muted">${dateStr ? dateStr.slice(0, 10) : '-'}</td>
             </tr>
         `;
     });
@@ -413,11 +450,15 @@ window.seedAppwriteDatabase = async function() {
             if (list.documents.length > 0) {
                 const existingDoc = list.documents[0];
                 docId = existingDoc.$id;
-                // Update country reference if missing/wrong
+                const updatePayload = {};
                 if (!existingDoc.country_id || existingDoc.country_id !== countryDocId) {
-                    await window.db.databases.updateDocument(dbId, conf.collections.destinations, docId, {
-                        country_id: countryDocId
-                    });
+                    updatePayload.country_id = countryDocId;
+                }
+                if (!existingDoc.image_url && d.image) {
+                    updatePayload.image_url = d.image;
+                }
+                if (Object.keys(updatePayload).length > 0) {
+                    await window.db.databases.updateDocument(dbId, conf.collections.destinations, docId, updatePayload);
                 }
             } else {
                 const payload = {
@@ -454,11 +495,15 @@ window.seedAppwriteDatabase = async function() {
             
             if (list.documents.length > 0) {
                 const existingDoc = list.documents[0];
-                // Update destination reference if missing/wrong
+                const updatePayload = {};
                 if (!existingDoc.destination_id || existingDoc.destination_id !== destId) {
-                    await window.db.databases.updateDocument(dbId, conf.collections.trips, existingDoc.$id, {
-                        destination_id: destId
-                    });
+                    updatePayload.destination_id = destId;
+                }
+                if (!existingDoc.image_url && t.image) {
+                    updatePayload.image_url = t.image;
+                }
+                if (Object.keys(updatePayload).length > 0) {
+                    await window.db.databases.updateDocument(dbId, conf.collections.trips, existingDoc.$id, updatePayload);
                 }
             } else {
                 const payload = {

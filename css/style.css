@@ -538,6 +538,50 @@ body.ltr-layout .trip-card-price {
     color: var(--color-nile);
 }
 
+/* Custom radio option button styling */
+.survey-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.85rem 1.2rem;
+    border: 2px solid var(--color-sand-dark);
+    border-radius: 12px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.25s ease;
+    user-select: none;
+}
+
+.survey-radio-option:hover {
+    border-color: var(--color-gold-light);
+    transform: translateY(-1px);
+}
+
+.survey-radio-option:has(input[type="radio"]:checked) {
+    border-color: var(--color-gold) !important;
+    background-color: rgba(197, 160, 40, 0.06) !important;
+    box-shadow: 0 5px 15px rgba(197, 160, 40, 0.06);
+}
+
+.survey-radio-option input[type="radio"] {
+    accent-color: var(--color-gold);
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.survey-radio-option .option-text {
+    font-weight: 700;
+    color: var(--color-nile);
+    font-size: 0.9rem;
+    transition: color 0.25s ease;
+}
+
+.survey-radio-option:has(input[type="radio"]:checked) .option-text {
+    color: var(--color-gold);
+}
+
 .survey-nav {
     display: flex;
     justify-content: space-between;
@@ -972,7 +1016,7 @@ body.ltr-layout .search-icon-btn {
         border-radius: 6px !important;
     }
 }
-
-
-
-
+/* Adjust placeholder color for newsletter input to be readable against dark background */
+#newsletterEmail::placeholder {
+    color: rgba(255, 255, 255, 0.45) !important;
+}

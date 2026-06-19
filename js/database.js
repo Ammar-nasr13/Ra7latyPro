@@ -609,11 +609,16 @@ class DBService {
                 if (list.documents.length > 0) {
                     const existingDoc = list.documents[0];
                     docId = existingDoc.$id;
+                    const updatePayload = {};
                     if (!existingDoc.country_id || existingDoc.country_id !== countryDocId) {
-                        console.log(`Updating country reference for destination: ${d.name_ar}`);
-                        await this.databases.updateDocument(conf.databaseId, conf.collections.destinations, docId, {
-                            country_id: countryDocId
-                        });
+                        updatePayload.country_id = countryDocId;
+                    }
+                    if (!existingDoc.image_url && d.image) {
+                        updatePayload.image_url = d.image;
+                    }
+                    if (Object.keys(updatePayload).length > 0) {
+                        console.log(`Updating destination: ${d.name_ar}`, updatePayload);
+                        await this.databases.updateDocument(conf.databaseId, conf.collections.destinations, docId, updatePayload);
                     }
                 } else {
                     console.log(`Seeding destination: ${d.name_ar}`);
@@ -650,11 +655,16 @@ class DBService {
                 
                 if (list.documents.length > 0) {
                     const existingDoc = list.documents[0];
+                    const updatePayload = {};
                     if (!existingDoc.destination_id || existingDoc.destination_id !== destId) {
-                        console.log(`Updating destination reference for trip: ${t.title_ar}`);
-                        await this.databases.updateDocument(conf.databaseId, conf.collections.trips, existingDoc.$id, {
-                            destination_id: destId
-                        });
+                        updatePayload.destination_id = destId;
+                    }
+                    if (!existingDoc.image_url && t.image) {
+                        updatePayload.image_url = t.image;
+                    }
+                    if (Object.keys(updatePayload).length > 0) {
+                        console.log(`Updating trip: ${t.title_ar}`, updatePayload);
+                        await this.databases.updateDocument(conf.databaseId, conf.collections.trips, existingDoc.$id, updatePayload);
                     }
                 } else {
                     console.log(`Seeding trip: ${t.title_ar}`);
