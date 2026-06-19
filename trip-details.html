@@ -8,6 +8,20 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://ra7laty.com/trip-details" id="pageCanonical">
 
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="تفاصيل الرحلة — رحلاتي" id="ogTitle">
+    <meta property="og:description" content="احجز رحلتك السياحية المميزة مع رحلاتي." id="ogDescription">
+    <meta property="og:url" content="https://ra7laty.com/trip-details" id="ogUrl">
+    <meta property="og:image" content="https://ra7laty.com/images/og-default.jpg" id="ogImage">
+    <meta property="og:locale" content="ar_EG">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="تفاصيل الرحلة — رحلاتي" id="twitterTitle">
+    <meta name="twitter:description" content="احجز رحلتك السياحية المميزة مع رحلاتي." id="twitterDescription">
+    <meta name="twitter:image" content="https://ra7laty.com/images/og-default.jpg" id="twitterImage">
+
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -569,10 +583,61 @@
             document.getElementById('tripHero').style.backgroundImage = `url('${trip.image}')`;
 
             // Update dynamic SEO meta tags
+            const finalDesc = `${title} — ${desc ? desc.slice(0, 150) : 'رحلة مميزة مع شركة رحلاتي'}. احجز الآن!`;
+            const finalUrl = `https://ra7laty.com/trip-details?id=${trip.id}`;
+            const finalImage = trip.image || 'https://ra7laty.com/images/og-default.jpg';
+
             const descEl = document.getElementById('pageDescription');
-            if (descEl) descEl.setAttribute('content', `${title} — ${desc ? desc.slice(0, 130) : 'رحلة مميزة مع رحلاتي'}. احجز الآن!`);
+            if (descEl) descEl.setAttribute('content', finalDesc);
             const canonEl = document.getElementById('pageCanonical');
-            if (canonEl) canonEl.setAttribute('href', `https://ra7laty.com/trip-details?id=${trip.id}`);
+            if (canonEl) canonEl.setAttribute('href', finalUrl);
+
+            // Update Open Graph tags
+            const ogTitle = document.getElementById('ogTitle');
+            if (ogTitle) ogTitle.setAttribute('content', `${title} — رحلاتي`);
+            const ogDesc = document.getElementById('ogDescription');
+            if (ogDesc) ogDesc.setAttribute('content', finalDesc);
+            const ogUrl = document.getElementById('ogUrl');
+            if (ogUrl) ogUrl.setAttribute('content', finalUrl);
+            const ogImage = document.getElementById('ogImage');
+            if (ogImage) ogImage.setAttribute('content', finalImage);
+
+            // Update Twitter Card tags
+            const twTitle = document.getElementById('twitterTitle');
+            if (twTitle) twTitle.setAttribute('content', `${title} — رحلاتي`);
+            const twDesc = document.getElementById('twitterDescription');
+            if (twDesc) twDesc.setAttribute('content', finalDesc);
+            const twImage = document.getElementById('twitterImage');
+            if (twImage) twImage.setAttribute('content', finalImage);
+
+            // Inject JSON-LD TouristTrip structured data dynamically
+            let schemaEl = document.getElementById('dynamicTripSchema');
+            if (!schemaEl) {
+                schemaEl = document.createElement('script');
+                schemaEl.type = 'application/ld+json';
+                schemaEl.id = 'dynamicTripSchema';
+                document.head.appendChild(schemaEl);
+            }
+            const schemaData = {
+                "@context": "https://schema.org",
+                "@type": "TouristTrip",
+                "name": title,
+                "description": desc || 'رحلة سياحية مميزة',
+                "image": finalImage,
+                "provider": {
+                    "@type": "TravelAgency",
+                    "name": "رحلاتي",
+                    "url": "https://ra7laty.com"
+                },
+                "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": "USD",
+                    "price": trip.price,
+                    "availability": trip.spots_left > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                    "url": finalUrl
+                }
+            };
+            schemaEl.textContent = JSON.stringify(schemaData);
 
 
             const durationNum = parseInt(trip.duration) || 1;

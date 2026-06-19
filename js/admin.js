@@ -394,6 +394,7 @@ window.seedAppwriteDatabase = async function() {
                 docId = newDoc.$id;
             }
             countryIdMap[c.id] = docId;
+            countryIdMap[c.slug] = docId;
         }
 
         // 2. Upload Destinations
@@ -405,12 +406,20 @@ window.seedAppwriteDatabase = async function() {
                 Query.equal('name_en', [d.name_en])
             ]);
             
+            const cSlug = d.country_slug || 'egypt';
+            const countryDocId = countryIdMap[cSlug] || '';
+            
             let docId;
             if (list.documents.length > 0) {
-                docId = list.documents[0].$id;
+                const existingDoc = list.documents[0];
+                docId = existingDoc.$id;
+                // Update country reference if missing/wrong
+                if (!existingDoc.country_id || existingDoc.country_id !== countryDocId) {
+                    await window.db.databases.updateDocument(dbId, conf.collections.destinations, docId, {
+                        country_id: countryDocId
+                    });
+                }
             } else {
-                const cSlug = d.country_slug || 'egypt';
-                const countryDocId = countryIdMap[cSlug] || '';
                 const payload = {
                     country_id: countryDocId,
                     name_ar: d.name_ar,
@@ -441,8 +450,17 @@ window.seedAppwriteDatabase = async function() {
                 Query.equal('title_en', [t.title_en])
             ]);
             
-            if (list.documents.length === 0) {
-                const destId = destIdMap[t.destination_id] || '';
+            const destId = destIdMap[t.destination_id] || '';
+            
+            if (list.documents.length > 0) {
+                const existingDoc = list.documents[0];
+                // Update destination reference if missing/wrong
+                if (!existingDoc.destination_id || existingDoc.destination_id !== destId) {
+                    await window.db.databases.updateDocument(dbId, conf.collections.trips, existingDoc.$id, {
+                        destination_id: destId
+                    });
+                }
+            } else {
                 const payload = {
                     destination_id: destId,
                     title_ar: t.title_ar,
@@ -485,7 +503,7 @@ window.seedAppwriteDatabase = async function() {
             }
         }
 
-        alert('تم تهيئة قاعدة البيانات ورفع جميع الدول والوجهات والرحلات الافتراضية بنجاح!');
+        alert('تم تهيئة قاعدة البيانات وربط جميع الدول والوجهات والرحلات الافتراضية بنجاح!');
         if (typeof window.loadCountriesTable === 'function') await window.loadCountriesTable();
         if (typeof window.loadDestinationsTable === 'function') await window.loadDestinationsTable();
         if (typeof window.loadTripsTable === 'function') await window.loadTripsTable();
@@ -1023,7 +1041,21 @@ window.editDestination = async function(id) {
             document.getElementById('dest_is_featured').value = String(doc.is_featured);
             document.getElementById('dest_description_ar').value = doc.description_ar || '';
             document.getElementById('dest_description_en').value = doc.description_en || '';
-            document.getElementById('dest_image_url').value = doc.image_url || '';
+            const url = doc.image_url || '';
+            document.getElementById('dest_image_url').value = url;
+            const previewImg = document.getElementById('dest_image_preview');
+            const placeholder = document.getElementById('dest_upload_placeholder');
+            if (previewImg && placeholder) {
+                if (url) {
+                    previewImg.src = url;
+                    previewImg.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                } else {
+                    previewImg.src = '';
+                    previewImg.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+                }
+            }
             
             document.getElementById('destinationModalTitle').innerHTML = '<i class="fa-solid fa-map-pin me-2 text-warning"></i>تعديل الوجهة';
             document.getElementById('saveDestBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>تعديل';
@@ -1083,7 +1115,21 @@ window.editTrip = async function(id) {
             document.getElementById('trip_sort_order').value = doc.sort_order || 0;
             document.getElementById('trip_color_from').value = doc.color_from || '#0099CC';
             document.getElementById('trip_color_to').value = doc.color_to || '#FF6633';
-            document.getElementById('trip_image_url').value = doc.image_url || '';
+            const url = doc.image_url || '';
+            document.getElementById('trip_image_url').value = url;
+            const previewImg = document.getElementById('trip_image_preview');
+            const placeholder = document.getElementById('trip_upload_placeholder');
+            if (previewImg && placeholder) {
+                if (url) {
+                    previewImg.src = url;
+                    previewImg.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                } else {
+                    previewImg.src = '';
+                    previewImg.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+                }
+            }
             
             document.getElementById('trip_highlights_ar').value = (doc.highlights_ar || []).join('\n');
             document.getElementById('trip_highlights_en').value = (doc.highlights_en || []).join('\n');
@@ -1125,6 +1171,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const statusEl = document.getElementById('dest_upload_status');
             if (statusEl) statusEl.innerHTML = '';
+            
+            // Reset preview
+            const previewImg = document.getElementById('dest_image_preview');
+            const placeholder = document.getElementById('dest_upload_placeholder');
+            if (previewImg && placeholder) {
+                previewImg.src = '';
+                previewImg.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+            }
+            const urlInput = document.getElementById('dest_image_url');
+            if (urlInput) urlInput.value = '';
+
             document.getElementById('destinationModalTitle').innerHTML = '<i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة وجهة جديدة';
             document.getElementById('saveDestBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الوجهة';
         });
@@ -1143,6 +1201,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const statusEl = document.getElementById('trip_upload_status');
             if (statusEl) statusEl.innerHTML = '';
+
+            // Reset preview
+            const previewImg = document.getElementById('trip_image_preview');
+            const placeholder = document.getElementById('trip_upload_placeholder');
+            if (previewImg && placeholder) {
+                previewImg.src = '';
+                previewImg.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+            }
+            const urlInput = document.getElementById('trip_image_url');
+            if (urlInput) urlInput.value = '';
+
             document.getElementById('tripModalTitle').innerHTML = '<i class="fa-solid fa-plane me-2 text-warning"></i>إضافة رحلة جديدة';
             document.getElementById('saveTripBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
         });
@@ -1175,6 +1245,16 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const url = await window.db.uploadFile(file);
                 document.getElementById('dest_image_url').value = url;
+                
+                // Show preview
+                const previewImg = document.getElementById('dest_image_preview');
+                const placeholder = document.getElementById('dest_upload_placeholder');
+                if (previewImg && placeholder) {
+                    previewImg.src = url;
+                    previewImg.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                }
+                
                 if (statusEl) statusEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-check me-1"></i>تم رفع الصورة بنجاح!</span>';
             } catch (err) {
                 console.error(err);
@@ -1193,6 +1273,16 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const url = await window.db.uploadFile(file);
                 document.getElementById('trip_image_url').value = url;
+                
+                // Show preview
+                const previewImg = document.getElementById('trip_image_preview');
+                const placeholder = document.getElementById('trip_upload_placeholder');
+                if (previewImg && placeholder) {
+                    previewImg.src = url;
+                    previewImg.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                }
+                
                 if (statusEl) statusEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-check me-1"></i>تم رفع الصورة بنجاح!</span>';
             } catch (err) {
                 console.error(err);
@@ -1201,3 +1291,70 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Dynamic sitemap generator
+window.generateSitemapXML = async function() {
+    if (!window.db.isAppwriteConnected()) {
+        alert('يرجى الاتصال بـ Appwrite أولاً!');
+        return;
+    }
+    const btn = document.getElementById('generateSitemapBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i>جاري التصدير...';
+    }
+    try {
+        const conf = window.CONFIG.appwrite;
+        
+        // Fetch destinations and trips from database
+        const [destsRes, tripsRes] = await Promise.all([
+            window.db.databases.listDocuments(conf.databaseId, conf.collections.destinations),
+            window.db.databases.listDocuments(conf.databaseId, conf.collections.trips)
+        ]);
+        
+        const dests = destsRes.documents;
+        const trips = tripsRes.documents;
+        
+        const today = new Date().toISOString().split('T')[0];
+        
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+        
+        // Core pages
+        xml += `  <!-- Core Pages -->\n`;
+        xml += `  <url>\n    <loc>https://ra7laty.com/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+        xml += `  <url>\n    <loc>https://ra7laty.com/destinations</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+        xml += `  <url>\n    <loc>https://ra7laty.com/survey</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+        
+        // Destinations
+        xml += `  <!-- Dynamic Destinations -->\n`;
+        dests.forEach(d => {
+            xml += `  <url>\n    <loc>https://ra7laty.com/destination-details?id=${d.$id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+        });
+        
+        // Trips
+        xml += `  <!-- Dynamic Trips -->\n`;
+        trips.forEach(t => {
+            xml += `  <url>\n    <loc>https://ra7laty.com/trip-details?id=${t.$id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+        });
+        
+        xml += `</urlset>\n`;
+        
+        // Download XML file
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'sitemap.xml';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (err) {
+        console.error(err);
+        alert('حدث خطأ أثناء تصدير خريطة الموقع: ' + err.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-download me-1"></i> تصدير خريطة الموقع (sitemap.xml)';
+        }
+    }
+};

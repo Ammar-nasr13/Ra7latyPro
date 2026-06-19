@@ -568,12 +568,20 @@ class DBService {
         if (!this.appwriteConnected || !this.databases) return;
         const conf = window.CONFIG.appwrite;
         try {
-            // 1. Seed Countries
-            const countriesRes = await this.databases.listDocuments(conf.databaseId, conf.collections.countries);
+            const { Query } = Appwrite;
+            console.log("Checking and seeding default database records...");
+            
+            // 1. Seed/Update Countries
             const countryIdMap = {};
-            if (countriesRes.total === 0) {
-                console.log("Seeding default countries...");
-                for (const c of this.staticCountries) {
+            for (const c of this.staticCountries) {
+                const list = await this.databases.listDocuments(conf.databaseId, conf.collections.countries, [
+                    Query.equal('slug', [c.slug])
+                ]);
+                let docId;
+                if (list.documents.length > 0) {
+                    docId = list.documents[0].$id;
+                } else {
+                    console.log(`Seeding country: ${c.name_ar}`);
                     const payload = {
                         name_ar: c.name_ar,
                         name_en: c.name_en,
@@ -581,26 +589,34 @@ class DBService {
                         flag: c.flag
                     };
                     const doc = await this.databases.createDocument(conf.databaseId, conf.collections.countries, Appwrite.ID.unique(), payload);
-                    countryIdMap[c.id] = doc.$id;
+                    docId = doc.$id;
                 }
-            } else {
-                countriesRes.documents.forEach(c => {
-                    countryIdMap[c.slug] = c.$id;
-                    const staticCountry = this.staticCountries.find(sc => sc.slug === c.slug);
-                    if (staticCountry) {
-                        countryIdMap[staticCountry.id] = c.$id;
-                    }
-                });
+                countryIdMap[c.id] = docId;
+                countryIdMap[c.slug] = docId;
             }
 
-            // 2. Seed Destinations
-            const destsRes = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
+            // 2. Seed/Update Destinations
             const destIdMap = {};
-            if (destsRes.total === 0) {
-                console.log("Seeding default destinations...");
-                for (const d of this.staticDestinations) {
-                    const cSlug = d.country_slug || 'egypt';
-                    const countryDocId = countryIdMap[cSlug] || '';
+            for (const d of this.staticDestinations) {
+                const list = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations, [
+                    Query.equal('name_en', [d.name_en])
+                ]);
+                
+                const cSlug = d.country_slug || 'egypt';
+                const countryDocId = countryIdMap[cSlug] || '';
+                
+                let docId;
+                if (list.documents.length > 0) {
+                    const existingDoc = list.documents[0];
+                    docId = existingDoc.$id;
+                    if (!existingDoc.country_id || existingDoc.country_id !== countryDocId) {
+                        console.log(`Updating country reference for destination: ${d.name_ar}`);
+                        await this.databases.updateDocument(conf.databaseId, conf.collections.destinations, docId, {
+                            country_id: countryDocId
+                        });
+                    }
+                } else {
+                    console.log(`Seeding destination: ${d.name_ar}`);
                     const payload = {
                         country_id: countryDocId,
                         name_ar: d.name_ar,
@@ -619,25 +635,29 @@ class DBService {
                         meta_keywords_en: d.name_en
                     };
                     const doc = await this.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
-                    destIdMap[d.id] = doc.$id;
+                    docId = doc.$id;
                 }
-            } else {
-                destsRes.documents.forEach(d => {
-                    const staticDest = this.staticDestinations.find(sd => sd.name_en === d.name_en);
-                    if (staticDest) {
-                        destIdMap[staticDest.id] = d.$id;
-                    } else {
-                        destIdMap[d.$id] = d.$id;
-                    }
-                });
+                destIdMap[d.id] = docId;
             }
 
-            // 3. Seed Trips
-            const tripsRes = await this.databases.listDocuments(conf.databaseId, conf.collections.trips);
-            if (tripsRes.total === 0) {
-                console.log("Seeding default trips...");
-                for (const t of this.staticTrips) {
-                    const destId = destIdMap[t.destination_id] || '';
+            // 3. Seed/Update Trips
+            for (const t of this.staticTrips) {
+                const list = await this.databases.listDocuments(conf.databaseId, conf.collections.trips, [
+                    Query.equal('title_en', [t.title_en])
+                ]);
+                
+                const destId = destIdMap[t.destination_id] || '';
+                
+                if (list.documents.length > 0) {
+                    const existingDoc = list.documents[0];
+                    if (!existingDoc.destination_id || existingDoc.destination_id !== destId) {
+                        console.log(`Updating destination reference for trip: ${t.title_ar}`);
+                        await this.databases.updateDocument(conf.databaseId, conf.collections.trips, existingDoc.$id, {
+                            destination_id: destId
+                        });
+                    }
+                } else {
+                    console.log(`Seeding trip: ${t.title_ar}`);
                     const payload = {
                         destination_id: destId,
                         title_ar: t.title_ar,
@@ -679,7 +699,7 @@ class DBService {
                 }
             }
 
-            console.log("Automatic database seeding finished successfully.");
+            console.log("Database check and seeding finished successfully.");
             
             // Refresh tables if loaded in Admin view
             if (typeof window.loadCountriesTable === 'function') window.loadCountriesTable();

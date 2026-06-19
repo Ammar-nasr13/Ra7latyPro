@@ -11,28 +11,28 @@
     <title>لوحة التحكم — رحلاتي</title>
     <meta name="robots" content="noindex, nofollow">
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap 5 RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-dpuaG1suU0eT09tx5plTaGMLBsfDLzUCCUXOY2j/LSvXYuG6Bqs43ALlhIqAJVRb" crossorigin="anonymous">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background: #f8fafc;
-            color: #334155;
+            background: #FDFAF4; /* Warm background matching site */
+            color: #1A1A1A;
         }
-        /* Sidebar styling */
+        /* Sidebar styling - Nile Dark brand color */
         .admin-sidebar {
-            background: #0f172a;
+            background: #0D2137;
             min-height: 100vh;
-            color: #f8fafc;
-            border-left: 4px solid #f59e0b;
-            box-shadow: 4px 0 25px rgba(15, 23, 42, 0.15);
+            color: #F7EDD5;
+            border-left: 4px solid #C5A028;
+            box-shadow: -4px 0 25px rgba(13, 33, 55, 0.15);
             transition: all 0.3s ease;
         }
         .admin-sidebar .nav-link {
-            color: #94a3b8;
+            color: #E8D5A3;
             padding: 0.9rem 1.25rem;
             border-radius: 12px;
             display: flex;
@@ -47,36 +47,36 @@
             transition: transform 0.25s ease;
         }
         .admin-sidebar .nav-link:hover {
-            color: #f59e0b;
-            background: rgba(245, 158, 11, 0.08);
+            color: #F0D060;
+            background: rgba(197, 160, 40, 0.1);
             transform: translateX(-4px);
         }
         .admin-sidebar .nav-link:hover i {
             transform: scale(1.1);
         }
         .admin-sidebar .nav-link.active {
-            color: #ffffff;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+            color: #0D2137;
+            background: linear-gradient(135deg, #C5A028, #F0D060);
+            box-shadow: 0 4px 15px rgba(197, 160, 40, 0.35);
         }
         /* Premium Card styling */
         .admin-card {
             background: #ffffff;
             border-radius: 16px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 10px 30px rgba(226, 232, 240, 0.4);
+            border: 1px solid rgba(212, 180, 131, 0.25);
+            box-shadow: 0 10px 30px rgba(13, 33, 55, 0.05);
             padding: 1.75rem;
             margin-bottom: 1.5rem;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .admin-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(226, 232, 240, 0.6);
+            box-shadow: 0 15px 35px rgba(13, 33, 55, 0.08);
         }
         .stats-badge {
             font-size: 2.25rem;
             font-weight: 800;
-            color: #0f172a;
+            color: #0D2137;
             line-height: 1.2;
         }
         /* Table enhancements */
@@ -86,7 +86,7 @@
         }
         .table thead th {
             border: none;
-            color: #64748b;
+            color: #1A3A5C;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.85rem;
@@ -94,12 +94,12 @@
         }
         .table tbody tr {
             background: #ffffff;
-            box-shadow: 0 2px 8px rgba(226, 232, 240, 0.5);
+            box-shadow: 0 2px 8px rgba(13, 33, 55, 0.04);
             border-radius: 10px;
             transition: all 0.2s ease;
         }
         .table tbody tr:hover {
-            background: #f8fafc !important;
+            background: #FDFAF4 !important;
             transform: scale(1.005);
         }
         .table td, .table th {
@@ -123,40 +123,59 @@
             transition: all 0.25s ease;
         }
         .btn-warning {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: linear-gradient(135deg, #C5A028, #F0D060);
             border: none;
-            color: white !important;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+            color: #0D2137 !important;
+            box-shadow: 0 4px 12px rgba(197, 160, 40, 0.2);
         }
         .btn-warning:hover {
-            background: linear-gradient(135deg, #d97706, #b45309);
+            background: linear-gradient(135deg, #9A7A10, #C5A028);
             transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 6px 15px rgba(197, 160, 40, 0.3);
         }
         .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #1A3A5C, #2A5A8C);
             border: none;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(26, 58, 92, 0.2);
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            background: linear-gradient(135deg, #0D2137, #1A3A5C);
             transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 6px 15px rgba(26, 58, 92, 0.3);
         }
-        .btn-outline-primary, .btn-outline-danger {
+        .btn-outline-primary {
+            border-color: #1A3A5C;
+            color: #1A3A5C;
+            border-radius: 10px !important;
+            padding: 0.4rem 0.8rem;
+        }
+        .btn-outline-primary:hover {
+            background-color: #1A3A5C;
+            color: #ffffff;
+        }
+        .btn-outline-danger {
             border-radius: 10px !important;
             padding: 0.4rem 0.8rem;
         }
         /* Input & Forms styling */
-        .form-control, .form-select {
+        .form-control {
             border-radius: 10px !important;
             border: 1px solid #cbd5e1;
             padding: 0.65rem 1rem;
             transition: all 0.2s ease;
         }
+        .form-select {
+            border-radius: 10px !important;
+            border: 1px solid #cbd5e1;
+            /* Adjust padding in RTL to keep space on left for select arrow */
+            padding: 0.65rem 1.75rem 0.65rem 1rem !important;
+            background-position: left 0.75rem center !important;
+            transition: all 0.2s ease;
+        }
         .form-control:focus, .form-select:focus {
-            border-color: #f59e0b;
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            border-color: #C5A028 !important;
+            box-shadow: 0 0 0 3px rgba(197, 160, 40, 0.2) !important;
         }
         .form-label {
             color: #475569;
@@ -166,13 +185,20 @@
         .modal-content {
             border-radius: 20px !important;
             border: none;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+            box-shadow: 0 20px 40px rgba(13, 33, 55, 0.25);
             overflow: hidden;
         }
         .modal-header {
-            background: #0f172a !important;
-            border: none;
+            background: #0D2137 !important; /* Nile Dark */
+            border-bottom: 3px solid #C5A028 !important; /* Gold border */
             padding: 1.25rem 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header .btn-close {
+            margin: 0 !important; /* Avoid overlap issues in RTL */
+            padding: 0.5rem;
         }
         .modal-footer {
             border: none;
@@ -188,7 +214,7 @@
         .upload-preview-box {
             width: 100%;
             height: 150px;
-            border: 2px dashed #cbd5e1;
+            border: 2px dashed #D4B483; /* Papyrus color border */
             border-radius: 12px;
             display: flex;
             flex-direction: column;
@@ -196,13 +222,13 @@
             justify-content: center;
             cursor: pointer;
             overflow: hidden;
-            background: #f8fafc;
+            background: #FDFAF4;
             position: relative;
             transition: all 0.25s ease;
         }
         .upload-preview-box:hover {
-            border-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.02);
+            border-color: #C5A028;
+            background: rgba(197, 160, 40, 0.05);
         }
         .upload-preview-box img {
             width: 100%;
@@ -214,7 +240,7 @@
             .admin-sidebar {
                 min-height: auto !important;
                 border-left: none !important;
-                border-bottom: 4px solid #f59e0b;
+                border-bottom: 4px solid #C5A028;
             }
             #adminTabs {
                 flex-direction: row !important;
@@ -595,23 +621,25 @@
                                             </select>
                                         </div>
                                         <div class="col-md-12">
+                                             <label class="form-label fw-semibold">صورة الوجهة *</label>
+                                             <div class="upload-preview-box" onclick="document.getElementById('dest_image_file').click()">
+                                                 <div id="dest_upload_placeholder" class="text-center p-3">
+                                                     <i class="fa-solid fa-cloud-arrow-up fa-2x text-muted mb-2"></i>
+                                                     <p class="mb-0 text-muted small">اضغط هنا لرفع صورة أو اسحبها</p>
+                                                 </div>
+                                                 <img id="dest_image_preview" src="" class="d-none" alt="Preview">
+                                             </div>
+                                             <input type="hidden" id="dest_image_url" required>
+                                             <input type="file" id="dest_image_file" class="d-none" accept="image/*">
+                                             <div class="small mt-2" id="dest_upload_status"></div>
+                                        </div>
+                                        <div class="col-md-12">
                                             <label class="form-label fw-semibold">وصف الوجهة (عربي) *</label>
                                             <textarea class="form-control" id="dest_description_ar" rows="2" placeholder="وصف تفصيلي..." required></textarea>
                                         </div>
                                         <div class="col-md-12">
                                             <label class="form-label fw-semibold">وصف الوجهة (إنجليزي) *</label>
                                             <textarea class="form-control" id="dest_description_en" rows="2" placeholder="Detailed description..." required></textarea>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label class="form-label fw-semibold">صورة الوجهة *</label>
-                                            <div class="input-group mb-2">
-                                                <input type="text" class="form-control" id="dest_image_url" placeholder="https://example.com/image.jpg" required>
-                                                <input type="file" id="dest_image_file" class="d-none" accept="image/*">
-                                                <button class="btn btn-primary" type="button" onclick="document.getElementById('dest_image_file').click()">
-                                                    <i class="fa-solid fa-cloud-arrow-up"></i> رفع صورة
-                                                </button>
-                                            </div>
-                                            <div class="small text-secondary" id="dest_upload_status"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -724,14 +752,16 @@
                                                 </div>
                                                 <div class="col-12">
                                                     <label class="form-label fw-semibold">صورة الرحلة *</label>
-                                                    <div class="input-group mb-2">
-                                                        <input type="text" class="form-control" id="trip_image_url" placeholder="https://images.unsplash.com/..." required>
-                                                        <input type="file" id="trip_image_file" class="d-none" accept="image/*">
-                                                        <button class="btn btn-primary" type="button" onclick="document.getElementById('trip_image_file').click()">
-                                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع صورة
-                                                        </button>
+                                                    <div class="upload-preview-box" onclick="document.getElementById('trip_image_file').click()">
+                                                        <div id="trip_upload_placeholder" class="text-center p-3">
+                                                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-muted mb-2"></i>
+                                                            <p class="mb-0 text-muted small">اضغط هنا لرفع صورة أو اسحبها</p>
+                                                        </div>
+                                                        <img id="trip_image_preview" src="" class="d-none" alt="Preview">
                                                     </div>
-                                                    <div class="small text-secondary" id="trip_upload_status"></div>
+                                                    <input type="hidden" id="trip_image_url" required>
+                                                    <input type="file" id="trip_image_file" class="d-none" accept="image/*">
+                                                    <div class="small mt-2" id="trip_upload_status"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -937,6 +967,14 @@
                                         <strong>ملاحظة هامة:</strong> يجب إنشاء مجموعات البيانات (Collections) داخل لوحة تحكم Appwrite الخاصة بك أولاً بالمسميات والخصائص الموضحة في الدليل الجانبي قبل الضغط على هذا الزر.
                                     </div>
                                     <button class="btn btn-primary rounded-pill px-4 fw-bold" id="seedDbBtn" onclick="seedAppwriteDatabase()">تهيئة قاعدة البيانات (Seed Data)</button>
+                                </div>
+
+                                <div class="admin-card">
+                                    <h2 class="h5 fw-bold text-dark mb-3"><i class="fa-solid fa-square-rss me-1"></i> أدوات محركات البحث (SEO & Sitemap)</h2>
+                                    <p class="text-secondary small">توليد ملف خريطة الموقع sitemap.xml يحتوي على جميع روابط الدول والوجهات والرحلات النشطة المخزنة حالياً في قاعدة البيانات لإرساله لمحركات البحث.</p>
+                                    <button class="btn btn-warning rounded-pill px-4 fw-bold" id="generateSitemapBtn" onclick="generateSitemapXML()">
+                                        <i class="fa-solid fa-download me-1"></i> تصدير خريطة الموقع (sitemap.xml)
+                                    </button>
                                 </div>
                             </div>
 
