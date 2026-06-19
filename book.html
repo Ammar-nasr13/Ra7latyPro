@@ -205,6 +205,68 @@
                                     <input type="hidden" name="payment_method" id="paymentMethodInput" value="credit_card">
                                 </div>
 
+                                <!-- Inline Payment Details Container -->
+                                <div id="inlinePaymentContainer" class="p-4 rounded-4 mb-4 border" style="background: #FDFAF4; border: 2px solid var(--color-sand-dark) !important; transition: all 0.3s ease;">
+                                    
+                                    <!-- Credit Card Inline Form -->
+                                    <div id="creditCardInlineForm">
+                                        <h5 class="fw-bold text-nile mb-3" style="font-size: 1rem; border-bottom: 2px solid var(--color-gold); padding-bottom: 0.4rem; display: inline-block;">
+                                            <i class="fa-solid fa-credit-card text-warning me-1"></i> بيانات بطاقة الائتمان
+                                        </h5>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-dark small" for="pay_cardholder_name">اسم صاحب البطاقة</label>
+                                            <input type="text" id="pay_cardholder_name" class="form-control rounded-3 py-2" placeholder="الاسم المكتوب على البطاقة...">
+                                            <div class="invalid-feedback text-start" id="err_cardholder" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">يرجى كتابة الاسم المكتوب على البطاقة بشكل صحيح</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-dark small" for="pay_card_number">رقم البطاقة</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-credit-card text-muted" id="cardIcon"></i></span>
+                                                <input type="text" id="pay_card_number" class="form-control border-start-0 rounded-3 py-2 text-center" placeholder="4444 4444 4444 4444" maxlength="19" style="letter-spacing:0.08em;">
+                                            </div>
+                                            <div class="invalid-feedback text-start" id="err_cardnumber" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">رقم بطاقة غير صالح (يجب أن يتكون من 16 رقماً)</div>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold text-dark small" for="pay_card_expiry">تاريخ الانتهاء</label>
+                                                <input type="text" id="pay_card_expiry" class="form-control rounded-3 py-2 text-center" placeholder="MM/YY" maxlength="5">
+                                                <div class="invalid-feedback text-center" id="err_expiry" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">تاريخ غير صالح (MM/YY)</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold text-dark small" for="pay_card_cvv">الرمز السري (CVV)</label>
+                                                <input type="password" id="pay_card_cvv" class="form-control rounded-3 py-2 text-center" placeholder="123" maxlength="3" style="letter-spacing: 0.15em;">
+                                                <div class="invalid-feedback text-center" id="err_cvv" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">3 أرقام</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mobile Wallet Inline Form -->
+                                    <div id="mobileWalletInlineForm" class="d-none">
+                                        <h5 class="fw-bold text-nile mb-3" style="font-size: 1rem; border-bottom: 2px solid var(--color-gold); padding-bottom: 0.4rem; display: inline-block;">
+                                            <i class="fa-solid fa-mobile-screen text-warning me-1"></i> بيانات المحفظة الإلكترونية
+                                        </h5>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-dark small" for="pay_wallet_phone">رقم الهاتف المرتبط بالمحفظة</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                                                <input type="tel" id="pay_wallet_phone" class="form-control border-start-0 rounded-3 py-2 text-center" placeholder="01012345678" maxlength="11" dir="ltr">
+                                            </div>
+                                            <div class="invalid-feedback text-start" id="err_wallet_phone" style="display:none; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">يرجى إدخال رقم هاتف محمول مصري صحيح (11 رقم يبدأ بـ 01)</div>
+                                        </div>
+                                        <div class="mb-0">
+                                            <label class="form-label fw-bold text-dark small" for="pay_wallet_provider">شبكة المحفظة الإلكترونية</label>
+                                            <select id="pay_wallet_provider" class="form-select rounded-3 py-2">
+                                                <option value="vodafone">فودافون كاش (Vodafone Cash)</option>
+                                                <option value="etisalat">اتصالات كاش (Etisalat Cash)</option>
+                                                <option value="orange">أورانج كاش (Orange Cash)</option>
+                                                <option value="we">وي باي (WE Pay)</option>
+                                                <option value="meeza">محفظة ميزة الذكية (Meeza Wallet)</option>
+                                                <option value="instapay">إنستا باي (InstaPay)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Notes -->
                                 <div class="mb-4">
                                     <label class="form-label fw-bold text-dark" for="notes" data-i18n="labelNotes">ملاحظات إضافية</label>
@@ -303,7 +365,7 @@
                         <i class="fa-solid fa-shield-halved text-warning"></i>
                         <span>بوابة الدفع الإلكتروني الآمنة</span>
                     </h5>
-                    <button type="button" class="btn-close btn-close-white m-0" data-bs-dismiss="modal" aria-label="Close" id="closePaymentModalBtn"></button>
+                    <button type="button" class="btn-close btn-close-white m-0 d-none" data-bs-dismiss="modal" aria-label="Close" id="closePaymentModalBtn"></button>
                 </div>
                 
                 <!-- Modal Body -->
@@ -320,75 +382,17 @@
                         </div>
                     </div>
 
-                    <!-- Form Views (Card or Wallet) -->
+                    <!-- Form Views (Loading, OTP, Success) -->
                     <div id="paymentModalViews">
                         
-                        <!-- View 1: Credit Card Details Form -->
-                        <div id="creditCardFormView">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold text-dark small" for="pay_cardholder_name">اسم صاحب البطاقة</label>
-                                <input type="text" id="pay_cardholder_name" class="form-control rounded-3" placeholder="أحمد علي" required>
-                                <div class="invalid-feedback text-start" id="err_cardholder">يرجى كتابة الاسم المكتوب على البطاقة</div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold text-dark small" for="pay_card_number">رقم البطاقة</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-credit-card text-muted" id="cardIcon"></i></span>
-                                    <input type="text" id="pay_card_number" class="form-control border-start-0 rounded-3 text-center" placeholder="4444 4444 4444 4444" maxlength="19" required style="letter-spacing:0.08em;">
-                                </div>
-                                <div class="invalid-feedback text-start" id="err_cardnumber" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">رقم بطاقة غير صالح (يجب أن يتكون من 16 رقماً)</div>
-                            </div>
-                            <div class="row g-3 mb-4">
-                                <div class="col-6">
-                                    <label class="form-label fw-bold text-dark small" for="pay_card_expiry">تاريخ الانتهاء</label>
-                                    <input type="text" id="pay_card_expiry" class="form-control rounded-3 text-center" placeholder="MM/YY" maxlength="5" required>
-                                    <div class="invalid-feedback text-center" id="err_expiry" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">تاريخ غير صالح (MM/YY)</div>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label fw-bold text-dark small" for="pay_card_cvv">الرمز السري (CVV)</label>
-                                    <input type="password" id="pay_card_cvv" class="form-control rounded-3 text-center" placeholder="123" maxlength="3" required style="letter-spacing: 0.15em;">
-                                    <div class="invalid-feedback text-center" id="err_cvv" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">3 أرقام</div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-warning w-100 rounded-pill py-2.5 fw-bold btn-gold fs-6" id="confirmCardPayBtn">
-                                تأكيد ودفع الآن
-                            </button>
-                        </div>
-
-                        <!-- View 2: Mobile Wallet Details Form -->
-                        <div id="mobileWalletFormView" class="d-none">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold text-dark small" for="pay_wallet_phone">رقم الهاتف المحمول للمحفظة</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
-                                    <input type="tel" id="pay_wallet_phone" class="form-control border-start-0 rounded-3 text-center" placeholder="01012345678" maxlength="11" required dir="ltr">
-                                </div>
-                                <div class="invalid-feedback text-start" id="err_wallet_phone" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">يرجى إدخال رقم هاتف محمول مصري صحيح (11 رقم)</div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-dark small" for="pay_wallet_provider">شبكة المحفظة الإلكترونية</label>
-                                <select id="pay_wallet_provider" class="form-select rounded-3" required>
-                                    <option value="vodafone">فودافون كاش (Vodafone Cash)</option>
-                                    <option value="etisalat">اتصالات كاش (Etisalat Cash)</option>
-                                    <option value="orange">أورانج كاش (Orange Cash)</option>
-                                    <option value="we">وي باي (WE Pay)</option>
-                                    <option value="meeza">محفظة ميزة الذكية (Meeza Wallet)</option>
-                                    <option value="instapay">إنستا باي (InstaPay)</option>
-                                </select>
-                            </div>
-                            <button type="button" class="btn btn-warning w-100 rounded-pill py-2.5 fw-bold btn-gold fs-6" id="confirmWalletPayBtn">
-                                إرسال طلب الدفع
-                            </button>
-                        </div>
-
-                        <!-- View 3: Secure Loading Screen -->
-                        <div id="paymentLoadingView" class="d-none text-center py-4">
+                        <!-- View 1: Secure Loading Screen -->
+                        <div id="paymentLoadingView" class="text-center py-4">
                             <div class="spinner-border text-warning mb-3" style="width: 3.5rem; height: 3.5rem; border-width: 0.4rem;" role="status"></div>
-                            <h5 class="fw-bold text-dark" id="paymentLoadingTitle">جاري معالجة المعاملة بأمان...</h5>
+                            <h5 class="fw-bold text-dark" id="paymentLoadingTitle">جاري الاتصال الآمن بالبنك المصدر...</h5>
                             <p class="text-secondary small mb-0">الرجاء عدم إغلاق النافذة أو مغادرة الصفحة</p>
                         </div>
 
-                        <!-- View 4: OTP Verification Screen -->
+                        <!-- View 2: OTP Verification Screen -->
                         <div id="paymentOtpView" class="d-none text-center py-3">
                             <div class="display-6 text-warning mb-3"><i class="fa-solid fa-envelope-open-text"></i></div>
                             <h5 class="fw-bold text-dark">رمز التحقق الأمني (OTP)</h5>
@@ -406,7 +410,7 @@
                             <button type="button" class="btn btn-link text-decoration-none text-secondary small p-0" id="resendOtpBtn">إعادة إرسال الرمز</button>
                         </div>
 
-                        <!-- View 5: Success Screen -->
+                        <!-- View 3: Success Screen -->
                         <div id="paymentSuccessView" class="d-none text-center py-4">
                             <div class="success-checkmark mb-3">
                                 <i class="fa-solid fa-check"></i>
@@ -450,6 +454,7 @@
 
             await loadTripSummary(tripId);
             setupBookingFormEvents();
+            setupPaymentInputsFormatting();
             
             // Initialize button states
             updateGuestCounterUI('adults');
@@ -489,7 +494,17 @@
                 opt.addEventListener('click', () => {
                     options.forEach(o => o.classList.remove('selected'));
                     opt.classList.add('selected');
-                    input.value = opt.getAttribute('data-value');
+                    const val = opt.getAttribute('data-value');
+                    input.value = val;
+
+                    // Toggle inline forms
+                    if (val === 'credit_card') {
+                        document.getElementById('creditCardInlineForm').classList.remove('d-none');
+                        document.getElementById('mobileWalletInlineForm').classList.add('d-none');
+                    } else {
+                        document.getElementById('creditCardInlineForm').classList.add('d-none');
+                        document.getElementById('mobileWalletInlineForm').classList.remove('d-none');
+                    }
                 });
             });
 
@@ -529,11 +544,84 @@
                     document.getElementById('phone').classList.remove('is-invalid');
                 }
 
+                // Payment validation
+                const paymentMethod = input.value;
+                if (paymentMethod === 'credit_card') {
+                    let payValid = true;
+                    const holder = document.getElementById('pay_cardholder_name');
+                    const number = document.getElementById('pay_card_number');
+                    const expiry = document.getElementById('pay_card_expiry');
+                    const cvv = document.getElementById('pay_card_cvv');
+                    
+                    if (!holder.value.trim() || holder.value.trim().length < 3) {
+                        holder.classList.add('is-invalid');
+                        document.getElementById('err_cardholder').style.display = 'block';
+                        payValid = false;
+                    } else {
+                        holder.classList.remove('is-invalid');
+                        document.getElementById('err_cardholder').style.display = 'none';
+                    }
+                    
+                    const cardDigits = number.value.replace(/\D/g, '');
+                    if (cardDigits.length !== 16) {
+                        number.classList.add('is-invalid');
+                        document.getElementById('err_cardnumber').style.setProperty('display', 'block', 'important');
+                        payValid = false;
+                    } else {
+                        number.classList.remove('is-invalid');
+                        document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
+                    }
+                    
+                    const expParts = expiry.value.split('/');
+                    if (expParts.length !== 2 || expParts[0].length !== 2 || expParts[1].length !== 2) {
+                        expiry.classList.add('is-invalid');
+                        document.getElementById('err_expiry').style.setProperty('display', 'block', 'important');
+                        payValid = false;
+                    } else {
+                        const month = parseInt(expParts[0]);
+                        const year = parseInt(expParts[1]);
+                        if (month < 1 || month > 12 || isNaN(month) || isNaN(year)) {
+                            expiry.classList.add('is-invalid');
+                            document.getElementById('err_expiry').style.setProperty('display', 'block', 'important');
+                            payValid = false;
+                        } else {
+                            expiry.classList.remove('is-invalid');
+                            document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
+                        }
+                    }
+                    
+                    if (cvv.value.length !== 3) {
+                        cvv.classList.add('is-invalid');
+                        document.getElementById('err_cvv').style.setProperty('display', 'block', 'important');
+                        payValid = false;
+                    } else {
+                        cvv.classList.remove('is-invalid');
+                        document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
+                    }
+                    
+                    if (!payValid) valid = false;
+                } else if (paymentMethod === 'mobile_wallet') {
+                    let payValid = true;
+                    const walletPhone = document.getElementById('pay_wallet_phone');
+                    const prefixes = ['010', '011', '012', '015'];
+                    const startsWithPrefix = prefixes.some(p => walletPhone.value.startsWith(p));
+                    
+                    if (walletPhone.value.length !== 11 || !startsWithPrefix) {
+                        walletPhone.classList.add('is-invalid');
+                        document.getElementById('err_wallet_phone').style.setProperty('display', 'block', 'important');
+                        payValid = false;
+                    } else {
+                        walletPhone.classList.remove('is-invalid');
+                        document.getElementById('err_wallet_phone').style.setProperty('display', 'none', 'important');
+                    }
+                    
+                    if (!payValid) valid = false;
+                }
+
                 if (!valid) return;
 
                 const adults = parseInt(document.getElementById('adults').value);
                 const children = parseInt(document.getElementById('children').value);
-                const paymentMethod = input.value;
                 const notes = document.getElementById('notes').value.trim();
 
                 const adultsPrice = adults * selectedTrip.price;
@@ -585,52 +673,26 @@
                 ? 'بطاقة ائتمان' 
                 : 'محفظة إلكترونية';
 
-            // Reset inputs & errors
-            document.getElementById('pay_cardholder_name').value = '';
-            document.getElementById('pay_card_number').value = '';
-            document.getElementById('pay_card_expiry').value = '';
-            document.getElementById('pay_card_cvv').value = '';
-            document.getElementById('pay_wallet_phone').value = '';
+            // Reset OTP inputs & errors
             document.getElementById('pay_otp_code').value = '';
-            
-            // Hide all errors
-            document.getElementById('pay_cardholder_name').classList.remove('is-invalid');
-            document.getElementById('pay_card_number').classList.remove('is-invalid');
-            document.getElementById('pay_card_expiry').classList.remove('is-invalid');
-            document.getElementById('pay_card_cvv').classList.remove('is-invalid');
-            document.getElementById('pay_wallet_phone').classList.remove('is-invalid');
             document.getElementById('pay_otp_code').classList.remove('is-invalid');
-            
-            document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
-            document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
-            document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
-            document.getElementById('err_wallet_phone').style.setProperty('display', 'none', 'important');
             document.getElementById('err_otp').style.setProperty('display', 'none', 'important');
-
-            // Hide/Show correct form
-            if (paymentMethod === 'credit_card') {
-                document.getElementById('creditCardFormView').classList.remove('d-none');
-                document.getElementById('mobileWalletFormView').classList.add('d-none');
-            } else {
-                document.getElementById('creditCardFormView').classList.add('d-none');
-                document.getElementById('mobileWalletFormView').classList.remove('d-none');
-            }
             
-            // Hide other screens
-            document.getElementById('paymentLoadingView').classList.add('d-none');
+            // Show / Hide correct initial view inside modal
             document.getElementById('paymentOtpView').classList.add('d-none');
             document.getElementById('paymentSuccessView').classList.add('d-none');
-
-            // Show close button
-            document.getElementById('closePaymentModalBtn').classList.remove('d-none');
 
             // Initialize and show modal
             if (!paymentModal) {
                 paymentModal = new bootstrap.Modal(document.getElementById('paymentGatewayModal'));
-                setupPaymentInputsFormatting();
                 setupPaymentButtonHandlers();
             }
             paymentModal.show();
+
+            const loadingText = paymentMethod === 'credit_card'
+                ? "جاري التحقق من بيانات البطاقة لدى البنك المصدر..."
+                : "جاري الاتصال بالمحفظة وإرسال طلب الدفع...";
+            startPaymentFlow(loadingText);
         }
 
         function setupPaymentInputsFormatting() {
@@ -704,77 +766,6 @@
         }
 
         function setupPaymentButtonHandlers() {
-            document.getElementById('confirmCardPayBtn').addEventListener('click', () => {
-                const holder = document.getElementById('pay_cardholder_name');
-                const number = document.getElementById('pay_card_number');
-                const expiry = document.getElementById('pay_card_expiry');
-                const cvv = document.getElementById('pay_card_cvv');
-                
-                let valid = true;
-                if (!holder.value.trim() || holder.value.trim().length < 3) {
-                    holder.classList.add('is-invalid');
-                    valid = false;
-                } else {
-                    holder.classList.remove('is-invalid');
-                }
-                
-                const cardDigits = number.value.replace(/\D/g, '');
-                if (cardDigits.length !== 16) {
-                    number.classList.add('is-invalid');
-                    document.getElementById('err_cardnumber').style.setProperty('display', 'block', 'important');
-                    valid = false;
-                } else {
-                    number.classList.remove('is-invalid');
-                    document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
-                }
-                
-                const expParts = expiry.value.split('/');
-                if (expParts.length !== 2 || expParts[0].length !== 2 || expParts[1].length !== 2) {
-                    expiry.classList.add('is-invalid');
-                    document.getElementById('err_expiry').style.setProperty('display', 'block', 'important');
-                    valid = false;
-                } else {
-                    const month = parseInt(expParts[0]);
-                    if (month < 1 || month > 12) {
-                        expiry.classList.add('is-invalid');
-                        document.getElementById('err_expiry').style.setProperty('display', 'block', 'important');
-                        valid = false;
-                    } else {
-                        expiry.classList.remove('is-invalid');
-                        document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
-                    }
-                }
-                
-                if (cvv.value.length !== 3) {
-                    cvv.classList.add('is-invalid');
-                    document.getElementById('err_cvv').style.setProperty('display', 'block', 'important');
-                    valid = false;
-                } else {
-                    cvv.classList.remove('is-invalid');
-                    document.getElementById('err_cvv').style.setProperty('display', 'none', 'important');
-                }
-                
-                if (valid) {
-                    startPaymentFlow("جاري التحقق من بيانات البطاقة لدى البنك...");
-                }
-            });
-
-            document.getElementById('confirmWalletPayBtn').addEventListener('click', () => {
-                const phone = document.getElementById('pay_wallet_phone');
-                
-                const prefixes = ['010', '011', '012', '015'];
-                const startsWithPrefix = prefixes.some(p => phone.value.startsWith(p));
-                
-                if (phone.value.length !== 11 || !startsWithPrefix) {
-                    phone.classList.add('is-invalid');
-                    document.getElementById('err_wallet_phone').style.setProperty('display', 'block', 'important');
-                } else {
-                    phone.classList.remove('is-invalid');
-                    document.getElementById('err_wallet_phone').style.setProperty('display', 'none', 'important');
-                    startPaymentFlow("جاري إرسال طلب الدفع للمحفظة...");
-                }
-            });
-
             document.getElementById('verifyOtpPayBtn').addEventListener('click', () => {
                 const otp = document.getElementById('pay_otp_code');
                 if (otp.value.length !== 6) {
@@ -795,10 +786,6 @@
         }
 
         function startPaymentFlow(loadingText) {
-            // Hide forms
-            document.getElementById('creditCardFormView').classList.add('d-none');
-            document.getElementById('mobileWalletFormView').classList.add('d-none');
-            
             // Hide close button
             document.getElementById('closePaymentModalBtn').classList.add('d-none');
             

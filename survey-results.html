@@ -236,31 +236,51 @@
             const allowedBudgets = BUDGET_MAP[survey.budget] || ['low', 'medium', 'high', 'luxury'];
             const maxDays = DURATION_MAP[survey.duration_preference] || 35;
 
-            const scored = allTrips.map(trip => {
+            // Strict filter: Climate must match the preferred climate
+            let filteredTrips = allTrips.filter(trip => trip.climate === survey.preferred_climate);
+
+            // If no exact climate match, fallback to all (to prevent empty recommendations if DB is empty of this climate)
+            if (filteredTrips.length === 0) {
+                filteredTrips = allTrips;
+            }
+
+            const scored = filteredTrips.map(trip => {
                 let score = 0;
 
-                if (allowedBudgets.includes(trip.budget_tier)) score += 3;
-                if (trip.travel_type.includes(survey.travel_type)) score += 3;
-                if (trip.climate === survey.preferred_climate) score += 2;
+                // Budget matching
+                if (allowedBudgets.includes(trip.budget_tier)) {
+                    if (trip.budget_tier === survey.budget) {
+                        score += 5;
+                    } else {
+                        score += 3;
+                    }
+                }
+                
+                // Travel type matching
+                if (trip.travel_type && trip.travel_type.includes(survey.travel_type)) {
+                    score += 4;
+                }
+                
+                // Climate matching
+                if (trip.climate === survey.preferred_climate) {
+                    score += 5;
+                }
+                
+                // Duration matching
                 const tripDuration = parseInt(trip.duration) || 0;
-                if (tripDuration <= maxDays) score += 1;
-                if (tripDuration <= maxDays + 2) score += 0.5;
+                if (tripDuration <= maxDays) {
+                    score += 2;
+                } else if (tripDuration <= maxDays + 2) {
+                    score += 1;
+                }
 
                 return { ...trip, score };
             });
 
-            const matched = scored
-                .filter(t => t.score >= 4) // budget + travel type match
-                .sort((a, b) => b.score - a.score);
-
-            if (matched.length < 3) {
-                const fallbacks = scored
-                    .filter(t => !matched.some(m => m.id === t.id))
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, 3 - matched.length);
-                return [...matched, ...fallbacks];
-            }
-            return matched.slice(0, 9);
+            // Sort by score descending and take up to 3 trips
+            return scored
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
         }
 
         function renderTripsGrid(trips, grid, lang) {

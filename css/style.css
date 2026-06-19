@@ -1091,3 +1091,43 @@ body.ltr-layout select.form-select,
     min-width: 30px;
     text-align: center;
 }
+
+/* Input group borders reset and styling for both RTL and LTR layouts */
+.input-group > .input-group-text,
+.input-group > .form-control {
+    border-radius: 0 !important;
+}
+
+/* LTR layout input groups */
+[dir="ltr"] .input-group > :first-child,
+.ltr-layout .input-group > :first-child {
+    border-top-left-radius: 8px !important;
+    border-bottom-left-radius: 8px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+[dir="ltr"] .input-group > :last-child,
+.ltr-layout .input-group > :last-child {
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+/* RTL layout input groups */
+[dir="rtl"] .input-group > :first-child,
+.rtl-layout .input-group > :first-child {
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+[dir="rtl"] .input-group > :last-child,
+.rtl-layout .input-group > :last-child {
+    border-top-left-radius: 8px !important;
+    border-bottom-left-radius: 8px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
