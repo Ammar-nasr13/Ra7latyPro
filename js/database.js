@@ -384,6 +384,9 @@ class DBService {
                 this.databases = new Databases(this.sdk);
                 this.appwriteConnected = true;
                 console.log('Appwrite initialized successfully.');
+                
+                // Auto seed in the background if the database is empty
+                this.autoSeed();
             } catch (err) {
                 console.error('Failed to initialize Appwrite SDK.', err);
                 this.appwriteConnected = false;
@@ -391,6 +394,93 @@ class DBService {
         } else {
             console.warn('Appwrite credentials not found.');
             this.appwriteConnected = false;
+        }
+    }
+
+    async autoSeed() {
+        if (!this.appwriteConnected || !this.databases) return;
+        const conf = window.CONFIG.appwrite;
+        try {
+            // Check destinations count
+            const destsRes = await this.databases.listDocuments(conf.databaseId, conf.collections.destinations);
+            if (destsRes.total > 0) return; // Already has data, no need to seed
+
+            console.log("Database is empty. Starting automatic database seeding...");
+            const destIdMap = {};
+
+            // 1. Seed Destinations
+            for (const d of this.staticDestinations) {
+                const payload = {
+                    country_id: String(d.id),
+                    name_ar: d.name_ar,
+                    name_en: d.name_en,
+                    description_ar: d.desc_ar,
+                    description_en: d.desc_en,
+                    category: d.category,
+                    is_featured: d.is_featured,
+                    sort_order: d.sort_order,
+                    image_url: d.image,
+                    meta_title_ar: d.name_ar,
+                    meta_title_en: d.name_en,
+                    meta_desc_ar: d.desc_ar ? d.desc_ar.slice(0, 150) : '',
+                    meta_desc_en: d.desc_en ? d.desc_en.slice(0, 150) : '',
+                    meta_keywords_ar: d.name_ar,
+                    meta_keywords_en: d.name_en
+                };
+                const newDoc = await this.databases.createDocument(conf.databaseId, conf.collections.destinations, Appwrite.ID.unique(), payload);
+                destIdMap[d.id] = newDoc.$id;
+            }
+
+            // 2. Seed Trips
+            for (const t of this.staticTrips) {
+                const destId = destIdMap[t.destination_id] || '';
+                const payload = {
+                    destination_id: destId,
+                    title_ar: t.title_ar,
+                    title_en: t.title_en,
+                    desc_ar: t.desc_ar || '',
+                    desc_en: t.desc_en || '',
+                    highlights_ar: t.highlights_ar || [],
+                    highlights_en: t.highlights_en || [],
+                    included_ar: [],
+                    included_en: [],
+                    excluded_ar: [],
+                    excluded_en: [],
+                    itinerary_ar: [],
+                    itinerary_en: [],
+                    price: parseFloat(t.price) || 0,
+                    currency: t.currency || '$',
+                    duration: String(t.duration) + ' أيام',
+                    category: t.category || 'beach',
+                    climate: t.climate || 'beach',
+                    travel_type: t.travel_type || [],
+                    budget_tier: t.budget_tier || 'medium',
+                    color_from: t.color_from || '#0099CC',
+                    color_to: t.color_to || '#FF6633',
+                    is_egyptian: t.is_egyptian || false,
+                    spots_total: parseInt(t.spots_total) || 20,
+                    spots_left: parseInt(t.spots_left) || 20,
+                    departure_dates: t.departure_dates || [],
+                    is_active: true,
+                    sort_order: parseInt(t.id) || 0,
+                    meta_title_ar: t.title_ar,
+                    meta_title_en: t.title_en,
+                    meta_desc_ar: t.desc_ar ? t.desc_ar.slice(0, 150) : '',
+                    meta_desc_en: t.desc_en ? t.desc_en.slice(0, 150) : '',
+                    meta_keywords_ar: t.title_ar,
+                    meta_keywords_en: t.title_en,
+                    image_url: t.image || ''
+                };
+                await this.databases.createDocument(conf.databaseId, conf.collections.trips, Appwrite.ID.unique(), payload);
+            }
+
+            console.log("Automatic database seeding finished successfully.");
+            
+            // Refresh tables if loaded in Admin view
+            if (typeof window.loadDestinationsTable === 'function') window.loadDestinationsTable();
+            if (typeof window.loadTripsTable === 'function') window.loadTripsTable();
+        } catch (err) {
+            console.error("Automatic seeding failed:", err);
         }
     }
 
@@ -455,6 +545,7 @@ class DBService {
             const dests = await this.getDestinations();
             
             trips.forEach(t => {
+                t.id = t.$id;
                 t.image = t.image_url || t.image || '';
                 const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.country_id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
                 if (dest) {
@@ -470,6 +561,7 @@ class DBService {
         } catch (err) {
             console.warn('Failed to map destinations to trips:', err);
             trips.forEach(t => {
+                t.id = t.$id;
                 t.image = t.image_url || t.image || '';
             });
         }
