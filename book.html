@@ -218,54 +218,49 @@
 
                                                 <!-- FRONT FACE -->
                                                 <div class="card-face card-face-front">
-                                                    <!-- Top row: Bank name + contactless -->
+                                                    <!-- Top: Logo only -->
                                                     <div class="card-front-top">
                                                         <div class="card-front-logo">
                                                             <span>RA7LATY</span> BANK
                                                         </div>
-                                                        <!-- Contactless SVG -->
-                                                        <svg class="card-contactless" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" fill="none"/>
-                                                            <path d="M8.5 8.5a5 5 0 010 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
-                                                            <path d="M11 7a7 7 0 010 10" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.65"/>
-                                                            <path d="M13.5 5.5a9.5 9.5 0 010 13" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.35"/>
-                                                        </svg>
-                                                    </div>
-
-                                                    <!-- Chip row -->
-                                                    <div class="d-flex align-items-center gap-3" style="position:relative; z-index:1;">
-                                                        <div class="card-chip"></div>
-                                                    </div>
-
-                                                    <!-- Card number -->
-                                                    <div class="card-front-number" id="cardVisualNumber">
-                                                        •••• &nbsp;•••• &nbsp;•••• &nbsp;••••
-                                                    </div>
-
-                                                    <!-- Bottom row: Name + Expiry + Brand -->
-                                                    <div class="card-front-bottom">
-                                                        <div>
-                                                            <div class="card-info-label">Card Holder</div>
-                                                            <div class="card-info-value" id="cardVisualName">FULL NAME</div>
-                                                        </div>
-                                                        <div style="text-align:center;">
-                                                            <div class="card-info-label">Expires</div>
-                                                            <div class="card-info-value" id="cardVisualExpiry">MM/YY</div>
-                                                        </div>
-                                                        <!-- Brand logo -->
                                                         <div id="cardBrandDisplay">
-                                                            <!-- default: generic card icon -->
-                                                            <svg width="52" height="32" viewBox="0 0 52 32" fill="none" id="cardBrandDefault">
-                                                                <rect x="1" y="1" width="50" height="30" rx="5" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-                                                                <rect x="1" y="9" width="50" height="8" fill="rgba(255,255,255,0.12)"/>
+                                                            <svg width="48" height="28" viewBox="0 0 52 32" fill="none" id="cardBrandDefault">
+                                                                <rect x="1" y="1" width="50" height="30" rx="5" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                                                <rect x="1" y="10" width="50" height="8" fill="rgba(255,255,255,0.08)"/>
                                                             </svg>
-                                                            <!-- Visa -->
                                                             <div class="visa-logo-text d-none" id="cardBrandVisa">VISA</div>
-                                                            <!-- Mastercard -->
                                                             <div class="mastercard-circles d-none" id="cardBrandMaster"></div>
                                                         </div>
                                                     </div>
+
+                                                    <!-- Chip + Contactless -->
+                                                    <div class="card-chip-row">
+                                                        <div class="card-chip"></div>
+                                                        <svg class="card-contactless" viewBox="0 0 24 24" fill="none">
+                                                            <path d="M8.5 8.5a5 5 0 010 7" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.5"/>
+                                                            <path d="M11 7a7 7 0 010 10" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.7"/>
+                                                            <path d="M13.5 5.5a9.5 9.5 0 010 13" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.4"/>
+                                                        </svg>
+                                                    </div>
+
+                                                    <!-- Card number — starts empty -->
+                                                    <div class="card-front-number" id="cardVisualNumber" dir="ltr">
+                                                        ···· &nbsp; ···· &nbsp; ···· &nbsp; ····
+                                                    </div>
+
+                                                    <!-- Bottom: Holder + Expiry -->
+                                                    <div class="card-front-bottom">
+                                                        <div>
+                                                            <div class="card-info-label">Card Holder</div>
+                                                            <div class="card-info-value" id="cardVisualName">&nbsp;</div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="card-info-label">Expires</div>
+                                                            <div class="card-info-value" id="cardVisualExpiry">&nbsp;</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
+
 
                                                 <!-- BACK FACE -->
                                                 <div class="card-face card-face-back">
@@ -926,9 +921,9 @@
 
             // ── Helper: format number groups on card ─────────
             function formatNumberGroups(digits) {
-                const padded = digits.padEnd(16, '•');
+                const padded = digits.padEnd(16, '·');
                 const g = [padded.slice(0,4), padded.slice(4,8), padded.slice(8,12), padded.slice(12,16)];
-                return g.join('\u00A0\u00A0');
+                return g.join('\u00A0\u00A0\u00A0');
             }
 
             // ── Card Holder Name ─────────────────────────────
@@ -936,8 +931,7 @@
                 holderInput.addEventListener('input', () => {
                     const val = holderInput.value.toUpperCase();
                     holderInput.value = val;
-                    const display = val.trim() || 'FULL NAME';
-                    if (vName) vName.textContent = display;
+                    if (vName) vName.textContent = val.trim() || '\u00A0';
                     if (vBackName) vBackName.textContent = val.trim() ? val : 'Authorized Signature';
                 });
             }
@@ -967,7 +961,7 @@
                     } else {
                         expiryInput.value = val;
                     }
-                    if (vExpiry) vExpiry.textContent = expiryInput.value || 'MM/YY';
+                    if (vExpiry) vExpiry.textContent = expiryInput.value || '\u00A0';
                     expiryInput.classList.remove('is-invalid');
                     document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
                 });

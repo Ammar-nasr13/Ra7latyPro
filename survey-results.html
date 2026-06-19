@@ -199,10 +199,27 @@
             const climateMap = { beach: tx.optCliBeach, desert: tx.optCliDesert, mountain: tx.optCliMountain, city: tx.optCliCity };
             const durationMap = { weekend: tx.optDurWeekend, week: tx.optDurWeek, twoweeks: tx.optDurTwoWeeks, month: tx.optDurMonth };
 
-            document.getElementById('chipTravel').innerHTML = `<i class="fa-solid fa-plane-up me-2"></i> ${travelMap[response.travel_type] || response.travel_type}`;
-            document.getElementById('chipBudget').innerHTML = `<i class="fa-solid fa-wallet me-2"></i> ${budgetMap[response.budget] || response.budget}`;
-            document.getElementById('chipClimate').innerHTML = `<i class="fa-solid fa-cloud-sun me-2"></i> ${climateMap[response.preferred_climate] || response.preferred_climate}`;
-            document.getElementById('chipDuration').innerHTML = `<i class="fa-regular fa-calendar me-2"></i> ${durationMap[response.duration_preference] || response.duration_preference}`;
+            // Resolve fields that may be stored under different names in Appwrite
+            const resolvedClimate = response.preferred_climate || response.climate || '';
+            const resolvedDurationKey = (() => {
+                if (response.duration_preference) return response.duration_preference;
+                // Convert stored numeric duration (days) back to key
+                const d = parseInt(response.duration) || 0;
+                if (d <= 3)  return 'weekend';
+                if (d <= 7)  return 'week';
+                if (d <= 14) return 'twoweeks';
+                return 'month';
+            })();
+
+            // Climate label fallbacks in Arabic
+            const climateLabelsAr = { beach: 'شاطئ وبحر', desert: 'صحراء وطبيعة', mountain: 'جبال وطبيعة', city: 'مدينة وحضارة' };
+            const durationLabelsAr = { weekend: 'عطلة نهاية الأسبوع', week: 'أسبوع', twoweeks: 'أسبوعان', month: 'شهر' };
+
+            document.getElementById('chipTravel').innerHTML = `<i class="fa-solid fa-plane-up me-2"></i> ${travelMap[response.travel_type] || response.travel_type || '—'}`;
+            document.getElementById('chipBudget').innerHTML = `<i class="fa-solid fa-wallet me-2"></i> ${budgetMap[response.budget] || response.budget || '—'}`;
+            document.getElementById('chipClimate').innerHTML = `<i class="fa-solid fa-cloud-sun me-2"></i> ${climateMap[resolvedClimate] || climateLabelsAr[resolvedClimate] || resolvedClimate || '—'}`;
+            document.getElementById('chipDuration').innerHTML = `<i class="fa-regular fa-calendar me-2"></i> ${durationMap[resolvedDurationKey] || durationLabelsAr[resolvedDurationKey] || resolvedDurationKey || '—'}`;
+
 
             // Populate preferred country chip
             const chipCountry = document.getElementById('chipCountry');
@@ -250,88 +267,94 @@
             const allowedBudgets = BUDGET_MAP[survey.budget] || ['low', 'medium', 'high', 'luxury'];
             const maxDays = DURATION_MAP[survey.duration_preference] || 35;
 
-            // Helper: check if a trip matches the selected country
-            const tripMatchesCountry = (trip, country) => {
-                if (!country || country === 'all') return true;
-                const c = country.toLowerCase();
-                return (trip.country_en && trip.country_en.toLowerCase() === c) ||
-                       (trip.country_ar && trip.country_ar === country);
+            // ── Helper: does trip match the selected country? ────────────
+            const matchesCountry = (trip) => {
+                const c = (survey.preferred_country || 'all');
+                if (c === 'all') return true;
+                return (trip.country_en && trip.country_en.toLowerCase() === c.toLowerCase()) ||
+                       (trip.country_ar && trip.country_ar === c);
             };
 
-            // ── STEP 1: STRICT country filter (if selected) ──────────────
-            let countryPool;
-            if (survey.preferred_country && survey.preferred_country !== 'all') {
-                countryPool = allTrips.filter(t => tripMatchesCountry(t, survey.preferred_country));
-                // If no trips at all in that country, fall back to all trips
-                if (countryPool.length === 0) {
-                    countryPool = allTrips;
+            // ── Helper: does trip match the selected climate? ────────────
+            const matchesClimate = (trip) => {
+                if (!survey.preferred_climate) return true;
+                return trip.climate === survey.preferred_climate;
+            };
+
+            // ── Helper: does trip match the selected travel_type? ────────
+            const matchesTravelType = (trip) => {
+                if (!survey.travel_type) return true;
+                // trip.travel_type can be an array or comma-separated string
+                if (Array.isArray(trip.travel_type)) {
+                    return trip.travel_type.includes(survey.travel_type);
                 }
-            } else {
-                countryPool = allTrips;
+                if (typeof trip.travel_type === 'string') {
+                    return trip.travel_type.split(',').map(s => s.trim()).includes(survey.travel_type);
+                }
+                return false;
+            };
+
+            // ══ STEP 1: Country pool (STRICT) ════════════════════════════
+            const hasCountry = survey.preferred_country && survey.preferred_country !== 'all';
+            let countryPool = hasCountry
+                ? allTrips.filter(matchesCountry)
+                : allTrips;
+            if (countryPool.length === 0) countryPool = allTrips; // fallback
+
+            // ══ STEP 2: Filter by climate + travel_type together ═════════
+            let filteredTrips = countryPool.filter(t => matchesClimate(t) && matchesTravelType(t));
+
+            // Fallback A: only climate (ignore travel_type)
+            if (filteredTrips.length === 0) {
+                filteredTrips = countryPool.filter(matchesClimate);
             }
 
-            // ── STEP 2: Try to further filter by climate within country pool ─
-            let filteredTrips = countryPool;
-            if (survey.preferred_climate) {
-                const climateFiltered = countryPool.filter(trip => trip.climate === survey.preferred_climate);
-                // Only apply climate filter if it returns results; otherwise keep all country trips
-                if (climateFiltered.length > 0) {
-                    filteredTrips = climateFiltered;
-                }
+            // Fallback B: only travel_type (ignore climate)
+            if (filteredTrips.length === 0) {
+                filteredTrips = countryPool.filter(matchesTravelType);
             }
 
-            // If still empty, fallback to all
+            // Fallback C: all trips from the country pool
+            if (filteredTrips.length === 0) {
+                filteredTrips = countryPool;
+            }
+
+            // Fallback D: all trips (only if country had no results)
             if (filteredTrips.length === 0) {
                 filteredTrips = allTrips;
             }
 
+            // ══ STEP 3: Score & rank ══════════════════════════════════════
             const scored = filteredTrips.map(trip => {
                 let score = 0;
 
-                // Budget matching
+                // Country exact match — highest priority
+                if (hasCountry && matchesCountry(trip)) score += 10;
+
+                // Climate match
+                if (matchesClimate(trip)) score += 7;
+
+                // Travel type match
+                if (matchesTravelType(trip)) score += 6;
+
+                // Budget match
                 if (allowedBudgets.includes(trip.budget_tier)) {
-                    if (trip.budget_tier === survey.budget) {
-                        score += 5;
-                    } else {
-                        score += 3;
-                    }
+                    score += (trip.budget_tier === survey.budget) ? 5 : 3;
                 }
-                
-                // Travel type matching
-                if (trip.travel_type && trip.travel_type.includes(survey.travel_type)) {
-                    score += 4;
-                }
-                
-                // Climate matching
-                if (trip.climate === survey.preferred_climate) {
-                    score += 5;
-                }
-                
-                // Country matching (bonus score if matches the country preference)
-                if (survey.preferred_country && survey.preferred_country !== 'all') {
-                    const countryMatch = (trip.country_en && trip.country_en.toLowerCase() === survey.preferred_country.toLowerCase()) ||
-                                         (trip.country_ar && trip.country_ar === survey.preferred_country);
-                    if (countryMatch) {
-                        score += 8;
-                    }
-                }
-                
-                // Duration matching
+
+                // Duration match
                 const tripDuration = parseInt(trip.duration) || 0;
-                if (tripDuration <= maxDays) {
-                    score += 2;
-                } else if (tripDuration <= maxDays + 2) {
-                    score += 1;
-                }
+                if (tripDuration <= maxDays) score += 2;
+                else if (tripDuration <= maxDays + 2) score += 1;
 
                 return { ...trip, score };
             });
 
-            // Sort by score descending and take up to 3 trips
             return scored
                 .sort((a, b) => b.score - a.score)
                 .slice(0, 3);
         }
+
 
         function renderTripsGrid(trips, grid, lang) {
             grid.innerHTML = '';
