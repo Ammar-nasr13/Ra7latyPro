@@ -213,6 +213,26 @@
                                         <h5 class="fw-bold text-nile mb-3" style="font-size: 1rem; border-bottom: 2px solid var(--color-gold); padding-bottom: 0.4rem; display: inline-block;">
                                             <i class="fa-solid fa-credit-card text-warning me-1"></i> بيانات بطاقة الائتمان
                                         </h5>
+
+                                        <!-- Interactive Digital Card Visual -->
+                                        <div class="payment-card-visual mb-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div class="card-visual-chip"></div>
+                                                <div class="fs-4"><i class="fa-solid fa-credit-card text-white-50" id="cardVisualIcon"></i></div>
+                                            </div>
+                                            <div class="card-visual-number" id="cardVisualNumber">•••• •••• •••• ••••</div>
+                                            <div class="card-visual-bottom">
+                                                <div class="flex-grow-1 me-2 text-truncate" style="max-width: 70%;">
+                                                    <div class="card-visual-label">حامل البطاقة</div>
+                                                    <div class="card-visual-value text-truncate" id="cardVisualName">NAME SURNAME</div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="card-visual-label">الانتهاء</div>
+                                                    <div class="card-visual-value" id="cardVisualExpiry">MM/YY</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="mb-3">
                                             <label class="form-label fw-bold text-dark small" for="pay_cardholder_name">اسم صاحب البطاقة</label>
                                             <input type="text" id="pay_cardholder_name" class="form-control rounded-3 py-2" placeholder="الاسم المكتوب على البطاقة...">
@@ -265,6 +285,7 @@
                                             </select>
                                         </div>
                                     </div>
+
                                 </div>
 
                                 <!-- Notes -->
@@ -397,6 +418,7 @@
                             <div class="display-6 text-warning mb-3"><i class="fa-solid fa-envelope-open-text"></i></div>
                             <h5 class="fw-bold text-dark">رمز التحقق الأمني (OTP)</h5>
                             <p class="text-secondary small">تم إرسال رمز تحقق مؤقت إلى هاتفك المحمول للتحقق من هويتك</p>
+                            <div class="mb-2" id="otpSmsNotice"></div>
                             <div class="mb-3 w-50 mx-auto">
                                 <input type="text" id="pay_otp_code" class="form-control rounded-3 text-center fs-4 fw-bold letter-spacing-10" placeholder="000000" maxlength="6" required>
                                 <div class="invalid-feedback text-center" id="err_otp" style="display:none !important; color:#dc3545; font-size:0.875em; margin-top:0.25rem;">رمز التحقق يتكون من 6 أرقام</div>
@@ -455,7 +477,7 @@
             await loadTripSummary(tripId);
             setupBookingFormEvents();
             setupPaymentInputsFormatting();
-            
+
             // Initialize button states
             updateGuestCounterUI('adults');
             updateGuestCounterUI('children');
@@ -501,7 +523,7 @@
                     if (val === 'credit_card') {
                         document.getElementById('creditCardInlineForm').classList.remove('d-none');
                         document.getElementById('mobileWalletInlineForm').classList.add('d-none');
-                    } else {
+                    } else if (val === 'mobile_wallet') {
                         document.getElementById('creditCardInlineForm').classList.add('d-none');
                         document.getElementById('mobileWalletInlineForm').classList.remove('d-none');
                     }
@@ -669,15 +691,19 @@
             document.getElementById('modalPaymentAmount').textContent = `${symbol}${converted}`;
             
             // Set payment method name
-            document.getElementById('modalPaymentMethodName').textContent = paymentMethod === 'credit_card' 
-                ? 'بطاقة ائتمان' 
-                : 'محفظة إلكترونية';
+            let methodLabel = 'بطاقة ائتمان';
+            if (paymentMethod === 'mobile_wallet') methodLabel = 'محفظة إلكترونية';
+            
+            document.getElementById('modalPaymentMethodName').textContent = methodLabel;
 
             // Reset OTP inputs & errors
             document.getElementById('pay_otp_code').value = '';
             document.getElementById('pay_otp_code').classList.remove('is-invalid');
             document.getElementById('err_otp').style.setProperty('display', 'none', 'important');
             
+            const noticeEl = document.getElementById('otpSmsNotice');
+            if (noticeEl) noticeEl.innerHTML = '';
+
             // Show / Hide correct initial view inside modal
             document.getElementById('paymentOtpView').classList.add('d-none');
             document.getElementById('paymentSuccessView').classList.add('d-none');
@@ -695,18 +721,95 @@
             startPaymentFlow(loadingText);
         }
 
+        function formatPhoneNumberForSms(phone) {
+            let clean = phone.replace(/\D/g, '');
+            if (clean.startsWith('01')) {
+                return '+20' + clean.substring(1);
+            }
+            if (clean.startsWith('201')) {
+                return '+' + clean;
+            }
+            if (!clean.startsWith('+')) {
+                return '+' + clean;
+            }
+            return phone;
+        }
+
+        async function sendRealSms(phone, otpCode) {
+            const conf = window.CONFIG.smsConfig;
+            if (!conf || conf.provider === 'none') {
+                console.log("SMS sending disabled. Simulated OTP is:", otpCode);
+                return { success: false, reason: 'disabled' };
+            }
+            
+            const message = `رمز التحقق لمنصة رحلاتي هو: ${otpCode}. ينتهي الرمز خلال دقيقة واحدة.`;
+            const formattedPhone = formatPhoneNumberForSms(phone);
+            
+            if (conf.provider === 'textbelt') {
+                try {
+                    const res = await fetch('https://textbelt.com/text', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            phone: formattedPhone,
+                            message: message,
+                            key: conf.textbeltKey || 'textbelt'
+                        })
+                    });
+                    const data = await res.json();
+                    console.log("TextBelt API response:", data);
+                    return data;
+                } catch (err) {
+                    console.error("TextBelt fetch error:", err);
+                    return { success: false, error: err.message };
+                }
+            } else if (conf.provider === 'custom' && conf.customWebhookUrl) {
+                try {
+                    const res = await fetch(conf.customWebhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            phone: formattedPhone,
+                            message: message,
+                            otp: otpCode
+                        })
+                    });
+                    const data = await res.json();
+                    return { success: true, data };
+                } catch (err) {
+                    console.error("Custom webhook error:", err);
+                    return { success: false, error: err.message };
+                }
+            }
+            return { success: false, reason: 'unknown_provider' };
+        }
+
         function setupPaymentInputsFormatting() {
+            // Card mockup sync
+            const holderInput = document.getElementById('pay_cardholder_name');
+            const cardVisualName = document.getElementById('cardVisualName');
+            if (holderInput && cardVisualName) {
+                holderInput.addEventListener('input', () => {
+                    cardVisualName.textContent = holderInput.value.trim().toUpperCase() || 'NAME SURNAME';
+                });
+            }
+
             const cardInput = document.getElementById('pay_card_number');
             const cardIcon = document.getElementById('cardIcon');
+            const cardVisualNumber = document.getElementById('cardVisualNumber');
+            const cardVisualIcon = document.getElementById('cardVisualIcon');
             if (cardInput) {
                 cardInput.addEventListener('input', () => {
                     let val = cardInput.value.replace(/\D/g, '');
                     if (val.startsWith('4')) {
                         cardIcon.className = 'fa-brands fa-cc-visa text-primary fs-5';
+                        if (cardVisualIcon) cardVisualIcon.className = 'fa-brands fa-cc-visa text-white';
                     } else if (val.startsWith('5')) {
                         cardIcon.className = 'fa-brands fa-cc-mastercard text-danger fs-5';
+                        if (cardVisualIcon) cardVisualIcon.className = 'fa-brands fa-cc-mastercard text-white';
                     } else {
                         cardIcon.className = 'fa-solid fa-credit-card text-muted fs-5';
+                        if (cardVisualIcon) cardVisualIcon.className = 'fa-solid fa-credit-card text-white-50';
                     }
                     
                     let formatted = '';
@@ -717,6 +820,9 @@
                         formatted += val[i];
                     }
                     cardInput.value = formatted;
+                    if (cardVisualNumber) {
+                        cardVisualNumber.textContent = formatted || '•••• •••• •••• ••••';
+                    }
                     
                     cardInput.classList.remove('is-invalid');
                     document.getElementById('err_cardnumber').style.setProperty('display', 'none', 'important');
@@ -724,6 +830,7 @@
             }
 
             const expiryInput = document.getElementById('pay_card_expiry');
+            const cardVisualExpiry = document.getElementById('cardVisualExpiry');
             if (expiryInput) {
                 expiryInput.addEventListener('input', () => {
                     let val = expiryInput.value.replace(/\D/g, '');
@@ -731,6 +838,9 @@
                         expiryInput.value = val.substring(0, 2) + '/' + val.substring(2, 4);
                     } else {
                         expiryInput.value = val;
+                    }
+                    if (cardVisualExpiry) {
+                        cardVisualExpiry.textContent = expiryInput.value || 'MM/YY';
                     }
                     expiryInput.classList.remove('is-invalid');
                     document.getElementById('err_expiry').style.setProperty('display', 'none', 'important');
@@ -768,8 +878,9 @@
         function setupPaymentButtonHandlers() {
             document.getElementById('verifyOtpPayBtn').addEventListener('click', () => {
                 const otp = document.getElementById('pay_otp_code');
-                if (otp.value.length !== 6) {
+                if (otp.value.length !== 6 || otp.value !== window.currentOtpCode) {
                     otp.classList.add('is-invalid');
+                    document.getElementById('err_otp').textContent = "رمز التحقق غير صحيح أو غير متطابق";
                     document.getElementById('err_otp').style.setProperty('display', 'block', 'important');
                 } else {
                     otp.classList.remove('is-invalid');
@@ -781,6 +892,18 @@
             document.getElementById('resendOtpBtn').addEventListener('click', () => {
                 alert('تم إعادة إرسال رمز التحقق (OTP) بنجاح إلى هاتفك.');
                 document.getElementById('pay_otp_code').value = '';
+                
+                // Trigger SMS send again
+                sendRealSms(window.currentBookingData.phone, window.currentOtpCode).then(smsResult => {
+                    const noticeEl = document.getElementById('otpSmsNotice');
+                    if (noticeEl) {
+                        if (smsResult && smsResult.success) {
+                            noticeEl.innerHTML = `<span class="text-success small fw-bold"><i class="fa-solid fa-circle-check me-1"></i> تم إعادة إرسال الرمز بنجاح إلى هاتفك المحمول.</span>`;
+                        } else {
+                            noticeEl.innerHTML = `<span class="text-warning small"><i class="fa-solid fa-circle-info me-1"></i> تم محاكاة الإرسال (حساب الرسائل منتهي الصلاحية). الرمز هو: <strong class="text-danger fs-6">${window.currentOtpCode}</strong></span>`;
+                        }
+                    }
+                });
                 startOtpTimer();
             });
         }
@@ -797,8 +920,24 @@
             setTimeout(() => {
                 loadingView.classList.add('d-none');
                 
-                // Show OTP View
+                // For card / wallet, show OTP verification view
                 document.getElementById('paymentOtpView').classList.remove('d-none');
+                
+                // Generate OTP and try sending SMS
+                window.currentOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
+                console.log("OTP Code for verification:", window.currentOtpCode);
+
+                sendRealSms(window.currentBookingData.phone, window.currentOtpCode).then(smsResult => {
+                    const noticeEl = document.getElementById('otpSmsNotice');
+                    if (noticeEl) {
+                        if (smsResult && smsResult.success) {
+                            noticeEl.innerHTML = `<span class="text-success small fw-bold"><i class="fa-solid fa-circle-check me-1"></i> تم إرسال الرمز بنجاح إلى هاتفك المحمول.</span>`;
+                        } else {
+                            noticeEl.innerHTML = `<span class="text-warning small"><i class="fa-solid fa-circle-info me-1"></i> تم محاكاة الإرسال (حساب الرسائل منتهي الصلاحية). الرمز هو: <strong class="text-danger fs-6">${window.currentOtpCode}</strong></span>`;
+                        }
+                    }
+                });
+
                 startOtpTimer();
             }, 2500);
         }
@@ -845,29 +984,31 @@
                 document.getElementById('paymentSuccessView').classList.remove('d-none');
                 
                 // Submit actual booking data after 2 seconds
-                setTimeout(async () => {
-                    paymentModal.hide();
-                    
-                    // Show standard form submit loading
-                    document.getElementById('submitBtn').disabled = true;
-                    document.getElementById('submitText').classList.add('d-none');
-                    document.getElementById('submitSpinner').classList.remove('d-none');
-                    
-                    try {
-                        const res = await window.db.createBooking(window.currentBookingData);
-                        // Redirect on success
-                        const isLocal = window.location.protocol === 'file:';
-                        const redirectPage = isLocal ? 'booking-confirmed.html' : 'booking-confirmed';
-                        window.location.href = `${redirectPage}?reference=${res.reference}&price=${window.currentBookingData.total_price}&trip_id=${window.currentBookingData.trip_id}`;
-                    } catch (err) {
-                        console.error(err);
-                        alert('عذراً، حدث خطأ أثناء إتمام الحجز بعد الدفع. يرجى مراجعة خدمة العملاء.');
-                        document.getElementById('submitBtn').disabled = false;
-                        document.getElementById('submitText').classList.remove('d-none');
-                        document.getElementById('submitSpinner').classList.add('d-none');
-                    }
-                }, 2000);
+                setTimeout(submitBookingAfterPayment, 2000);
             }, 2000);
+        }
+
+        async function submitBookingAfterPayment() {
+            paymentModal.hide();
+            
+            // Show standard form submit loading
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitText').classList.add('d-none');
+            document.getElementById('submitSpinner').classList.remove('d-none');
+            
+            try {
+                const res = await window.db.createBooking(window.currentBookingData);
+                // Redirect on success
+                const isLocal = window.location.protocol === 'file:';
+                const redirectPage = isLocal ? 'booking-confirmed.html' : 'booking-confirmed';
+                window.location.href = `${redirectPage}?reference=${res.reference}&price=${window.currentBookingData.total_price}&trip_id=${window.currentBookingData.trip_id}`;
+            } catch (err) {
+                console.error(err);
+                alert('عذراً، حدث خطأ أثناء إتمام الحجز بعد الدفع. يرجى مراجعة خدمة العملاء.');
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitText').classList.remove('d-none');
+                document.getElementById('submitSpinner').classList.add('d-none');
+            }
         }
 
         async function updatePriceBreakdown() {

@@ -998,7 +998,12 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         const response = await this.databases.listDocuments(conf.databaseId, conf.collections.surveys);
-        return response.documents;
+        return response.documents.map(doc => {
+            doc.preferred_country = sessionStorage.getItem('survey_pref_country_' + doc.$id) || 
+                                    sessionStorage.getItem('survey_pref_country_' + doc.email) || 
+                                    'all';
+            return doc;
+        });
     }
 
     async createSurveyResponse(survey) {
@@ -1015,6 +1020,12 @@ class DBService {
         };
         const doc = await this.databases.createDocument(conf.databaseId, conf.collections.surveys, Appwrite.ID.unique(), record);
         
+        const preferredCountry = survey.preferred_country || 'all';
+        sessionStorage.setItem('survey_pref_country_' + doc.$id, preferredCountry);
+        sessionStorage.setItem('survey_pref_country_' + doc.email, preferredCountry);
+        
+        doc.preferred_country = preferredCountry;
+        
         sessionStorage.setItem('survey_response_id', doc.$id);
         sessionStorage.setItem('survey_response_data', JSON.stringify(doc));
         return doc.$id;
@@ -1024,12 +1035,23 @@ class DBService {
         this._assertConnected();
         const conf = window.CONFIG.appwrite;
         try {
-            return await this.databases.getDocument(conf.databaseId, conf.collections.surveys, id);
+            const doc = await this.databases.getDocument(conf.databaseId, conf.collections.surveys, id);
+            doc.preferred_country = sessionStorage.getItem('survey_pref_country_' + id) || 
+                                    sessionStorage.getItem('survey_pref_country_' + doc.email) || 
+                                    'all';
+            return doc;
         } catch (e) {
             const sessionData = sessionStorage.getItem('survey_response_data');
             if (sessionData) {
                 const parsed = JSON.parse(sessionData);
-                if (String(parsed.$id || parsed.id) === String(id)) return parsed;
+                if (String(parsed.$id || parsed.id) === String(id)) {
+                    if (!parsed.preferred_country) {
+                        parsed.preferred_country = sessionStorage.getItem('survey_pref_country_' + id) || 
+                                                sessionStorage.getItem('survey_pref_country_' + parsed.email) || 
+                                                'all';
+                    }
+                    return parsed;
+                }
             }
             throw e;
         }

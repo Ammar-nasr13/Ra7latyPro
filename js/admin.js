@@ -255,11 +255,20 @@ function renderSurveys(list) {
         const clm = climateMap[s.preferred_climate || s.climate] || s.preferred_climate || s.climate || '-';
         const dur = durationMap[s.duration_preference || s.duration] || s.duration_preference || s.duration || '-';
 
+        const countries = window.db.staticCountries || [];
+        const found = countries.find(c => c.name_en === s.preferred_country);
+        const countryText = found ? `${found.flag} ${found.name_ar}` : (s.preferred_country === 'all' || !s.preferred_country ? 'أي دولة 🌍' : s.preferred_country);
+
         table.innerHTML += `
             <tr>
                 <td>
                     <div class="fw-bold" style="color: #0D2137; font-size: 0.95rem;">${s.name}</div>
                     <div class="small text-muted mb-1" dir="ltr">${s.phone || ''} | ${s.email}</div>
+                    <div class="small mt-1 text-secondary mb-2" style="font-size: 0.8rem;">
+                        <span style="background-color: #f0f2f5; color: #495057; padding: 2px 6px; border-radius: 4px; border: 1px solid #dee2e6;">
+                            <strong>الدولة المفضلة:</strong> ${countryText}
+                        </span>
+                    </div>
                     ${s.message ? `
                         <div class="mt-1 p-2 rounded bg-light border-start border-warning border-3 small text-secondary" style="font-style: italic; max-width: 320px; font-size: 0.82rem;">
                             <strong>ملاحظات العميل:</strong> "${s.message}"

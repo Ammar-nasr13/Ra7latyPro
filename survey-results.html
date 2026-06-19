@@ -97,6 +97,7 @@
                     <span class="badge bg-white bg-opacity-10 border border-secondary border-opacity-30 rounded-pill px-3 py-2 text-warning fs-7" id="chipTravel"></span>
                     <span class="badge bg-white bg-opacity-10 border border-secondary border-opacity-30 rounded-pill px-3 py-2 text-warning fs-7" id="chipBudget"></span>
                     <span class="badge bg-white bg-opacity-10 border border-secondary border-opacity-30 rounded-pill px-3 py-2 text-warning fs-7" id="chipClimate"></span>
+                    <span class="badge bg-white bg-opacity-10 border border-secondary border-opacity-30 rounded-pill px-3 py-2 text-warning fs-7" id="chipCountry"></span>
                     <span class="badge bg-white bg-opacity-10 border border-secondary border-opacity-30 rounded-pill px-3 py-2 text-warning fs-7" id="chipDuration"></span>
                 </div>
             </div>
@@ -203,6 +204,21 @@
             document.getElementById('chipClimate').innerHTML = `<i class="fa-solid fa-cloud-sun me-2"></i> ${climateMap[response.preferred_climate] || response.preferred_climate}`;
             document.getElementById('chipDuration').innerHTML = `<i class="fa-regular fa-calendar me-2"></i> ${durationMap[response.duration_preference] || response.duration_preference}`;
 
+            // Populate preferred country chip
+            const chipCountry = document.getElementById('chipCountry');
+            if (chipCountry) {
+                if (response.preferred_country && response.preferred_country !== 'all') {
+                    const countries = window.db.staticCountries || [];
+                    const found = countries.find(c => c.name_en === response.preferred_country);
+                    const flag = found ? found.flag : '🌍';
+                    const countryName = found ? (lang === 'ar' ? found.name_ar : found.name_en) : response.preferred_country;
+                    chipCountry.innerHTML = `<span class="me-2">${flag}</span> ${countryName}`;
+                    chipCountry.classList.remove('d-none');
+                } else {
+                    chipCountry.classList.add('d-none');
+                }
+            }
+
             // 3. Match Trips
             const trips = await window.db.getTrips();
             const matched = matchTrips(response, trips);
@@ -218,8 +234,6 @@
                 noMatches.classList.remove('d-none');
                 grid.style.display = 'none';
             } else {
-                // If there are exact matches but we fell back to show recommendations
-                // check if the matched trips score is below 4. If all matched scores are fallback
                 const hasMatch = matched.some(t => t.score >= 4);
                 if (!hasMatch) {
                     noMatches.classList.remove('d-none');
@@ -239,7 +253,28 @@
             // Strict filter: Climate must match the preferred climate
             let filteredTrips = allTrips.filter(trip => trip.climate === survey.preferred_climate);
 
-            // If no exact climate match, fallback to all (to prevent empty recommendations if DB is empty of this climate)
+            // Filter by preferred country if not 'all'
+            if (survey.preferred_country && survey.preferred_country !== 'all') {
+                const countryFiltered = filteredTrips.filter(trip => 
+                    (trip.country_en && trip.country_en.toLowerCase() === survey.preferred_country.toLowerCase()) ||
+                    (trip.country_ar && trip.country_ar === survey.preferred_country)
+                );
+                
+                if (countryFiltered.length > 0) {
+                    filteredTrips = countryFiltered;
+                } else {
+                    // Fallback to match country trips even if climate differs
+                    const justCountry = allTrips.filter(trip => 
+                        (trip.country_en && trip.country_en.toLowerCase() === survey.preferred_country.toLowerCase()) ||
+                        (trip.country_ar && trip.country_ar === survey.preferred_country)
+                    );
+                    if (justCountry.length > 0) {
+                        filteredTrips = justCountry;
+                    }
+                }
+            }
+
+            // If no exact matches, fallback to all
             if (filteredTrips.length === 0) {
                 filteredTrips = allTrips;
             }
@@ -264,6 +299,15 @@
                 // Climate matching
                 if (trip.climate === survey.preferred_climate) {
                     score += 5;
+                }
+                
+                // Country matching (bonus score if matches the country preference)
+                if (survey.preferred_country && survey.preferred_country !== 'all') {
+                    const countryMatch = (trip.country_en && trip.country_en.toLowerCase() === survey.preferred_country.toLowerCase()) ||
+                                         (trip.country_ar && trip.country_ar === survey.preferred_country);
+                    if (countryMatch) {
+                        score += 8;
+                    }
                 }
                 
                 // Duration matching

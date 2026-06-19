@@ -3,6 +3,11 @@ const CONFIG = {
     domain: 'https://ra7laty.com',
     whatsappNumber: '+201000000000',
     contactEmail: 'info@ra7laty.com',
+    smsConfig: {
+        provider: 'textbelt', // Options: 'textbelt', 'custom', 'none'
+        textbeltKey: 'textbelt', // Free testing key, allows 1 free SMS per day per IP
+        customWebhookUrl: '' // In case the user wants to forward OTPs to a custom webhook/gateway
+    },
     appwrite: {
         endpoint: 'https://appwrite.etihadalmdina.com/v1',
         projectId: '6a32ee5e0018a83516bc',

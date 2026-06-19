@@ -1131,3 +1131,68 @@ body.ltr-layout select.form-select,
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }
+
+/* Interactive Payment Card Mockup Design */
+.payment-card-visual {
+    background: linear-gradient(135deg, var(--color-nile-dark), var(--color-nile));
+    border: 1px solid rgba(197, 160, 40, 0.35);
+    border-radius: 15px !important;
+    padding: 1.5rem;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    box-shadow: 0 10px 30px rgba(13, 33, 55, 0.25);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.05em;
+}
+
+.payment-card-visual::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(197, 160, 40, 0.12) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+.card-visual-chip {
+    width: 42px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+    border-radius: 6px !important;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+.card-visual-number {
+    font-size: 1.35rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 1.25rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    min-height: 24px;
+    direction: ltr;
+    text-align: left;
+}
+
+.card-visual-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.card-visual-label {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    letter-spacing: 0.08em;
+}
+
+.card-visual-value {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    min-height: 18px;
+    font-weight: 600;
+}

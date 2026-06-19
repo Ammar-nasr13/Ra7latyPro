@@ -96,6 +96,7 @@ const TEXTS = {
         step2Sub: 'مع من ستسافر في مغامرتك القادمة؟',
         step3Title: 'ثالثاً — تفضيلاتك',
         step3Sub: 'أخبرنا عن ميزانيتك، المناخ والمدة المفضلة للسفر',
+        countryLabel: 'الوجهة أو الدولة المفضلة للسفر إليها:',
         step4Title: 'رابعاً — ملاحظات إضافية',
         step4Sub: 'أي طلبات أو تفاصيل خاصة تريد إضافتها؟',
         optFamily: 'مع العائلة',
@@ -229,6 +230,7 @@ const TEXTS = {
         step2Sub: 'Who will be joining you on your next adventure?',
         step3Title: 'Third — Preferences',
         step3Sub: 'Tell us about your budget, preferred climate, and trip duration',
+        countryLabel: 'Preferred travel destination or country:',
         step4Title: 'Fourth — Additional Notes',
         step4Sub: 'Any special requests or details you want to add?',
         optFamily: 'With Family',
@@ -347,6 +349,7 @@ async function convertPrices(currencyCode) {
     localStorage.setItem('rahalaty_currency', currencyCode);
     const label = document.getElementById('currencyBtnLabel');
     if (label) label.textContent = currencyCode;
+    document.dispatchEvent(new CustomEvent('currencyChanged', { detail: { currency: currencyCode } }));
 }
 
 // ─── NAVBAR & MENU UTILITY ────────────────────────────────────────────
