@@ -621,6 +621,24 @@
                 });
             });
 
+            // Check currency for payment method visibility (Only EGP gets e-wallet)
+            const savedCurrency = localStorage.getItem('rahalaty_currency') || 'USD';
+            const walletOption = document.querySelector('.payment-option[data-value="mobile_wallet"]');
+            if (savedCurrency !== 'EGP') {
+                if (walletOption) {
+                    walletOption.classList.add('d-none');
+                }
+                // Force credit card
+                const cardOption = document.querySelector('.payment-option[data-value="credit_card"]');
+                if (cardOption) {
+                    cardOption.click();
+                }
+            } else {
+                if (walletOption) {
+                    walletOption.classList.remove('d-none');
+                }
+            }
+
             // Form Submit handler
             const form = document.getElementById('bookingForm');
             form.addEventListener('submit', async (e) => {
@@ -1129,7 +1147,7 @@
                 // Redirect on success
                 const isLocal = window.location.protocol === 'file:';
                 const redirectPage = isLocal ? 'booking-confirmed.html' : 'booking-confirmed';
-                window.location.href = `${redirectPage}?reference=${res.reference}&price=${window.currentBookingData.total_price}&trip_id=${window.currentBookingData.trip_id}`;
+                window.location.replace(`${redirectPage}?reference=${res.reference}&price=${window.currentBookingData.total_price}&trip_id=${window.currentBookingData.trip_id}`);
             } catch (err) {
                 console.error(err);
                 alert('عذراً، حدث خطأ أثناء إتمام الحجز بعد الدفع. يرجى مراجعة خدمة العملاء.');

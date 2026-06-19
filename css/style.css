@@ -1841,3 +1841,26 @@ body.ltr-layout select.form-select,
     box-shadow: 0 0 0 3px rgba(197,160,40,0.3), 0 2px 6px rgba(0,0,0,0.08) !important;
     border-color: #C5A028 !important;
 }
+
+/* Override warning/orange text classes to navy blue in texts */
+span.text-warning,
+div.text-warning,
+p.text-warning,
+a.text-warning,
+strong.text-warning,
+li.text-warning,
+h1.text-warning,
+h2.text-warning,
+h3.text-warning,
+h4.text-warning,
+h5.text-warning,
+h6.text-warning,
+span.text-warning-emphasis,
+div.text-warning-emphasis,
+p.text-warning-emphasis,
+a.text-warning-emphasis,
+strong.text-warning-emphasis,
+li.text-warning-emphasis {
+    color: var(--color-nile) !important;
+}
+
