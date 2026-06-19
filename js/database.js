@@ -20,6 +20,7 @@ const STATIC_COUNTRIES = [
 const STATIC_DESTINATIONS = [
     {
         id: 1,
+        country_slug: 'egypt',
         name_ar: 'الغردقة', name_en: 'Hurghada',
         desc_ar: 'مدينة ساحلية رائعة على البحر الأحمر، مشهورة بشعابها المرجانية وشواطئها الذهبية ورياضات الغوص والسنوركل.',
         desc_en: 'A stunning coastal city on the Red Sea, famous for its coral reefs, golden beaches, and world-class diving.',
@@ -30,6 +31,7 @@ const STATIC_DESTINATIONS = [
     },
     {
         id: 2,
+        country_slug: 'egypt',
         name_ar: 'شرم الشيخ', name_en: 'Sharm El-Sheikh',
         desc_ar: 'جنة الشعاب المرجانية والمنتجعات الفاخرة بين جبال سيناء وأزرق البحر الأحمر.',
         desc_en: 'Paradise of coral reefs and luxury resorts nestled between the Sinai mountains and the Red Sea.',
@@ -40,6 +42,7 @@ const STATIC_DESTINATIONS = [
     },
     {
         id: 3,
+        country_slug: 'egypt',
         name_ar: 'الأقصر وأسوان', name_en: 'Luxor & Aswan',
         desc_ar: 'معابد الفراعنة ووادي الملوك الأسطوري والإبحار على النيل بين الحضارات.',
         desc_en: 'Pharaonic temples, the Valley of the Kings, and Nile cruises between ancient civilizations.',
@@ -50,6 +53,7 @@ const STATIC_DESTINATIONS = [
     },
     {
         id: 4,
+        country_slug: 'egypt',
         name_ar: 'القاهرة', name_en: 'Cairo',
         desc_ar: 'قلب مصر النابض بين الأهرامات والمتحف المصري وأزقة الحي الإسلامي العريق.',
         desc_en: 'The beating heart of Egypt between the Pyramids, the Egyptian Museum, and the ancient Islamic Quarter.',
@@ -60,6 +64,7 @@ const STATIC_DESTINATIONS = [
     },
     {
         id: 5,
+        country_slug: 'egypt',
         name_ar: 'مرسى مطروح', name_en: 'Marsa Matrouh',
         desc_ar: 'أنقى شواطئ البحر المتوسط بمياهه الفيروزية الشفافة ورماله الناصعة البياض.',
         desc_en: "The Mediterranean's purest beaches with crystal-clear turquoise waters and pristine white sands.",
@@ -70,6 +75,7 @@ const STATIC_DESTINATIONS = [
     },
     {
         id: 6,
+        country_slug: 'egypt',
         name_ar: 'سيناء', name_en: 'Sinai',
         desc_ar: 'جبال سيناء الشاهقة وجبل موسى المقدس وشواطئ العقبة الرائعة.',
         desc_en: 'The towering Sinai mountains, sacred Mount Moses, and the stunning Gulf of Aqaba beaches.',
@@ -77,6 +83,149 @@ const STATIC_DESTINATIONS = [
         is_featured: false,
         sort_order: 6,
         image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?w=1200&q=80'
+    },
+    {
+        id: 7,
+        country_slug: 'france',
+        name_ar: 'باريس', name_en: 'Paris',
+        desc_ar: 'عاصمة الموضة والثقافة والفن، وتضم أشهر المعالم مثل برج إيفل ومتحف اللوفر.',
+        desc_en: 'The capital of fashion, culture, and art, featuring famous landmarks like the Eiffel Tower and the Louvre.',
+        category: 'culture',
+        is_featured: true,
+        sort_order: 7,
+        image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&q=80'
+    },
+    {
+        id: 8,
+        country_slug: 'italy',
+        name_ar: 'روما', name_en: 'Rome',
+        desc_ar: 'العاصمة التاريخية الأسطورية مع الكولوسيوم والفاتيكان والمأكولات الإيطالية الشهية.',
+        desc_en: 'The legendary historical capital with the Colosseum, Vatican, and delicious Italian cuisine.',
+        category: 'culture',
+        is_featured: true,
+        sort_order: 8,
+        image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&q=80'
+    },
+    {
+        id: 9,
+        country_slug: 'spain',
+        name_ar: 'برشلونة', name_en: 'Barcelona',
+        desc_ar: 'مدينة الفن والعمارة الفريدة لغاودي والشواطئ الحيوية على البحر الأبيض المتوسط.',
+        desc_en: 'The city of art, unique Gaudí architecture, and vibrant beaches on the Mediterranean Sea.',
+        category: 'adventure',
+        is_featured: true,
+        sort_order: 9,
+        image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&q=80'
+    },
+    {
+        id: 10,
+        country_slug: 'uae',
+        name_ar: 'دبي', name_en: 'Dubai',
+        desc_ar: 'مدينة المستقبل وناطحات السحاب الشاهقة ومراكز التسوق الفاخرة والمغامرات الصحراوية.',
+        desc_en: 'The city of the future, towering skyscrapers, luxury shopping malls, and desert adventures.',
+        category: 'adventure',
+        is_featured: true,
+        sort_order: 10,
+        image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80'
+    },
+    {
+        id: 11,
+        country_slug: 'turkey',
+        name_ar: 'إسطنبول', name_en: 'Istanbul',
+        desc_ar: 'ملتقى الشرق والغرب، وتاريخ حافل بالمساجد والقصور العثمانية والبوسفور الساحر.',
+        desc_en: 'Where East meets West, featuring a rich history of Ottoman mosques, palaces, and the charming Bosphorus.',
+        category: 'culture',
+        is_featured: true,
+        sort_order: 11,
+        image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1200&q=80'
+    },
+    {
+        id: 12,
+        country_slug: 'indonesia',
+        name_ar: 'بالي', name_en: 'Bali',
+        desc_ar: 'جزيرة استوائية ساحرة بشواطئها الذهبية ومعابدها وتلال الأرز الخضراء.',
+        desc_en: 'A charming tropical island with golden beaches, temples, and green rice terraces.',
+        category: 'beach',
+        is_featured: true,
+        sort_order: 12,
+        image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=80'
+    },
+    {
+        id: 13,
+        country_slug: 'usa',
+        name_ar: 'نيويورك', name_en: 'New York',
+        desc_ar: 'المدينة الأكثر حيوية في العالم، بساحة تايمز سكوير وسنترال بارك الشهير.',
+        desc_en: 'The most vibrant city in the world, with Times Square and the famous Central Park.',
+        category: 'adventure',
+        is_featured: true,
+        sort_order: 13,
+        image: 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=1200&q=80'
+    },
+    {
+        id: 14,
+        country_slug: 'maldives',
+        name_ar: 'جزر المالديف', name_en: 'Maldives',
+        desc_ar: 'جنة الاسترخاء والاستجمام وسط المياه الفيروزية والمنتجعات الفاخرة فوق الماء.',
+        desc_en: 'The paradise of relaxation amidst turquoise waters and luxury overwater resorts.',
+        category: 'beach',
+        is_featured: true,
+        sort_order: 14,
+        image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1200&q=80'
+    },
+    {
+        id: 15,
+        country_slug: 'japan',
+        name_ar: 'طوكيو', name_en: 'Tokyo',
+        desc_ar: 'مزيج مذهل بين المستقبل المضيء والتقاليد العريقة في أحياء مميزة لا مثيل لها.',
+        desc_en: 'An amazing blend of a glowing future and ancient traditions in unique districts.',
+        category: 'culture',
+        is_featured: true,
+        sort_order: 15,
+        image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&q=80'
+    },
+    {
+        id: 16,
+        country_slug: 'morocco',
+        name_ar: 'مراكش والجنوب', name_en: 'Marrakech & South',
+        desc_ar: 'عالم من الألوان والأسواق العتيقة والقصور الفاخرة والصحراء الكبرى الساحرة.',
+        desc_en: 'A world of colors, ancient souks, luxury palaces, and the magical Sahara Desert.',
+        category: 'adventure',
+        is_featured: true,
+        sort_order: 16,
+        image: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=1200&q=80'
+    },
+    {
+        id: 17,
+        country_slug: 'greece',
+        name_ar: 'سانتوريني وميكونوس', name_en: 'Santorini & Mykonos',
+        desc_ar: 'أجمل جزر اليونان بالمباني البيضاء والقباب الزرقاء وغروب الشمس الساحر.',
+        desc_en: 'Greece\'s most beautiful islands with white buildings, blue domes, and a magical sunset.',
+        category: 'beach',
+        is_featured: true,
+        sort_order: 17,
+        image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1200&q=80'
+    },
+    {
+        id: 18,
+        country_slug: 'switzerland',
+        name_ar: 'إنترلاكن وجنيف', name_en: 'Interlaken & Geneva',
+        desc_ar: 'طبيعة جبال الألب الساحرة والبحيرات الكريستالية والشلالات المتدفقة والقرى الجبلية.',
+        desc_en: 'Stunning Alpine nature, crystal lakes, flowing waterfalls, and mountain villages.',
+        category: 'adventure',
+        is_featured: true,
+        sort_order: 18,
+        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80'
+    },
+    {
+        id: 19,
+        country_slug: 'albania',
+        name_ar: 'تيرانا وساراندا', name_en: 'Tirana & Saranda',
+        desc_ar: 'جوهرة البلقان المخفية بشواطئها الساحرة البكر وجبالها وأسعارها المناسبة للغاية.',
+        desc_en: 'The hidden gem of the Balkans with pristine beaches, mountains, and affordable prices.',
+        category: 'beach',
+        is_featured: true,
+        sort_order: 19,
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80'
     }
 ];
 
@@ -150,7 +299,7 @@ const STATIC_TRIPS = [
         desc_en: 'Explore the capital of arts and fashion, from the Eiffel Tower to the Louvre in an unparalleled romantic journey.',
         highlights_ar: ['برج إيفل', 'متحف اللوفر', 'الشانزليزيه', 'قصر فرساي'],
         highlights_en: ['Eiffel Tower', 'Louvre Museum', 'Champs-Élysées', 'Palace of Versailles'],
-        destination_id: null,
+        destination_id: 7,
         image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&q=80'
     },
     {
@@ -164,11 +313,11 @@ const STATIC_TRIPS = [
         color_from: '#009246', color_to: '#CE2B37',
         is_egyptian: false, spots_total: 16, spots_left: 7,
         departure_dates: ['2026-07-28', '2026-08-01', '2026-09-18'],
-        desc_ar: 'تجول في شوارع التاريخ بين الكولوسيوم والفاتيكان وينابيع تريفي في مدينة خالدة.',
+        desc_ar: 'مجرد التجول في شوارع التاريخ بين الكولوسيوم والفاتيكان وينابيع تريفي هو متعة بحد ذاتها.',
         desc_en: 'Walk through streets of history between the Colosseum, Vatican, and Trevi Fountain in an eternal city.',
         highlights_ar: ['الكولوسيوم', 'الفاتيكان', 'نافورة تريفي', 'البانثيون'],
         highlights_en: ['Colosseum', 'Vatican City', 'Trevi Fountain', 'Pantheon'],
-        destination_id: null,
+        destination_id: 8,
         image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&q=80'
     },
     {
@@ -186,7 +335,7 @@ const STATIC_TRIPS = [
         desc_en: "From Gaudí's unique architecture to the stunning beaches of La Barceloneta, Barcelona combines art and fun.",
         highlights_ar: ['الساغرادا فاميليا', 'لاس رامبلاس', 'شاطئ برشلونة', 'الحي القوطي'],
         highlights_en: ['Sagrada Família', 'Las Ramblas', 'Barcelona Beach', 'Gothic Quarter'],
-        destination_id: null,
+        destination_id: 9,
         image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&q=80'
     },
     {
@@ -204,7 +353,7 @@ const STATIC_TRIPS = [
         desc_en: 'Shop in the most luxurious malls and ski on snow while the desert stretches outside the window.',
         highlights_ar: ['برج خليفة', 'دبي مول', 'ميناء جميرا', 'رحلة الصحراء'],
         highlights_en: ['Burj Khalifa', 'Dubai Mall', 'Jumeirah Port', 'Desert Safari'],
-        destination_id: null,
+        destination_id: 10,
         image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80'
     },
     {
@@ -222,7 +371,7 @@ const STATIC_TRIPS = [
         desc_en: 'A city that brings together East and West, between Hagia Sophia, the Bosphorus, and ancient Eastern bazaars.',
         highlights_ar: ['آيا صوفيا', 'القصر الكبير', 'البازار المسقوف', 'جسر البسفور'],
         highlights_en: ['Hagia Sophia', 'Topkapi Palace', 'Grand Bazaar', 'Bosphorus Bridge'],
-        destination_id: null,
+        destination_id: 11,
         image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1200&q=80'
     },
     {
@@ -240,7 +389,7 @@ const STATIC_TRIPS = [
         desc_en: 'Island of the gods with temples, waterfalls, volcanic beaches, and a unique culture like no other.',
         highlights_ar: ['معبد أولوواتو', 'تراسات أوبود', 'شاطئ كوتا', 'كانيون أيانغ'],
         highlights_en: ['Uluwatu Temple', 'Ubud Terraces', 'Kuta Beach', 'Ayung Canyon'],
-        destination_id: null,
+        destination_id: 12,
         image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=80'
     },
     {
@@ -258,7 +407,7 @@ const STATIC_TRIPS = [
         desc_en: 'Experience the most exciting city in the world, from Times Square to Central Park and the American Museum.',
         highlights_ar: ['تايمز سكوير', 'سنترال بارك', 'تمثال الحرية', 'برودواي'],
         highlights_en: ['Times Square', 'Central Park', 'Statue of Liberty', 'Broadway'],
-        destination_id: null,
+        destination_id: 13,
         image: 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=1200&q=80'
     },
     {
@@ -276,7 +425,7 @@ const STATIC_TRIPS = [
         desc_en: 'Dreamy Indian Ocean islands with overwater bungalows, crystal coral reefs, and indescribable sunsets.',
         highlights_ar: ['كوخ فوق الماء', 'الغوص في المرجان', 'غروب المحيط', 'سبا خاص'],
         highlights_en: ['Overwater Bungalow', 'Coral Diving', 'Ocean Sunset', 'Private Spa'],
-        destination_id: null,
+        destination_id: 14,
         image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1200&q=80'
     },
     {
@@ -294,7 +443,7 @@ const STATIC_TRIPS = [
         desc_en: 'An amazing blend of modern technology and authentic Japanese heritage in a city unlike anywhere else.',
         highlights_ar: ['جبل فوجي', 'شينجوكو', 'معبد سنسوجي', 'حي أكيهابارا'],
         highlights_en: ['Mount Fuji', 'Shinjuku', 'Senso-ji Temple', 'Akihabara District'],
-        destination_id: null,
+        destination_id: 15,
         image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&q=80'
     },
     {
@@ -312,7 +461,7 @@ const STATIC_TRIPS = [
         desc_en: 'From the pink alleys of Marrakech to the Sahara Desert and stunning Agadir beach — a journey of a thousand colors.',
         highlights_ar: ['جامع الفنا', 'الصحراء الكبرى', 'فاس القديمة', 'شاطئ أغادير'],
         highlights_en: ["Jemaa el-Fna", 'Sahara Desert', 'Ancient Fez', 'Agadir Beach'],
-        destination_id: null,
+        destination_id: 16,
         image: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=1200&q=80'
     },
     {
@@ -330,7 +479,7 @@ const STATIC_TRIPS = [
         desc_en: 'Dreamy Santorini and vibrant Mykonos and stunning Aegean islands in a unique sea journey.',
         highlights_ar: ['سانتوريني', 'ميكونوس', 'جزيرة كريت', 'أكروبوليس أثينا'],
         highlights_en: ['Santorini', 'Mykonos', 'Crete Island', 'Athens Acropolis'],
-        destination_id: null,
+        destination_id: 17,
         image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1200&q=80'
     },
     {
@@ -348,7 +497,7 @@ const STATIC_TRIPS = [
         desc_en: 'Ski in the Alps, stroll through chocolate villages, and visit stunning Lake Geneva in the heart of Europe.',
         highlights_ar: ['جبل يونغفراو', 'زيرمات', 'بحيرة جنيف', 'إنترلاكن'],
         highlights_en: ['Jungfrau Mountain', 'Zermatt', 'Lake Geneva', 'Interlaken'],
-        destination_id: null,
+        destination_id: 18,
         image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80'
     },
     {
@@ -366,7 +515,7 @@ const STATIC_TRIPS = [
         desc_en: 'Adriatic and Mediterranean beaches at unbelievable prices with pristine natural beauty few have discovered.',
         highlights_ar: ['شاطئ كاميل', 'جيروكاستر', 'بحيرة شكودر', 'ساراندا'],
         highlights_en: ['Ksamil Beach', 'Gjirokastër', 'Lake Shkodër', 'Saranda'],
-        destination_id: null,
+        destination_id: 19,
         image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80'
     }
 ];
@@ -449,10 +598,11 @@ class DBService {
             const destIdMap = {};
             if (destsRes.total === 0) {
                 console.log("Seeding default destinations...");
-                const egyptDocId = countryIdMap['egypt'] || '';
                 for (const d of this.staticDestinations) {
+                    const cSlug = d.country_slug || 'egypt';
+                    const countryDocId = countryIdMap[cSlug] || '';
                     const payload = {
-                        country_id: egyptDocId, // Default destinations belong to Egypt
+                        country_id: countryDocId,
                         name_ar: d.name_ar,
                         name_en: d.name_en,
                         description_ar: d.desc_ar,
@@ -887,6 +1037,18 @@ class DBService {
         } else {
             return await this.databases.createDocument(conf.databaseId, conf.collections.settings, Appwrite.ID.unique(), { key, value: String(value) });
         }
+    }
+
+    async uploadFile(file) {
+        this._assertConnected();
+        const conf = window.CONFIG.appwrite;
+        const storage = new Appwrite.Storage(this.sdk);
+        const response = await storage.createFile(
+            conf.bucketId || '6a33db0d003899080b7d',
+            Appwrite.ID.unique(),
+            file
+        );
+        return `${conf.endpoint}/storage/buckets/${conf.bucketId || '6a33db0d003899080b7d'}/files/${response.$id}/view?project=${conf.projectId}`;
     }
 }
 

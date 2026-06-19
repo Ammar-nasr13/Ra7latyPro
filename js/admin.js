@@ -57,11 +57,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const endpoint = document.getElementById('appwriteEndpoint').value.trim();
             const projectId = document.getElementById('appwriteProjectId').value.trim();
             const databaseId = document.getElementById('appwriteDatabaseId').value.trim();
+            const bucketId = document.getElementById('appwriteBucketId').value.trim();
 
             // Save settings locally
             localStorage.setItem('rahalaty_appwrite_endpoint', endpoint);
             localStorage.setItem('rahalaty_appwrite_project_id', projectId);
             localStorage.setItem('rahalaty_appwrite_database_id', databaseId);
+            localStorage.setItem('rahalaty_appwrite_bucket_id', bucketId);
 
             alert('تم حفظ إعدادات الاتصال بنجاح. جاري إعادة تحميل الصفحة لتطبيق التغييرات...');
             window.location.reload();
@@ -75,18 +77,22 @@ function loadAppwriteFormConfig() {
     const endpointInput = document.getElementById('appwriteEndpoint');
     const projectInput = document.getElementById('appwriteProjectId');
     const dbInput = document.getElementById('appwriteDatabaseId');
+    const bucketInput = document.getElementById('appwriteBucketId');
 
     const storedEndpoint = localStorage.getItem('rahalaty_appwrite_endpoint');
     const storedProjectId = localStorage.getItem('rahalaty_appwrite_project_id');
     const storedDatabaseId = localStorage.getItem('rahalaty_appwrite_database_id');
+    const storedBucketId = localStorage.getItem('rahalaty_appwrite_bucket_id');
 
     if (storedEndpoint) conf.endpoint = storedEndpoint;
     if (storedProjectId) conf.projectId = storedProjectId;
     if (storedDatabaseId) conf.databaseId = storedDatabaseId;
+    if (storedBucketId) conf.bucketId = storedBucketId;
 
     if (endpointInput) endpointInput.value = conf.endpoint;
     if (projectInput) projectInput.value = conf.projectId || '';
     if (dbInput) dbInput.value = conf.databaseId;
+    if (bucketInput) bucketInput.value = conf.bucketId || '';
 }
 
 function updateAppwriteConnectionStatus() {
@@ -393,7 +399,6 @@ window.seedAppwriteDatabase = async function() {
         // 2. Upload Destinations
         const dests = window.db.staticDestinations;
         const destIdMap = {};
-        const egyptDocId = countryIdMap['egypt'] || '';
 
         for (const d of dests) {
             const list = await window.db.databases.listDocuments(dbId, conf.collections.destinations, [
@@ -404,8 +409,10 @@ window.seedAppwriteDatabase = async function() {
             if (list.documents.length > 0) {
                 docId = list.documents[0].$id;
             } else {
+                const cSlug = d.country_slug || 'egypt';
+                const countryDocId = countryIdMap[cSlug] || '';
                 const payload = {
-                    country_id: egyptDocId,
+                    country_id: countryDocId,
                     name_ar: d.name_ar,
                     name_en: d.name_en,
                     description_ar: d.desc_ar,
@@ -815,14 +822,16 @@ window.loadTripsTable = async function () {
         const client = new Client().setEndpoint(conf.endpoint).setProject(conf.projectId);
         const databases = new Databases(client);
         
-        // Fetch both trips and destinations
-        const [tripsRes, destsRes] = await Promise.all([
+        // Fetch trips, destinations, and countries
+        const [tripsRes, destsRes, countriesRes] = await Promise.all([
             databases.listDocuments(conf.databaseId, conf.collections.trips),
-            databases.listDocuments(conf.databaseId, conf.collections.destinations)
+            databases.listDocuments(conf.databaseId, conf.collections.destinations),
+            databases.listDocuments(conf.databaseId, conf.collections.countries)
         ]);
         
         const trips = tripsRes.documents;
         const dests = destsRes.documents;
+        const countries = countriesRes.documents;
 
         if (!trips.length) {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-plane fa-2x mb-2 d-block opacity-25"></i>لا توجد رحلات بعد. أضف أول رحلة!</td></tr>`;
@@ -831,7 +840,15 @@ window.loadTripsTable = async function () {
 
         tbody.innerHTML = trips.map(t => {
             const dest = dests.find(d => String(d.$id) === String(t.destination_id) || String(d.id) === String(t.destination_id));
-            const countryDisplay = dest ? `${dest.flag || ''} ${dest.name_ar}` : '<span class="text-muted">غير محدد</span>';
+            let countryDisplay = '<span class="text-muted">غير محدد</span>';
+            if (dest) {
+                const country = countries.find(c => String(c.$id) === String(dest.country_id));
+                if (country) {
+                    countryDisplay = `${country.flag || '🌍'} ${country.name_ar}`;
+                } else {
+                    countryDisplay = `🌍 ${dest.name_ar}`;
+                }
+            }
             const imgUrl = t.image_url || t.image;
             
             return `
@@ -1106,6 +1123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 form.reset();
                 delete form.dataset.editId;
             }
+            const statusEl = document.getElementById('dest_upload_status');
+            if (statusEl) statusEl.innerHTML = '';
             document.getElementById('destinationModalTitle').innerHTML = '<i class="fa-solid fa-map-pin me-2 text-warning"></i>إضافة وجهة جديدة';
             document.getElementById('saveDestBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الوجهة';
         });
@@ -1122,6 +1141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 form.reset();
                 delete form.dataset.editId;
             }
+            const statusEl = document.getElementById('trip_upload_status');
+            if (statusEl) statusEl.innerHTML = '';
             document.getElementById('tripModalTitle').innerHTML = '<i class="fa-solid fa-plane me-2 text-warning"></i>إضافة رحلة جديدة';
             document.getElementById('saveTripBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الرحلة';
         });
@@ -1140,6 +1161,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             document.getElementById('countryModalTitle').innerHTML = '<i class="fa-solid fa-earth-americas me-2 text-warning"></i>إضافة دولة جديدة';
             document.getElementById('saveCountryBtn').innerHTML = '<i class="fa-solid fa-save me-1"></i>حفظ الدولة';
+        });
+    }
+
+    // File upload listeners
+    const destFileInp = document.getElementById('dest_image_file');
+    if (destFileInp) {
+        destFileInp.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('dest_upload_status');
+            if (statusEl) statusEl.innerHTML = '<span class="text-warning"><i class="spinner-border spinner-border-sm me-1"></i>جاري رفع الصورة...</span>';
+            try {
+                const url = await window.db.uploadFile(file);
+                document.getElementById('dest_image_url').value = url;
+                if (statusEl) statusEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-check me-1"></i>تم رفع الصورة بنجاح!</span>';
+            } catch (err) {
+                console.error(err);
+                if (statusEl) statusEl.innerHTML = `<span class="text-danger"><i class="fa-solid fa-times me-1"></i>فشل الرفع: ${err.message}</span>`;
+            }
+        });
+    }
+
+    const tripFileInp = document.getElementById('trip_image_file');
+    if (tripFileInp) {
+        tripFileInp.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('trip_upload_status');
+            if (statusEl) statusEl.innerHTML = '<span class="text-warning"><i class="spinner-border spinner-border-sm me-1"></i>جاري رفع الصورة...</span>';
+            try {
+                const url = await window.db.uploadFile(file);
+                document.getElementById('trip_image_url').value = url;
+                if (statusEl) statusEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-check me-1"></i>تم رفع الصورة بنجاح!</span>';
+            } catch (err) {
+                console.error(err);
+                if (statusEl) statusEl.innerHTML = `<span class="text-danger"><i class="fa-solid fa-times me-1"></i>فشل الرفع: ${err.message}</span>`;
+            }
         });
     }
 });

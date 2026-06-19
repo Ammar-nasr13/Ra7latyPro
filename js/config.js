@@ -7,6 +7,7 @@ const CONFIG = {
         endpoint: 'https://appwrite.etihadalmdina.com/v1',
         projectId: '6a32ee5e0018a83516bc',
         databaseId: '6a32ee91000b40dd8d3c',
+        bucketId: '6a33db0d003899080b7d',
         collections: {
             countries: 'countries',
             destinations: 'destinations',
