@@ -6,7 +6,7 @@
     <title id="pageTitle">تفاصيل الرحلة — رحلاتي</title>
     <meta name="description" content="احجز رحلتك السياحية المميزة مع رحلاتي. تفاصيل شاملة عن البرنامج، الأسعار، الميزات والتواريخ المتاحة." id="pageDescription">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://ra7alaty.com/trip-details" id="pageCanonical">
+    <link rel="canonical" href="https://ra7laty.com/trip-details" id="pageCanonical">
 
 
     <!-- Bootstrap 5 CSS -->
@@ -26,19 +26,19 @@
           "@type": "ListItem",
           "position": 1,
           "name": "الرئيسية",
-          "item": "https://ra7alaty.com"
+          "item": "https://ra7laty.com"
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "الوجهات",
-          "item": "https://ra7alaty.com/destinations"
+          "item": "https://ra7laty.com/destinations"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "تفاصيل الرحلة",
-          "item": "https://ra7alaty.com/trip-details"
+          "item": "https://ra7laty.com/trip-details"
         }
       ]
     }
@@ -500,9 +500,9 @@
                     <h3 class="h6 text-white fw-bold mb-3" data-i18n="footerContact">اتصل بنا</h3>
                     <ul class="list-unstyled d-flex flex-column gap-2 small align-items-center align-items-md-start">
                         <li>
-                            <a href="mailto:info@ra7alaty.com" class="footer-contact-link">
+                            <a href="mailto:info@ra7laty.com" class="footer-contact-link">
                                 <i class="fa-solid fa-envelope text-warning"></i>
-                                <span>info@ra7alaty.com</span>
+                                <span>info@ra7laty.com</span>
                             </a>
                         </li>
                         <li>
@@ -572,7 +572,7 @@
             const descEl = document.getElementById('pageDescription');
             if (descEl) descEl.setAttribute('content', `${title} — ${desc ? desc.slice(0, 130) : 'رحلة مميزة مع رحلاتي'}. احجز الآن!`);
             const canonEl = document.getElementById('pageCanonical');
-            if (canonEl) canonEl.setAttribute('href', `https://ra7alaty.com/trip-details?id=${trip.id}`);
+            if (canonEl) canonEl.setAttribute('href', `https://ra7laty.com/trip-details?id=${trip.id}`);
 
 
             document.getElementById('factDuration').textContent = lang === 'ar' ? `${trip.duration} أيام` : `${trip.duration} days`;
@@ -657,8 +657,8 @@
               "@type": "TouristTrip",
               "name": title,
               "description": desc,
-              "image": trip.image || 'https://ra7alaty.com/images/og-default.jpg',
-              "url": `https://ra7alaty.com/trip-details?id=${trip.id}`,
+              "image": trip.image || 'https://ra7laty.com/images/og-default.jpg',
+              "url": `https://ra7laty.com/trip-details?id=${trip.id}`,
               "touristType": trip.travel_type || [],
               "itinerary": {
                 "@type": "ItemList",
@@ -667,7 +667,7 @@
               "provider": {
                 "@type": "TravelAgency",
                 "name": "رحلاتي",
-                "url": "https://ra7alaty.com",
+                "url": "https://ra7laty.com",
                 "telephone": "+201000000000"
               },
               "offers": {
@@ -675,7 +675,7 @@
                 "price": trip.price,
                 "priceCurrency": "USD",
                 "availability": (trip.spots_left && trip.spots_left > 0) ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
-                "url": `https://ra7alaty.com/book?trip_id=${trip.id}`,
+                "url": `https://ra7laty.com/book?trip_id=${trip.id}`,
                 "validFrom": new Date().toISOString().split('T')[0]
               }
             });
@@ -691,9 +691,9 @@
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "الرئيسية", "item": "https://ra7alaty.com" },
-                { "@type": "ListItem", "position": 2, "name": "الوجهات", "item": "https://ra7alaty.com/destinations" },
-                { "@type": "ListItem", "position": 3, "name": title, "item": `https://ra7alaty.com/trip-details?id=${trip.id}` }
+                { "@type": "ListItem", "position": 1, "name": "الرئيسية", "item": "https://ra7laty.com" },
+                { "@type": "ListItem", "position": 2, "name": "الوجهات", "item": "https://ra7laty.com/destinations" },
+                { "@type": "ListItem", "position": 3, "name": title, "item": `https://ra7laty.com/trip-details?id=${trip.id}` }
               ]
             });
             document.head.appendChild(bcScript);

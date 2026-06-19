@@ -1,4 +1,4 @@
-# robots.txt for Rahalaty (https://ra7alaty.com)
+# robots.txt for Rahalaty (https://ra7laty.com)
 # Optimized for Googlebot, Bingbot and major search crawlers
 
 User-agent: *
@@ -16,4 +16,4 @@ Disallow: /book.html
 Disallow: /booking-confirmed.html
 
 # Sitemap link
-Sitemap: https://ra7alaty.com/sitemap.xml
+Sitemap: https://ra7laty.com/sitemap.xml

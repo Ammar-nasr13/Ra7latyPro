@@ -2,19 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Core Pages -->
   <url>
-    <loc>https://ra7alaty.com/</loc>
+    <loc>https://ra7laty.com/</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/destinations</loc>
+    <loc>https://ra7laty.com/destinations</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/survey</loc>
+    <loc>https://ra7laty.com/survey</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -22,37 +22,37 @@
 
   <!-- Destinations -->
   <url>
-    <loc>https://ra7alaty.com/destination-details?id=1</loc>
+    <loc>https://ra7laty.com/destination-details?id=1</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/destination-details?id=2</loc>
+    <loc>https://ra7laty.com/destination-details?id=2</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/destination-details?id=3</loc>
+    <loc>https://ra7laty.com/destination-details?id=3</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/destination-details?id=4</loc>
+    <loc>https://ra7laty.com/destination-details?id=4</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/destination-details?id=5</loc>
+    <loc>https://ra7laty.com/destination-details?id=5</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/destination-details?id=6</loc>
+    <loc>https://ra7laty.com/destination-details?id=6</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -60,97 +60,97 @@
 
   <!-- Trips -->
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=1</loc>
+    <loc>https://ra7laty.com/trip-details?id=1</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=2</loc>
+    <loc>https://ra7laty.com/trip-details?id=2</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=3</loc>
+    <loc>https://ra7laty.com/trip-details?id=3</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=4</loc>
+    <loc>https://ra7laty.com/trip-details?id=4</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=5</loc>
+    <loc>https://ra7laty.com/trip-details?id=5</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=6</loc>
+    <loc>https://ra7laty.com/trip-details?id=6</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=7</loc>
+    <loc>https://ra7laty.com/trip-details?id=7</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=8</loc>
+    <loc>https://ra7laty.com/trip-details?id=8</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=9</loc>
+    <loc>https://ra7laty.com/trip-details?id=9</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=10</loc>
+    <loc>https://ra7laty.com/trip-details?id=10</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=11</loc>
+    <loc>https://ra7laty.com/trip-details?id=11</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=12</loc>
+    <loc>https://ra7laty.com/trip-details?id=12</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=13</loc>
+    <loc>https://ra7laty.com/trip-details?id=13</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=14</loc>
+    <loc>https://ra7laty.com/trip-details?id=14</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=15</loc>
+    <loc>https://ra7laty.com/trip-details?id=15</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ra7alaty.com/trip-details?id=16</loc>
+    <loc>https://ra7laty.com/trip-details?id=16</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
